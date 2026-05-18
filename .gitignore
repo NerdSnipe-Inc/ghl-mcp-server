@@ -3,6 +3,7 @@ dist/
 .env
 .env.local
 *.env
+vitest.config.ts.*
 
 # OS
 .DS_Store
