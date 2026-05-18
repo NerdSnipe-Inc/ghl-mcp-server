@@ -100,24 +100,41 @@ export const socialTools = [
 export const mediaTools = [
   {
     name: "ghl_get_media_files",
-    description: "Get files in the GHL media library.",
+    description: "Get files and folders in the GHL media library.",
     inputSchema: z.object({
-      limit: z.number().optional().default(25),
-      skip: z.number().optional().default(0),
-      type: z
-        .enum(["image", "video", "document", "audio"])
+      sortBy: z
+        .enum(["contentType", "uploadedBy", "createdAt", "updatedAt", "name", "size"])
         .optional()
+        .default("updatedAt")
+        .describe("Field to sort by"),
+      sortOrder: z
+        .enum(["asc", "desc"])
+        .optional()
+        .default("desc"),
+      type: z
+        .enum(["image", "video", "document", "audio", "all"])
+        .optional()
+        .default("all")
         .describe("Filter by file type"),
+      limit: z.number().optional().default(25),
+      offset: z.number().optional().default(0),
+      query: z.string().optional().describe("Search query to filter files by name"),
+      parentId: z.string().optional().describe("Folder ID to list contents of"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/medias/files", {
           token: config.token,
           params: {
-            locationId: config.locationId,
+            altType: "location",
+            altId: config.locationId,
+            sortBy: args.sortBy as string,
+            sortOrder: args.sortOrder as string,
+            type: args.type as string,
             limit: args.limit as number | undefined,
-            skip: args.skip as number | undefined,
-            type: args.type as string | undefined,
+            offset: args.offset as number | undefined,
+            query: args.query as string | undefined,
+            parentId: args.parentId as string | undefined,
           },
         });
         return JSON.stringify(result, null, 2);
@@ -128,14 +145,18 @@ export const mediaTools = [
   },
   {
     name: "ghl_delete_media_file",
-    description: "Delete a file from the GHL media library.",
+    description: "Delete a file or folder from the GHL media library.",
     inputSchema: z.object({
-      fileId: z.string(),
+      fileId: z.string().describe("File or folder ID to delete"),
     }),
     handler: async (args: { fileId: string }, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("DELETE", `/medias/files/${args.fileId}`, {
+        const result = await ghlRequest("DELETE", `/medias/${args.fileId}`, {
           token: config.token,
+          params: {
+            altType: "location",
+            altId: config.locationId,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

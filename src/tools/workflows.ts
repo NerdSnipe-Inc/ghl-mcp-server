@@ -6,14 +6,12 @@ export const workflowTools = [
     name: "ghl_get_workflows",
     description:
       "List all workflows/automations in the GHL location. Use this to discover workflow IDs before enrolling contacts.",
-    inputSchema: z.object({
-      status: z.enum(["published", "draft", "all"]).optional().default("all"),
-    }),
-    handler: async (args: { status?: string }, config: GHLConfig) => {
+    inputSchema: z.object({}),
+    handler: async (_args: Record<string, never>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/workflows/", {
           token: config.token,
-          params: { locationId: config.locationId, status: args.status },
+          params: { locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

@@ -33,10 +33,10 @@ export const surveyTools = [
       "Get survey submissions — optionally filter by survey, contact, or date range.",
     inputSchema: z.object({
       surveyId: z.string().optional().describe("Filter by survey ID"),
-      contactId: z.string().optional().describe("Filter by contact ID"),
-      startAt: z.string().optional().describe("Start date ISO 8601"),
-      endAt: z.string().optional().describe("End date ISO 8601"),
-      limit: z.number().optional().default(25),
+      q: z.string().optional().describe("Search by contact ID, name, email, or phone"),
+      startAt: z.string().optional().describe("Start date YYYY-MM-DD"),
+      endAt: z.string().optional().describe("End date YYYY-MM-DD"),
+      limit: z.number().optional().default(20).describe("Max 100"),
       page: z.number().optional().default(1),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
@@ -46,7 +46,7 @@ export const surveyTools = [
           params: {
             locationId: config.locationId,
             surveyId: args.surveyId as string | undefined,
-            contactId: args.contactId as string | undefined,
+            q: args.q as string | undefined,
             startAt: args.startAt as string | undefined,
             endAt: args.endAt as string | undefined,
             limit: args.limit as number | undefined,

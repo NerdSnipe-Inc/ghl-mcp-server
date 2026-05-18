@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { locationTools } from '../../src/tools/locations.js';
+import { locationTools } from '../../src/tools/location.js';
+import { tagTools } from '../../src/tools/tags.js';
+import { customFieldTools } from '../../src/tools/custom_fields.js';
+import { customValueTools } from '../../src/tools/custom_values.js';
+import { userTools } from '../../src/tools/users.js';
+import { templateTools } from '../../src/tools/templates.js';
+import { formTools } from '../../src/tools/forms.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -9,8 +15,18 @@ import {
   expectError,
 } from '../helpers.js';
 
+const ALL_LOCATION_TOOLS = [
+  ...locationTools,
+  ...tagTools,
+  ...customFieldTools,
+  ...customValueTools,
+  ...userTools,
+  ...templateTools,
+  ...formTools,
+];
+
 const getTool = (name: string) => {
-  const tool = locationTools.find((t) => t.name === name);
+  const tool = ALL_LOCATION_TOOLS.find((t) => t.name === name);
   if (!tool) throw new Error(`Tool not found: ${name}`);
   return tool;
 };

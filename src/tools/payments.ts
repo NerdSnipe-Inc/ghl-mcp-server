@@ -96,13 +96,22 @@ export const paymentTools = [
     description: "Get discount coupons in the location.",
     inputSchema: z.object({
       limit: z.number().optional().default(20),
-      page: z.number().optional().default(1),
+      offset: z.number().optional().default(0),
+      status: z.string().optional().describe("Filter by coupon status"),
+      search: z.string().optional().describe("Search by coupon name or code"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("GET", "/payments/coupons", {
+        const result = await ghlRequest("GET", "/payments/coupon/list", {
           token: config.token,
-          params: { altId: config.locationId, altType: "location", limit: args.limit as number | undefined, page: args.page as number | undefined },
+          params: {
+            altId: config.locationId,
+            altType: "location",
+            limit: args.limit as number | undefined,
+            offset: args.offset as number | undefined,
+            status: args.status as string | undefined,
+            search: args.search as string | undefined,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -117,14 +126,15 @@ export const paymentTools = [
       name: z.string(),
       code: z.string().describe("Coupon code (e.g. SAVE20)"),
       discountType: z.enum(["percentage", "fixed"]),
-      discount: z.number().describe("Discount value (% or $ amount)"),
-      currency: z.string().optional().default("USD"),
-      expiresAt: z.string().optional().describe("ISO 8601 expiry date"),
-      maxUses: z.number().optional().describe("Max number of times coupon can be used"),
+      discountValue: z.number().describe("Discount value (% or $ amount)"),
+      startDate: z.string().describe("Coupon validity start date ISO 8601"),
+      endDate: z.string().optional().describe("Coupon expiry date ISO 8601"),
+      usageLimit: z.number().optional().describe("Max number of times coupon can be used"),
+      productIds: z.array(z.string()).optional().describe("Restrict to specific product IDs"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("POST", "/payments/coupons", {
+        const result = await ghlRequest("POST", "/payments/coupon", {
           token: config.token,
           body: { ...args, altId: config.locationId, altType: "location" },
         });
@@ -146,13 +156,26 @@ export const invoiceTools = [
         .enum(["draft", "sent", "paid", "void", "overdue", "partially_paid"])
         .optional(),
       limit: z.number().optional().default(20),
-      page: z.number().optional().default(1),
+      offset: z.number().optional().default(0),
+      search: z.string().optional(),
+      startAt: z.string().optional(),
+      endAt: z.string().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/invoices/", {
           token: config.token,
-          params: { altId: config.locationId, altType: "location", ...args as Record<string, string | number | boolean | undefined> },
+          params: {
+            altId: config.locationId,
+            altType: "location",
+            contactId: args.contactId as string | undefined,
+            status: args.status as string | undefined,
+            limit: args.limit as number | undefined,
+            offset: args.offset as number | undefined,
+            search: args.search as string | undefined,
+            startAt: args.startAt as string | undefined,
+            endAt: args.endAt as string | undefined,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -170,6 +193,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("GET", `/invoices/${args.invoiceId}`, {
           token: config.token,
+          params: { altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -221,12 +245,16 @@ export const invoiceTools = [
     description: "Send an invoice to the contact via email.",
     inputSchema: z.object({
       invoiceId: z.string(),
+      userId: z.string().describe("User ID of the sender"),
+      action: z.enum(["send", "resend"]).optional().default("send"),
+      liveMode: z.boolean().optional().default(true).describe("Use live payment mode (false = test mode)"),
     }),
-    handler: async (args: { invoiceId: string }, config: GHLConfig) => {
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
+      const { invoiceId, ...sendData } = args as { invoiceId: string } & Record<string, unknown>;
       try {
-        const result = await ghlRequest("POST", `/invoices/${args.invoiceId}/send`, {
+        const result = await ghlRequest("POST", `/invoices/${invoiceId}/send`, {
           token: config.token,
-          body: { altId: config.locationId, altType: "location" },
+          body: { altId: config.locationId, altType: "location", ...sendData },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

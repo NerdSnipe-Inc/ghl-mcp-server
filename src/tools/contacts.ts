@@ -5,26 +5,23 @@ export const contactTools = [
   {
     name: "ghl_get_contacts",
     description:
-      "List/search contacts in the GHL location. Supports filtering by query, email, phone, tags, and pagination.",
+      "List/search contacts in the GHL location. Supports filtering by query and cursor-based pagination.",
     inputSchema: z.object({
       query: z.string().optional().describe("Search query (name, email, phone)"),
-      email: z.string().optional().describe("Filter by exact email"),
-      phone: z.string().optional().describe("Filter by phone number"),
       limit: z.number().optional().default(20).describe("Max results (1-100)"),
-      skip: z.number().optional().default(0).describe("Offset for pagination"),
-      tags: z.array(z.string()).optional().describe("Filter by tags"),
+      startAfterId: z.string().optional().describe("Contact ID to start after (cursor pagination)"),
+      startAfter: z.number().optional().describe("Timestamp cursor for pagination"),
     }),
-    handler: async (args: z.infer<ReturnType<typeof z.object>>, config: GHLConfig) => {
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/contacts/", {
           token: config.token,
           params: {
             locationId: config.locationId,
-            query: args.query,
-            email: args.email,
-            phone: args.phone,
-            limit: args.limit,
-            skip: args.skip,
+            query: args.query as string | undefined,
+            limit: args.limit as number | undefined,
+            startAfterId: args.startAfterId as string | undefined,
+            startAfter: args.startAfter as number | undefined,
           },
         });
         return JSON.stringify(result, null, 2);
@@ -341,7 +338,7 @@ export const contactTools = [
       title: z.string().describe("Task title"),
       body: z.string().optional().describe("Task description"),
       dueDate: z.string().describe("Due date ISO 8601 (e.g. 2024-12-31T17:00:00Z)"),
-      status: z.enum(["incompleted", "completed"]).optional().default("incompleted"),
+      completed: z.boolean().optional().default(false).describe("Mark task as completed"),
       assignedTo: z.string().optional().describe("User ID to assign task to"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
@@ -366,7 +363,7 @@ export const contactTools = [
       title: z.string().optional(),
       body: z.string().optional(),
       dueDate: z.string().optional(),
-      status: z.enum(["incompleted", "completed"]).optional(),
+      completed: z.boolean().optional().describe("Mark task completed or not"),
       assignedTo: z.string().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {

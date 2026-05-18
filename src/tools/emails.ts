@@ -28,7 +28,7 @@ export const emailBuilderTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("GET", "/emails/builder/templates", {
+        const result = await ghlRequest("GET", "/emails/builder", {
           token: config.token,
           params: {
             locationId: config.locationId,
@@ -53,8 +53,8 @@ export const emailBuilderTools = [
       try {
         const result = await ghlRequest(
           "GET",
-          `/emails/builder/templates/${args.templateId}`,
-          { token: config.token, params: { locationId: config.locationId } }
+          `/emails/builder/${config.locationId}/${args.templateId}`,
+          { token: config.token }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -65,7 +65,7 @@ export const emailBuilderTools = [
   {
     name: "ghl_create_email_builder_template",
     description:
-      "Create a new email marketing template using the GHL email builder. Provide name and raw HTML. Returns the created template ID which can then be referenced in workflow Send Email actions.",
+      "Create a new HTML email template in GHL Marketing → Emails. Handles both the skeleton creation and HTML content upload in one call. Returns the template ID for use in workflows.",
     inputSchema: z.object({
       name: z.string().describe("Template display name (shown in Marketing → Emails)"),
       html: z
@@ -76,15 +76,46 @@ export const emailBuilderTools = [
       previewText: z
         .string()
         .optional()
-        .describe("Email preview/snippet text shown in the inbox before the email is opened"),
+        .describe("Preview/snippet text shown in the inbox before opening"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("POST", "/emails/builder/templates", {
-          token: config.token,
-          body: { ...args, locationId: config.locationId },
-        });
-        return JSON.stringify(result, null, 2);
+        // Step 1 — create the empty template skeleton
+        const created = await ghlRequest<{ redirect: string; traceId: string }>(
+          "POST",
+          "/emails/builder",
+          {
+            token: config.token,
+            body: {
+              locationId: config.locationId,
+              type: "html",
+              title: args.name,
+              name: args.name,
+              isPlainText: false,
+            },
+          }
+        );
+        const templateId = created.redirect;
+
+        // Step 2 — push HTML content into the template
+        const updated = await ghlRequest(
+          "POST",
+          "/emails/builder/data",
+          {
+            token: config.token,
+            body: {
+              locationId: config.locationId,
+              templateId,
+              updatedBy: config.locationId,
+              dnd: { elements: [], attrs: {}, templateSettings: {} },
+              html: args.html,
+              editorType: "html",
+              ...(args.previewText ? { previewText: args.previewText } : {}),
+            },
+          }
+        );
+
+        return JSON.stringify({ templateId, created, updated }, null, 2);
       } catch (e) {
         return formatError(e);
       }
@@ -92,22 +123,28 @@ export const emailBuilderTools = [
   },
   {
     name: "ghl_update_email_builder_template",
-    description: "Update an existing email builder template's name or HTML content.",
+    description: "Update an existing email builder template's HTML content.",
     inputSchema: z.object({
       templateId: z.string().describe("Template ID to update"),
-      name: z.string().optional(),
-      html: z.string().optional().describe("Updated HTML content"),
+      html: z.string().describe("Updated HTML content"),
       previewText: z.string().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      const { templateId, ...updateData } = args as { templateId: string } & Record<string, unknown>;
       try {
         const result = await ghlRequest(
-          "PUT",
-          `/emails/builder/templates/${templateId}`,
+          "POST",
+          "/emails/builder/data",
           {
             token: config.token,
-            body: { ...updateData, locationId: config.locationId },
+            body: {
+              locationId: config.locationId,
+              templateId: args.templateId,
+              updatedBy: config.locationId,
+              dnd: { elements: [], attrs: {}, templateSettings: {} },
+              html: args.html,
+              editorType: "html",
+              ...(args.previewText ? { previewText: args.previewText } : {}),
+            },
           }
         );
         return JSON.stringify(result, null, 2);
@@ -126,8 +163,8 @@ export const emailBuilderTools = [
       try {
         const result = await ghlRequest(
           "DELETE",
-          `/emails/builder/templates/${args.templateId}`,
-          { token: config.token, params: { locationId: config.locationId } }
+          `/emails/builder/${config.locationId}/${args.templateId}`,
+          { token: config.token }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
