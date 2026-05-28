@@ -20,18 +20,19 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**86 tools** covering the full GHL API:
+**100 tools** covering the full GHL API:
 
-| Category                  | Tools                                                                       |
-|---------------------------|-----------------------------------------------------------------------------|
-| Contacts                  | CRUD, search, upsert, tags, notes, tasks, workflow enrollment, appointments |
-| Conversations & Messaging | Search, send SMS/email/WhatsApp, schedule, message history                  |
-| Calendars & Appointments  | List calendars, check availability, book, reschedule, block slots           |
-| Opportunities / Pipeline  | Pipelines, deals, stage moves, won/lost/abandoned                           |
-| Workflows & Campaigns     | List workflows and campaigns                                                |
-| Location Settings         | Custom fields, custom values, tags, users, templates, forms                 |
-| Payments & Invoices       | Orders, transactions, subscriptions, coupons, invoices, payments            |
-| Social & Media            | Social posts, media library, trigger links                                  |
+| Category                      | Tools                                                                       |
+|-------------------------------|-----------------------------------------------------------------------------|
+| Contacts                      | CRUD, search, upsert, tags, notes, tasks, workflow enrollment, appointments |
+| Conversations & Messaging     | Search, send SMS/email/WhatsApp, schedule, message history                  |
+| Calendars & Appointments      | List calendars, check availability, book, reschedule, block slots           |
+| Opportunities / Pipeline      | Pipelines, deals, stage moves, won/lost/abandoned                           |
+| Workflows & Campaigns         | List workflows and campaigns                                                |
+| Location Settings             | Custom fields, custom values, tags, users, templates, forms                 |
+| Payments & Invoices           | Orders, transactions, subscriptions, coupons, invoices, payments            |
+| Social & Media                | Social posts, media library, trigger links                                  |
+| Knowledge Base, FAQs & Crawler| Create/manage knowledge bases, FAQ pairs, and AI-train websites via crawler |
 
 ---
 
@@ -235,7 +236,7 @@ This is slower to start but useful during development.
 
 ---
 
-## All 86 Tools — Full Reference
+## All 100 Tools — Full Reference
 
 ### Contacts
 
@@ -365,6 +366,37 @@ This is slower to start but useful during development.
 | `ghl_create_trigger_link` | Create a trigger link                   |
 | `ghl_delete_trigger_link` | Delete a trigger link                   |
 
+### Knowledge Bases
+
+| Tool                          | Description                                                                                   |
+|-------------------------------|-----------------------------------------------------------------------------------------------|
+| `ghl_list_knowledge_bases`    | List all knowledge bases for the location with cursor-based pagination                        |
+| `ghl_get_knowledge_base`      | Get a single knowledge base by ID — includes metadata counts (FAQs, URLs, files)             |
+| `ghl_create_knowledge_base`   | Create a new knowledge base (max 15 per location)                                             |
+| `ghl_update_knowledge_base`   | Update the name or description of an existing knowledge base                                  |
+| `ghl_delete_knowledge_base`   | Permanently delete a knowledge base and all its content (FAQs, trained URLs, etc.)           |
+
+### FAQs
+
+| Tool              | Description                                                                                   |
+|-------------------|-----------------------------------------------------------------------------------------------|
+| `ghl_list_faqs`   | List all FAQ question/answer pairs for a knowledge base with cursor-based pagination          |
+| `ghl_create_faq`  | Add a new FAQ question and answer to a knowledge base                                         |
+| `ghl_update_faq`  | Update the question and answer text of an existing FAQ                                        |
+| `ghl_delete_faq`  | Permanently delete an FAQ by ID                                                               |
+
+### Web Crawler
+
+Use the crawler to discover and ingest website pages as AI training data for a knowledge base. The typical flow is: **discover → check status → train**.
+
+| Tool                      | Description                                                                                                          |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `ghl_discover_website`    | Start crawling a website to discover pages. Choose scope: `Exact` (one URL), `Path` (sub-paths), or `Domain` (all). Returns an `operationId` |
+| `ghl_get_crawler_status`  | Check progress of a crawl job by `operationId` — returns per-URL status (Pending, Successful, Failed, etc.)          |
+| `ghl_list_crawler_urls`   | List all trained page links for a knowledge base. Use to retrieve `urlIds` for training or deletion                  |
+| `ghl_train_crawler_urls`  | Ingest discovered pages into the knowledge base for AI training using `urlIds` from the crawler                      |
+| `ghl_delete_crawler_urls` | Remove previously trained page URLs from a knowledge base by `urlIds`                                                |
+
 ---
 
 ## Example Prompts
@@ -391,6 +423,14 @@ Here are some things you can say to your AI once connected:
 "List all users/team members in this location"
 
 "What workflows do we have? Show me the names and IDs"
+
+"Create a knowledge base called 'Product FAQ' and add 5 FAQs covering our pricing, refund policy, and onboarding steps"
+
+"Crawl https://example.com and train our support knowledge base on every page under /docs"
+
+"List all the FAQs in our knowledge base and update any that mention the old pricing"
+
+"Show me the status of the last website crawl and train on all successfully discovered pages"
 ```
 
 ---
@@ -440,7 +480,8 @@ ghl-mcp-server/
 │       ├── workflows.ts      #  2 workflow & campaign tools
 │       ├── locations.ts      # 16 location settings tools
 │       ├── payments.ts       # 12 payment & invoice tools
-│       └── social.ts         #  8 social, media & trigger link tools
+│       ├── social.ts         #  8 social, media & trigger link tools
+│       └── knowledge_base.ts # 14 knowledge base, FAQ & web crawler tools
 ├── dist/                 # Compiled output (generated by npm run build)
 ├── .env.example          # Environment variable template
 ├── package.json
