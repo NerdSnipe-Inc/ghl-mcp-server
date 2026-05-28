@@ -178,7 +178,7 @@ export const emailCampaignTools = [
   {
     name: "ghl_get_email_campaigns",
     description:
-      "List all email marketing campaigns (broadcasts/drip campaigns) in the location.",
+      "List email marketing campaigns in the location via the schedule endpoint.",
     inputSchema: z.object({
       status: z
         .enum(["draft", "scheduled", "sent", "all"])
@@ -189,10 +189,11 @@ export const emailCampaignTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("GET", "/emails/campaigns", {
+        const result = await ghlRequest("GET", "/emails/schedule", {
           token: config.token,
           params: {
             locationId: config.locationId,
+            campaignsOnly: true,
             status: args.status as string | undefined,
             limit: args.limit as number | undefined,
             offset: args.offset as number | undefined,
@@ -206,16 +207,16 @@ export const emailCampaignTools = [
   },
   {
     name: "ghl_get_email_campaign",
-    description: "Get details of a single email campaign by ID.",
+    description: "Get a single email marketing campaign by ID.",
     inputSchema: z.object({
-      campaignId: z.string(),
+      campaignId: z.string().describe("Campaign ID to retrieve"),
     }),
     handler: async (args: { campaignId: string }, config: GHLConfig) => {
       try {
         const result = await ghlRequest(
           "GET",
-          `/emails/campaigns/${args.campaignId}`,
-          { token: config.token, params: { locationId: config.locationId } }
+          `/emails/schedule/${args.campaignId}`,
+          { token: config.token }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -226,26 +227,27 @@ export const emailCampaignTools = [
   {
     name: "ghl_create_email_campaign",
     description:
-      "Create a new email marketing campaign (broadcast). Requires a template ID from ghl_create_email_builder_template or ghl_get_email_builder_templates.",
+      "Create a new email marketing campaign (scheduled send) using an existing email builder template.",
     inputSchema: z.object({
-      name: z.string().describe("Campaign name"),
+      name: z.string().describe("Campaign display name"),
+      templateId: z.string().describe("Email builder template ID to use"),
       subject: z.string().describe("Email subject line"),
-      templateId: z
-        .string()
-        .describe("Email builder template ID to use as the campaign body"),
-      fromName: z.string().optional().describe("Sender display name"),
-      fromEmail: z.string().optional().describe("Sender email address"),
-      replyToEmail: z.string().optional(),
       scheduledAt: z
         .string()
         .optional()
-        .describe("ISO 8601 datetime to send the campaign. Omit to save as draft."),
+        .describe("ISO 8601 datetime to schedule the send (e.g. 2025-06-01T10:00:00Z)"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("POST", "/emails/campaigns", {
+        const result = await ghlRequest("POST", "/emails/schedule", {
           token: config.token,
-          body: { ...args, locationId: config.locationId },
+          body: {
+            locationId: config.locationId,
+            name: args.name,
+            templateId: args.templateId,
+            subject: args.subject,
+            ...(args.scheduledAt ? { scheduledAt: args.scheduledAt } : {}),
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -255,15 +257,15 @@ export const emailCampaignTools = [
   },
   {
     name: "ghl_delete_email_campaign",
-    description: "Delete an email campaign by ID.",
+    description: "Delete an email marketing campaign by ID.",
     inputSchema: z.object({
-      campaignId: z.string(),
+      campaignId: z.string().describe("Campaign ID to delete"),
     }),
     handler: async (args: { campaignId: string }, config: GHLConfig) => {
       try {
         const result = await ghlRequest(
           "DELETE",
-          `/emails/campaigns/${args.campaignId}`,
+          `/emails/schedule/${args.campaignId}`,
           { token: config.token }
         );
         return JSON.stringify(result, null, 2);

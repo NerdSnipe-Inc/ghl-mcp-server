@@ -6,9 +6,10 @@ export const phoneNumberTools = [
     name: "ghl_get_phone_numbers",
     description: "List all purchased/active phone numbers in the location.",
     inputSchema: z.object({
-      pageSize: z.number().optional().default(100).describe("Max 1000"),
-      page: z.number().optional().default(1),
-      searchFilter: z.string().optional().describe("Filter by phone number pattern"),
+      pageSize: z.number().optional().describe("Number of results per page"),
+      page: z.number().optional().describe("Page number"),
+      searchFilter: z.string().optional().describe("Filter by phone number or label"),
+      skipNumberPool: z.boolean().optional().describe("Skip number pool results"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -21,6 +22,7 @@ export const phoneNumberTools = [
               pageSize: args.pageSize as number | undefined,
               page: args.page as number | undefined,
               searchFilter: args.searchFilter as string | undefined,
+              skipNumberPool: args.skipNumberPool as boolean | undefined,
             },
           }
         );
@@ -33,19 +35,16 @@ export const phoneNumberTools = [
   {
     name: "ghl_search_available_phone_numbers",
     description:
-      "Search for available phone numbers to purchase. Filter by country, area code, or capabilities.",
+      "Search for available phone numbers to purchase. Filter by country, number type, or capabilities.",
     inputSchema: z.object({
       countryCode: z.string().describe("ISO 2-letter country code (e.g. CA, US)"),
-      numberTypes: z
-        .enum(["local", "tollFree", "mobile", "national"])
-        .optional()
-        .describe("Phone number type filter"),
-      firstPart: z.string().optional().describe("Leading digits / area code pattern"),
-      lastPart: z.string().optional().describe("Trailing digit pattern"),
-      anywhere: z.string().optional().describe("Any-position digit match"),
-      smsEnabled: z.boolean().optional(),
-      mmsEnabled: z.boolean().optional(),
-      voiceEnabled: z.boolean().optional(),
+      numberTypes: z.string().optional().describe("Phone number type (e.g. local, tollFree)"),
+      firstPart: z.string().optional().describe("First part of the number to match"),
+      lastPart: z.string().optional().describe("Last part of the number to match"),
+      anywhere: z.boolean().optional().describe("Match digits anywhere in number"),
+      smsEnabled: z.boolean().optional().describe("Filter for SMS-capable numbers"),
+      mmsEnabled: z.boolean().optional().describe("Filter for MMS-capable numbers"),
+      voiceEnabled: z.boolean().optional().describe("Filter for voice-capable numbers"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -59,7 +58,7 @@ export const phoneNumberTools = [
               numberTypes: args.numberTypes as string | undefined,
               firstPart: args.firstPart as string | undefined,
               lastPart: args.lastPart as string | undefined,
-              anywhere: args.anywhere as string | undefined,
+              anywhere: args.anywhere as boolean | undefined,
               smsEnabled: args.smsEnabled as boolean | undefined,
               mmsEnabled: args.mmsEnabled as boolean | undefined,
               voiceEnabled: args.voiceEnabled as boolean | undefined,
@@ -75,17 +74,11 @@ export const phoneNumberTools = [
   {
     name: "ghl_purchase_phone_number",
     description:
-      "Purchase a phone number for the location. Use ghl_search_available_phone_numbers first to find a number — pass its fingerprintId when available.",
+      "Purchase a phone number for the location.",
     inputSchema: z.object({
       phoneNumber: z
         .string()
         .describe("Phone number to purchase in E.164 format (e.g. +16135550100)"),
-      countryCode: z.string().optional().describe("ISO 2-letter country code"),
-      numberType: z.enum(["local", "tollFree", "mobile"]).optional(),
-      fingerprintId: z
-        .string()
-        .optional()
-        .describe("fingerprintId from search results — include when available"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -94,7 +87,58 @@ export const phoneNumberTools = [
           `/phone-system/numbers/location/${config.locationId}/purchase`,
           {
             token: config.token,
-            body: args,
+            body: { phoneNumber: args.phoneNumber },
+          }
+        );
+        return JSON.stringify(result, null, 2);
+      } catch (e) {
+        return formatError(e);
+      }
+    },
+  },
+  {
+    name: "ghl_release_phone_number",
+    description:
+      "Release (delete) a purchased phone number from the location.",
+    inputSchema: z.object({
+      numberId: z.string().describe("The phone number ID to release"),
+    }),
+    handler: async (args: { numberId: string }, config: GHLConfig) => {
+      try {
+        const result = await ghlRequest(
+          "DELETE",
+          `/phone-system/numbers/location/${config.locationId}/${args.numberId}`,
+          { token: config.token }
+        );
+        return JSON.stringify(result, null, 2);
+      } catch (e) {
+        return formatError(e);
+      }
+    },
+  },
+  {
+    name: "ghl_update_phone_number",
+    description:
+      "Update settings for a phone number (friendly name, call forwarding, etc.).",
+    inputSchema: z.object({
+      numberId: z.string().describe("The phone number ID to update"),
+      friendlyName: z.string().optional().describe("Display label for the number"),
+      callForwardingNumber: z
+        .string()
+        .optional()
+        .describe("Number to forward calls to in E.164 format"),
+    }),
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
+      try {
+        const result = await ghlRequest(
+          "PUT",
+          `/phone-system/numbers/location/${config.locationId}/${args.numberId as string}`,
+          {
+            token: config.token,
+            body: {
+              ...(args.friendlyName !== undefined ? { friendlyName: args.friendlyName } : {}),
+              ...(args.callForwardingNumber !== undefined ? { callForwardingNumber: args.callForwardingNumber } : {}),
+            },
           }
         );
         return JSON.stringify(result, null, 2);

@@ -187,13 +187,14 @@ describe('ghl_delete_email_builder_template', () => {
 // ── ghl_get_email_campaigns ───────────────────────────────────────────────────
 
 describe('ghl_get_email_campaigns', () => {
-  it('calls GET /emails/campaigns with locationId', async () => {
+  it('calls GET /emails/schedule with campaignsOnly=true and locationId', async () => {
     const fetch = mockFetchSuccess({ campaigns: [] });
     await getTool('ghl_get_email_campaigns').handler({}, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/emails/campaigns');
+    expect(call.pathname).toBe('/emails/schedule');
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.params.campaignsOnly).toBe('true');
   });
 
   it('passes status, limit, and offset params', async () => {
@@ -220,7 +221,7 @@ describe('ghl_get_email_campaigns', () => {
 // ── ghl_get_email_campaign ────────────────────────────────────────────────────
 
 describe('ghl_get_email_campaign', () => {
-  it('calls GET /emails/campaigns/:id with locationId', async () => {
+  it('calls GET /emails/schedule/:campaignId', async () => {
     const fetch = mockFetchSuccess({ campaign: { id: 'camp-1' } });
     await getTool('ghl_get_email_campaign').handler(
       { campaignId: 'camp-1' },
@@ -228,15 +229,14 @@ describe('ghl_get_email_campaign', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/emails/campaigns/camp-1');
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.pathname).toBe('/emails/schedule/camp-1');
   });
 
   it('handles 404', async () => {
     mockFetchError(404, { message: 'Not found' });
     expectError(
       await getTool('ghl_get_email_campaign').handler(
-        { campaignId: 'bad' },
+        { campaignId: 'bad-id' },
         TEST_CONFIG
       ),
       404
@@ -247,30 +247,26 @@ describe('ghl_get_email_campaign', () => {
 // ── ghl_create_email_campaign ─────────────────────────────────────────────────
 
 describe('ghl_create_email_campaign', () => {
-  it('calls POST /emails/campaigns with locationId and campaign data', async () => {
+  it('calls POST /emails/schedule with locationId and required fields', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_create_email_campaign').handler(
-      {
-        name: 'Summer Sale',
-        subject: 'Special offer inside',
-        templateId: 'tmpl-abc',
-      },
+      { name: 'My Campaign', templateId: 'tmpl-1', subject: 'Hello World' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
-    expect(call.pathname).toBe('/emails/campaigns');
+    expect(call.pathname).toBe('/emails/schedule');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
-    expect(call.body?.name).toBe('Summer Sale');
-    expect(call.body?.subject).toBe('Special offer inside');
-    expect(call.body?.templateId).toBe('tmpl-abc');
+    expect(call.body?.name).toBe('My Campaign');
+    expect(call.body?.templateId).toBe('tmpl-1');
+    expect(call.body?.subject).toBe('Hello World');
   });
 
-  it('handles validation errors', async () => {
-    mockFetchError(422, { message: 'Template not found' });
+  it('handles API errors', async () => {
+    mockFetchError(422, { message: 'Validation error' });
     expectError(
       await getTool('ghl_create_email_campaign').handler(
-        { name: 'x', subject: 'y', templateId: 'bad' },
+        { name: 'Bad', templateId: 'tmpl-1', subject: 'x' },
         TEST_CONFIG
       ),
       422
@@ -281,22 +277,22 @@ describe('ghl_create_email_campaign', () => {
 // ── ghl_delete_email_campaign ─────────────────────────────────────────────────
 
 describe('ghl_delete_email_campaign', () => {
-  it('calls DELETE /emails/campaigns/:id', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
+  it('calls DELETE /emails/schedule/:campaignId', async () => {
+    const fetch = mockFetchSuccess({ success: true });
     await getTool('ghl_delete_email_campaign').handler(
       { campaignId: 'camp-1' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
-    expect(call.pathname).toBe('/emails/campaigns/camp-1');
+    expect(call.pathname).toBe('/emails/schedule/camp-1');
   });
 
   it('handles errors', async () => {
-    mockFetchError(404, { message: 'Not found' });
+    mockFetchError(404, { message: 'Campaign not found' });
     expectError(
       await getTool('ghl_delete_email_campaign').handler(
-        { campaignId: 'bad' },
+        { campaignId: 'bad-id' },
         TEST_CONFIG
       ),
       404

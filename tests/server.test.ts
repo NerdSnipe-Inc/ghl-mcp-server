@@ -17,6 +17,7 @@ import { funnelTools } from '../src/tools/funnels.js';
 import { phoneNumberTools } from '../src/tools/phone_numbers.js';
 import { paymentTools, invoiceTools } from '../src/tools/payments.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
+import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -52,11 +53,16 @@ const ALL_TOOLS = [
   ...socialTools,
   ...mediaTools,
   ...triggerLinkTools,
+
+  // Knowledge base, FAQ, crawler
+  ...knowledgeBaseTools,
+  ...faqTools,
+  ...crawlerTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 113 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(113);
+  it('registers exactly 127 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(127);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -118,6 +124,9 @@ describe('Tool counts per module', () => {
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
+  it('knowledgeBase has 5 tools', () => expect(knowledgeBaseTools).toHaveLength(5));
+  it('faq has 4 tools', () => expect(faqTools).toHaveLength(4));
+  it('crawler has 5 tools', () => expect(crawlerTools).toHaveLength(5));
 });
 
 describe('Specific tool existence', () => {
@@ -191,12 +200,20 @@ describe('Specific tool existence', () => {
     'ghl_get_media_files', 'ghl_delete_media_file',
     // Trigger links (3)
     'ghl_get_trigger_links', 'ghl_create_trigger_link', 'ghl_delete_trigger_link',
+    // Knowledge base (5)
+    'ghl_list_knowledge_bases', 'ghl_get_knowledge_base', 'ghl_create_knowledge_base',
+    'ghl_update_knowledge_base', 'ghl_delete_knowledge_base',
+    // FAQ (4)
+    'ghl_list_faqs', 'ghl_create_faq', 'ghl_update_faq', 'ghl_delete_faq',
+    // Crawler (5)
+    'ghl_list_crawler_urls', 'ghl_discover_website', 'ghl_get_crawler_status',
+    'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 113 expected tools are present', () => {
+  it('all 127 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(113);
+    expect(expectedTools).toHaveLength(127);
   });
 });

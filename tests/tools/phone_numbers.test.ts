@@ -18,24 +18,26 @@ const getTool = (name: string) => {
 // ── ghl_get_phone_numbers ─────────────────────────────────────────────────────
 
 describe('ghl_get_phone_numbers', () => {
-  it('calls GET /phone-number/ with locationId', async () => {
+  it('calls GET /phone-system/numbers/location/:locationId with no extra params', async () => {
     const fetch = mockFetchSuccess({ phoneNumbers: [] });
     await getTool('ghl_get_phone_numbers').handler({}, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/phone-number/');
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.pathname).toBe(
+      `/phone-system/numbers/location/${TEST_CONFIG.locationId}`
+    );
   });
 
-  it('passes limit and skip params', async () => {
+  it('passes pageSize, page, and searchFilter params', async () => {
     const fetch = mockFetchSuccess({ phoneNumbers: [] });
     await getTool('ghl_get_phone_numbers').handler(
-      { limit: 10, skip: 5 },
+      { pageSize: 10, page: 2, searchFilter: '613' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.params.limit).toBe('10');
-    expect(call.params.skip).toBe('5');
+    expect(call.params.pageSize).toBe('10');
+    expect(call.params.page).toBe('2');
+    expect(call.params.searchFilter).toBe('613');
   });
 
   it('handles API errors', async () => {
@@ -50,32 +52,40 @@ describe('ghl_get_phone_numbers', () => {
 // ── ghl_search_available_phone_numbers ────────────────────────────────────────
 
 describe('ghl_search_available_phone_numbers', () => {
-  it('calls GET /phone-number/search with locationId', async () => {
-    const fetch = mockFetchSuccess({ numbers: [] });
-    await getTool('ghl_search_available_phone_numbers').handler({}, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/phone-number/search');
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
-  });
-
-  it('passes areaCode, countryCode, type, and limit params', async () => {
+  it('calls GET /phone-system/numbers/location/:locationId/available with countryCode', async () => {
     const fetch = mockFetchSuccess({ numbers: [] });
     await getTool('ghl_search_available_phone_numbers').handler(
-      { areaCode: '613', countryCode: 'CA', type: 'local', limit: 5 },
+      { countryCode: 'US' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.params.areaCode).toBe('613');
+    expect(call.method).toBe('GET');
+    expect(call.pathname).toBe(
+      `/phone-system/numbers/location/${TEST_CONFIG.locationId}/available`
+    );
+    expect(call.params.countryCode).toBe('US');
+  });
+
+  it('passes optional params: numberTypes, firstPart, smsEnabled', async () => {
+    const fetch = mockFetchSuccess({ numbers: [] });
+    await getTool('ghl_search_available_phone_numbers').handler(
+      { countryCode: 'CA', numberTypes: 'local', firstPart: '613', smsEnabled: true },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
     expect(call.params.countryCode).toBe('CA');
-    expect(call.params.type).toBe('local');
-    expect(call.params.limit).toBe('5');
+    expect(call.params.numberTypes).toBe('local');
+    expect(call.params.firstPart).toBe('613');
+    expect(call.params.smsEnabled).toBe('true');
   });
 
   it('handles API errors', async () => {
     mockFetchError(500, { message: 'Server error' });
     expectError(
-      await getTool('ghl_search_available_phone_numbers').handler({}, TEST_CONFIG),
+      await getTool('ghl_search_available_phone_numbers').handler(
+        { countryCode: 'US' },
+        TEST_CONFIG
+      ),
       500
     );
   });
@@ -84,7 +94,7 @@ describe('ghl_search_available_phone_numbers', () => {
 // ── ghl_purchase_phone_number ─────────────────────────────────────────────────
 
 describe('ghl_purchase_phone_number', () => {
-  it('calls POST /phone-number/ with locationId and phoneNumber', async () => {
+  it('calls POST /phone-system/numbers/location/:locationId/purchase with phoneNumber', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_purchase_phone_number').handler(
       { phoneNumber: '+16135550100' },
@@ -92,8 +102,9 @@ describe('ghl_purchase_phone_number', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
-    expect(call.pathname).toBe('/phone-number/');
-    expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.pathname).toBe(
+      `/phone-system/numbers/location/${TEST_CONFIG.locationId}/purchase`
+    );
     expect(call.body?.phoneNumber).toBe('+16135550100');
   });
 
@@ -112,22 +123,24 @@ describe('ghl_purchase_phone_number', () => {
 // ── ghl_release_phone_number ──────────────────────────────────────────────────
 
 describe('ghl_release_phone_number', () => {
-  it('calls DELETE /phone-number/:id', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
+  it('calls DELETE /phone-system/numbers/location/:locationId/:numberId', async () => {
+    const fetch = mockFetchSuccess({ success: true });
     await getTool('ghl_release_phone_number').handler(
-      { phoneNumberId: 'pn-1' },
+      { numberId: 'num-abc123' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
-    expect(call.pathname).toBe('/phone-number/pn-1');
+    expect(call.pathname).toBe(
+      `/phone-system/numbers/location/${TEST_CONFIG.locationId}/num-abc123`
+    );
   });
 
   it('handles errors', async () => {
     mockFetchError(404, { message: 'Number not found' });
     expectError(
       await getTool('ghl_release_phone_number').handler(
-        { phoneNumberId: 'bad' },
+        { numberId: 'bad-id' },
         TEST_CONFIG
       ),
       404
@@ -138,40 +151,26 @@ describe('ghl_release_phone_number', () => {
 // ── ghl_update_phone_number ───────────────────────────────────────────────────
 
 describe('ghl_update_phone_number', () => {
-  it('calls PUT /phone-number/:id with locationId and update data', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
+  it('calls PUT /phone-system/numbers/location/:locationId/:numberId with body', async () => {
+    const fetch = mockFetchSuccess({ success: true });
     await getTool('ghl_update_phone_number').handler(
-      { phoneNumberId: 'pn-1', assignedTo: 'user-123' },
+      { numberId: 'num-abc123', friendlyName: 'Sales Line', callForwardingNumber: '+15550001111' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
-    expect(call.pathname).toBe('/phone-number/pn-1');
-    expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
-    expect(call.body?.assignedTo).toBe('user-123');
-    expect(call.body?.phoneNumberId).toBeUndefined();
-  });
-
-  it('passes call forwarding settings', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
-    await getTool('ghl_update_phone_number').handler(
-      {
-        phoneNumberId: 'pn-1',
-        callForwardingEnabled: true,
-        callForwardingNumber: '+16135559999',
-      },
-      TEST_CONFIG
+    expect(call.pathname).toBe(
+      `/phone-system/numbers/location/${TEST_CONFIG.locationId}/num-abc123`
     );
-    const call = parseLastFetchCall(fetch);
-    expect(call.body?.callForwardingEnabled).toBe(true);
-    expect(call.body?.callForwardingNumber).toBe('+16135559999');
+    expect(call.body?.friendlyName).toBe('Sales Line');
+    expect(call.body?.callForwardingNumber).toBe('+15550001111');
   });
 
   it('handles errors', async () => {
-    mockFetchError(422, { message: 'Invalid data' });
+    mockFetchError(422, { message: 'Invalid config' });
     expectError(
       await getTool('ghl_update_phone_number').handler(
-        { phoneNumberId: 'pn-1' },
+        { numberId: 'num-abc123' },
         TEST_CONFIG
       ),
       422
