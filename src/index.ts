@@ -47,6 +47,11 @@ import { funnelTools } from "./tools/funnels.js";
 import { phoneNumberTools } from "./tools/phone_numbers.js";
 import { paymentTools, invoiceTools } from "./tools/payments.js";
 import { socialTools, mediaTools, triggerLinkTools } from "./tools/social.js";
+import {
+  knowledgeBaseTools,
+  faqTools,
+  crawlerTools,
+} from "./tools/knowledge_base.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -98,6 +103,11 @@ const ALL_TOOLS: ToolDef[] = [
   ...socialTools,
   ...mediaTools,
   ...triggerLinkTools,
+
+  // AI Knowledge Base
+  ...knowledgeBaseTools,
+  ...faqTools,
+  ...crawlerTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
@@ -148,7 +158,7 @@ function zodToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
 // ── MCP Server ────────────────────────────────────────────────────────────────
 
 const server = new Server(
-  { name: "ghl-mcp-server", version: "1.1.0" },
+  { name: "ghl-mcp-server", version: "1.2.0" },
   { capabilities: { tools: {} } }
 );
 
@@ -207,7 +217,7 @@ async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error(
-    `GHL MCP Server v1.1.0 running — ${ALL_TOOLS.length} tools available`
+    `GHL MCP Server v1.2.0 running — ${ALL_TOOLS.length} tools available`
   );
 }
 
