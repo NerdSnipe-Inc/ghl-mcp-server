@@ -1,6 +1,6 @@
 {
   "name": "@nerdsnipe-inc/ghl-mcp-server",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A Model Context Protocol (MCP) server for GoHighLevel API v2 — giving any AI agent full access to your GHL location.",
   "keywords": [
     "mcp",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Nerdsnipe-Inc/ghl-mcp-server.git"
+    "url": "https://github.com/NerdSnipe-Inc/ghl-mcp-server.git"
   },
   "license": "MIT",
   "author": "NerdSnipe Inc <hello@nerdsnipe.cc>",
