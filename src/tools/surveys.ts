@@ -33,6 +33,7 @@ export const surveyTools = [
       "Get survey submissions — optionally filter by survey, contact, or date range.",
     inputSchema: z.object({
       surveyId: z.string().optional().describe("Filter by survey ID"),
+      contactId: z.string().optional().describe("Filter by contact ID"),
       q: z.string().optional().describe("Search by contact ID, name, email, or phone"),
       startAt: z.string().optional().describe("Start date YYYY-MM-DD"),
       endAt: z.string().optional().describe("End date YYYY-MM-DD"),
@@ -46,6 +47,7 @@ export const surveyTools = [
           params: {
             locationId: config.locationId,
             surveyId: args.surveyId as string | undefined,
+            contactId: args.contactId as string | undefined,
             q: args.q as string | undefined,
             startAt: args.startAt as string | undefined,
             endAt: args.endAt as string | undefined,

@@ -27,16 +27,16 @@ describe('ghl_get_funnels', () => {
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
-  it('passes limit, offset, and search params', async () => {
+  it('passes limit, offset, and name params', async () => {
     const fetch = mockFetchSuccess({ funnels: [] });
     await getTool('ghl_get_funnels').handler(
-      { limit: 10, offset: 5, search: 'landing' },
+      { limit: 10, offset: 5, name: 'landing' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.params.limit).toBe('10');
     expect(call.params.offset).toBe('5');
-    expect(call.params.search).toBe('landing');
+    expect(call.params.name).toBe('landing');
   });
 
   it('handles API errors', async () => {
@@ -48,7 +48,7 @@ describe('ghl_get_funnels', () => {
 // ── ghl_get_funnel_pages ──────────────────────────────────────────────────────
 
 describe('ghl_get_funnel_pages', () => {
-  it('calls GET /funnels/funnel/:id/pages with locationId', async () => {
+  it('calls GET /funnels/page with funnelId as query param', async () => {
     const fetch = mockFetchSuccess({ pages: [] });
     await getTool('ghl_get_funnel_pages').handler(
       { funnelId: 'funnel-1' },
@@ -56,8 +56,9 @@ describe('ghl_get_funnel_pages', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/funnels/funnel/funnel-1/pages');
+    expect(call.pathname).toBe('/funnels/page');
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.params.funnelId).toBe('funnel-1');
   });
 
   it('passes limit and offset params', async () => {
@@ -86,39 +87,34 @@ describe('ghl_get_funnel_pages', () => {
 // ── ghl_get_funnel_page_count ─────────────────────────────────────────────────
 
 describe('ghl_get_funnel_page_count', () => {
-  it('calls GET /funnels/funnel/:funnelId/pages/:pageId/count with locationId', async () => {
+  it('calls GET /funnels/page/count with funnelId as query param', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_get_funnel_page_count').handler(
-      { funnelId: 'funnel-1', pageId: 'page-1' },
+      { funnelId: 'funnel-1' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/funnels/funnel/funnel-1/pages/page-1/count');
+    expect(call.pathname).toBe('/funnels/page/count');
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.params.funnelId).toBe('funnel-1');
   });
 
-  it('passes date range filters', async () => {
+  it('passes optional name filter', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_get_funnel_page_count').handler(
-      {
-        funnelId: 'funnel-1',
-        pageId: 'page-1',
-        startDate: '2024-01-01',
-        endDate: '2024-12-31',
-      },
+      { funnelId: 'funnel-1', name: 'checkout' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.params.startDate).toBe('2024-01-01');
-    expect(call.params.endDate).toBe('2024-12-31');
+    expect(call.params.name).toBe('checkout');
   });
 
   it('handles API errors', async () => {
     mockFetchError(500, { message: 'Server error' });
     expectError(
       await getTool('ghl_get_funnel_page_count').handler(
-        { funnelId: 'f', pageId: 'p' },
+        { funnelId: 'f' },
         TEST_CONFIG
       ),
       500

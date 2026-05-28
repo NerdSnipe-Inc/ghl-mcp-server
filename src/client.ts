@@ -84,11 +84,15 @@ export async function ghlRequest<T = unknown>(
   });
 
   if (!response.ok) {
+    // Read body once as text, then try to parse as JSON.
+    // Avoids "Body already read" errors from calling .json() then .text() on
+    // the same consumed stream.
+    const text = await response.text();
     let errorBody: unknown;
     try {
-      errorBody = await response.json();
+      errorBody = JSON.parse(text);
     } catch {
-      errorBody = await response.text();
+      errorBody = text;
     }
     throw new GHLApiError(response.status, response.statusText, errorBody, path);
   }

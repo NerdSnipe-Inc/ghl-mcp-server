@@ -10,7 +10,7 @@ export const socialTools = [
       try {
         const result = await ghlRequest(
           "GET",
-          `/social-media-posting/oauth/${config.locationId}/accounts`,
+          `/social-media-posting/${config.locationId}/accounts`,
           { token: config.token }
         );
         return JSON.stringify(result, null, 2);
@@ -33,11 +33,15 @@ export const socialTools = [
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest(
-          "GET",
-          `/social-media-posting/${config.locationId}/posts`,
+          "POST",
+          `/social-media-posting/${config.locationId}/posts/list`,
           {
             token: config.token,
-            params: { skip: args.skip as number | undefined, limit: args.limit as number | undefined, status: args.status as string | undefined },
+            body: {
+              skip: args.skip,
+              limit: args.limit,
+              status: args.status,
+            },
           }
         );
         return JSON.stringify(result, null, 2);
@@ -126,6 +130,7 @@ export const mediaTools = [
         const result = await ghlRequest("GET", "/medias/files", {
           token: config.token,
           params: {
+            locationId: config.locationId,
             altType: "location",
             altId: config.locationId,
             sortBy: args.sortBy as string,

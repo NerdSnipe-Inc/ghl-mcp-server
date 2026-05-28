@@ -5,21 +5,14 @@ export const customFieldTools = [
   {
     name: "ghl_get_custom_fields",
     description:
-      "List custom fields for a given object type in the location. Use objectKey='contact' for contact fields, 'company' for business fields.",
-    inputSchema: z.object({
-      objectKey: z
-        .string()
-        .optional()
-        .default("contact")
-        .describe("Object type key: 'contact', 'company', etc."),
-    }),
-    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      const objectKey = (args.objectKey as string) ?? "contact";
+      "List custom fields for the location.",
+    inputSchema: z.object({}),
+    handler: async (_args: Record<string, never>, config: GHLConfig) => {
       try {
         const result = await ghlRequest(
           "GET",
-          `/custom-fields/object-key/${objectKey}`,
-          { token: config.token, params: { locationId: config.locationId } }
+          `/locations/${config.locationId}/customFields`,
+          { token: config.token }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -49,11 +42,6 @@ export const customFieldTools = [
           "EMAIL",
         ])
         .describe("Field data type"),
-      objectKey: z
-        .string()
-        .optional()
-        .default("contact")
-        .describe("Object type: 'contact', 'company', etc."),
       fieldKey: z
         .string()
         .optional()
@@ -76,9 +64,9 @@ export const customFieldTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("POST", "/custom-fields/", {
+        const result = await ghlRequest("POST", `/locations/${config.locationId}/customFields`, {
           token: config.token,
-          body: { ...args, locationId: config.locationId },
+          body: args,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -99,7 +87,7 @@ export const customFieldTools = [
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { fieldId, ...updateData } = args as { fieldId: string } & Record<string, unknown>;
       try {
-        const result = await ghlRequest("PUT", `/custom-fields/${fieldId}`, {
+        const result = await ghlRequest("PUT", `/locations/${config.locationId}/customFields/${fieldId}`, {
           token: config.token,
           body: updateData,
         });
@@ -117,7 +105,7 @@ export const customFieldTools = [
     }),
     handler: async (args: { fieldId: string }, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("DELETE", `/custom-fields/${args.fieldId}`, {
+        const result = await ghlRequest("DELETE", `/locations/${config.locationId}/customFields/${args.fieldId}`, {
           token: config.token,
         });
         return JSON.stringify(result, null, 2);

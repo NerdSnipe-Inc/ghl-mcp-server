@@ -38,12 +38,19 @@ export const userTools = [
   {
     name: "ghl_get_users",
     description: "List all team members in the GHL location.",
-    inputSchema: z.object({}),
-    handler: async (_args: Record<string, never>, config: GHLConfig) => {
+    inputSchema: z.object({
+      limit: z.number().optional().describe("Max results"),
+      skip: z.number().optional().describe("Number of results to skip"),
+    }),
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/users/", {
           token: config.token,
-          params: { locationId: config.locationId },
+          params: {
+            locationId: config.locationId,
+            limit: args.limit as number | undefined,
+            skip: args.skip as number | undefined,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

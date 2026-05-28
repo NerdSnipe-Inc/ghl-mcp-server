@@ -8,7 +8,7 @@ export const funnelTools = [
     inputSchema: z.object({
       limit: z.number().optional().default(25),
       offset: z.number().optional().default(0),
-      search: z.string().optional().describe("Filter funnels by name"),
+      name: z.string().optional().describe("Filter funnels by name"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -18,7 +18,7 @@ export const funnelTools = [
             locationId: config.locationId,
             limit: args.limit as number | undefined,
             offset: args.offset as number | undefined,
-            search: args.search as string | undefined,
+            name: args.name as string | undefined,
           },
         });
         return JSON.stringify(result, null, 2);

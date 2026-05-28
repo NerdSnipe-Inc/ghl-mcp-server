@@ -19,3 +19,6 @@ Thumbs.db
 *.log
 npm-debug.log*
 /.env.nerdsnipe
+
+# Local dev notes (private reference, not for repo)
+_DEV_NOTES.md

@@ -9,6 +9,7 @@ export const contactTools = [
     inputSchema: z.object({
       query: z.string().optional().describe("Search query (name, email, phone)"),
       limit: z.number().optional().default(20).describe("Max results (1-100)"),
+      skip: z.number().optional().describe("Number of results to skip"),
       startAfterId: z.string().optional().describe("Contact ID to start after (cursor pagination)"),
       startAfter: z.number().optional().describe("Timestamp cursor for pagination"),
     }),
@@ -20,6 +21,7 @@ export const contactTools = [
             locationId: config.locationId,
             query: args.query as string | undefined,
             limit: args.limit as number | undefined,
+            skip: args.skip as number | undefined,
             startAfterId: args.startAfterId as string | undefined,
             startAfter: args.startAfter as number | undefined,
           },

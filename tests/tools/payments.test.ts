@@ -92,12 +92,12 @@ describe('ghl_get_subscriptions', () => {
 // ── ghl_get_coupons ───────────────────────────────────────────────────────────
 
 describe('ghl_get_coupons', () => {
-  it('calls GET /payments/coupons with altId', async () => {
+  it('calls GET /payments/coupon/list with altId', async () => {
     const fetch = mockFetchSuccess({ coupons: [] });
     await getTool('ghl_get_coupons').handler({}, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/payments/coupons');
+    expect(call.pathname).toBe('/payments/coupon/list');
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -106,7 +106,7 @@ describe('ghl_get_coupons', () => {
 // ── ghl_create_coupon ─────────────────────────────────────────────────────────
 
 describe('ghl_create_coupon', () => {
-  it('calls POST /payments/coupons with coupon data and altId in body', async () => {
+  it('calls POST /payments/coupon with coupon data and altId in body', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_create_coupon').handler(
       {
@@ -119,7 +119,7 @@ describe('ghl_create_coupon', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
-    expect(call.pathname).toBe('/payments/coupons');
+    expect(call.pathname).toBe('/payments/coupon');
     expect(call.body?.code).toBe('SAVE20');
     expect(call.body?.discountType).toBe('percentage');
     expect(call.body?.discount).toBe(20);

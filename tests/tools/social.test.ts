@@ -20,13 +20,13 @@ const getTool = (name: string) => {
 // ── ghl_get_social_accounts ───────────────────────────────────────────────────
 
 describe('ghl_get_social_accounts', () => {
-  it('calls GET /social-media-posting/oauth/:locationId/accounts', async () => {
+  it('calls GET /social-media-posting/:locationId/accounts', async () => {
     const fetch = mockFetchSuccess({ accounts: [] });
     await getTool('ghl_get_social_accounts').handler({}, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe(
-      `/social-media-posting/oauth/${TEST_CONFIG.locationId}/accounts`
+      `/social-media-posting/${TEST_CONFIG.locationId}/accounts`
     );
   });
 
@@ -39,26 +39,26 @@ describe('ghl_get_social_accounts', () => {
 // ── ghl_get_social_posts ──────────────────────────────────────────────────────
 
 describe('ghl_get_social_posts', () => {
-  it('calls GET /social-media-posting/:locationId/posts', async () => {
+  it('calls POST /social-media-posting/:locationId/posts/list', async () => {
     const fetch = mockFetchSuccess({ posts: [] });
     await getTool('ghl_get_social_posts').handler({}, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('GET');
+    expect(call.method).toBe('POST');
     expect(call.pathname).toBe(
-      `/social-media-posting/${TEST_CONFIG.locationId}/posts`
+      `/social-media-posting/${TEST_CONFIG.locationId}/posts/list`
     );
   });
 
-  it('passes skip, limit, and status params', async () => {
+  it('passes skip, limit, and status in the request body', async () => {
     const fetch = mockFetchSuccess({ posts: [] });
     await getTool('ghl_get_social_posts').handler(
       { skip: 10, limit: 5, status: 'scheduled' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.params.skip).toBe('10');
-    expect(call.params.limit).toBe('5');
-    expect(call.params.status).toBe('scheduled');
+    expect(call.body?.skip).toBe(10);
+    expect(call.body?.limit).toBe(5);
+    expect(call.body?.status).toBe('scheduled');
   });
 });
 
@@ -135,12 +135,14 @@ describe('ghl_get_media_files', () => {
 // ── ghl_delete_media_file ─────────────────────────────────────────────────────
 
 describe('ghl_delete_media_file', () => {
-  it('calls DELETE /medias/files/:id', async () => {
+  it('calls DELETE /medias/:id with altType and altId query params', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_delete_media_file').handler({ fileId: 'file-1' }, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
-    expect(call.pathname).toBe('/medias/files/file-1');
+    expect(call.pathname).toBe('/medias/file-1');
+    expect(call.params.altType).toBe('location');
+    expect(call.params.altId).toBe(TEST_CONFIG.locationId);
   });
 
   it('handles errors', async () => {

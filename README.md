@@ -20,19 +20,22 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**100 tools** covering the full GHL API:
+**127 tools** covering the full GHL API:
 
-| Category                      | Tools                                                                       |
-|-------------------------------|-----------------------------------------------------------------------------|
-| Contacts                      | CRUD, search, upsert, tags, notes, tasks, workflow enrollment, appointments |
-| Conversations & Messaging     | Search, send SMS/email/WhatsApp, schedule, message history                  |
-| Calendars & Appointments      | List calendars, check availability, book, reschedule, block slots           |
-| Opportunities / Pipeline      | Pipelines, deals, stage moves, won/lost/abandoned                           |
-| Workflows & Campaigns         | List workflows and campaigns                                                |
-| Location Settings             | Custom fields, custom values, tags, users, templates, forms                 |
-| Payments & Invoices           | Orders, transactions, subscriptions, coupons, invoices, payments            |
-| Social & Media                | Social posts, media library, trigger links                                  |
-| Knowledge Base, FAQs & Crawler| Create/manage knowledge bases, FAQ pairs, and AI-train websites via crawler |
+| Category                       | Tools                                                                       |
+|--------------------------------|-----------------------------------------------------------------------------|
+| Contacts                       | CRUD, search, upsert, tags, notes, tasks, workflow enrollment, appointments |
+| Conversations & Messaging      | Search, send SMS/email/WhatsApp, schedule, message history                  |
+| Calendars & Appointments       | List calendars, check availability, book, reschedule, block slots           |
+| Opportunities / Pipeline       | Pipelines, deals, stage moves, won/lost/abandoned                           |
+| Workflows & Campaigns          | List workflows and campaigns                                                |
+| Location Settings              | Custom fields, custom values, tags, users, templates, forms, surveys        |
+| Email Marketing                | Email builder templates, email campaigns                                    |
+| Funnels                        | List funnels, pages, page counts                                            |
+| Phone Numbers                  | List, search, purchase, update, release phone numbers                       |
+| Payments & Invoices            | Orders, transactions, subscriptions, coupons, invoices, payments            |
+| Social & Media                 | Social posts, media library, trigger links                                  |
+| Knowledge Base, FAQs & Crawler | Create/manage knowledge bases, FAQ pairs, and AI-train websites via crawler |
 
 ---
 
@@ -70,33 +73,32 @@ https://app.gohighlevel.com/location/XXXXXXXXXXXXXXXXXX/dashboard
 
 ## Installation
 
-### Step 1 — Clone and build
+No build step needed. Pass your credentials directly in your AI client config and the server runs on demand.
+
+### Quick install via package manager (recommended)
+
+Use `npx`, `pnpm dlx`, or `bunx` to run the server without installing anything globally:
 
 ```bash
-git clone https://github.com/Nerdsnipe-Inc/ghl-mcp-server.git
-cd ghl-mcp-server
-npm install
-npm run build
+# npm / npx  (no install required)
+npx @nerdsnipe-inc/ghl-mcp-server
+
+# pnpm
+pnpm dlx @nerdsnipe-inc/ghl-mcp-server
+
+# bun
+bunx @nerdsnipe-inc/ghl-mcp-server
 ```
 
-This creates a `dist/` folder with the compiled server.
-
-### Step 2 — Configure your credentials
-
-Copy the example env file and fill in your values:
+Or install it globally if you prefer:
 
 ```bash
-cp .env.example .env
+npm install -g @nerdsnipe-inc/ghl-mcp-server
+# then run:
+ghl-mcp-server
 ```
 
-Then open `.env` in any text editor and add your credentials:
-
-```env
-GHL_PIT_TOKEN=your_private_integration_token_here
-GHL_LOCATION=your_location_id_here
-```
-
-### Step 3 — Connect to your AI tool
+### Connect to your AI tool
 
 Pick your AI client below and follow the instructions.
 
@@ -111,14 +113,12 @@ Open (or create) your Claude Desktop config file:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-Add the following (replace the path with wherever you cloned this repo):
-
 ```json
 {
   "mcpServers": {
     "ghl": {
-      "command": "node",
-      "args": ["/absolute/path/to/ghl-mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "@nerdsnipe-inc/ghl-mcp-server"],
       "env": {
         "GHL_PIT_TOKEN": "your_token_here",
         "GHL_LOCATION": "your_location_id_here"
@@ -127,8 +127,6 @@ Add the following (replace the path with wherever you cloned this repo):
   }
 }
 ```
-
-> **Tip:** If you set up `.env` in Step 2, you can omit the `env` block entirely — the server loads `.env` automatically on startup. Passing them in the config also works and keeps everything in one place — use whichever you prefer.
 
 Restart Claude Desktop. You should see a hammer icon (🔨) in the chat input — that means MCP tools are active.
 
@@ -139,7 +137,7 @@ Restart Claude Desktop. You should see a hammer icon (🔨) in the chat input �
 Run this from your terminal to add the server to your Claude Code config:
 
 ```bash
-claude mcp add ghl node /absolute/path/to/ghl-mcp-server/dist/index.js \
+claude mcp add ghl npx -- -y @nerdsnipe-inc/ghl-mcp-server \
   -e GHL_PIT_TOKEN=your_token_here \
   -e GHL_LOCATION=your_location_id_here
 ```
@@ -150,8 +148,8 @@ Or add it manually to `~/.claude/mcp_servers.json` (or your project's `.mcp.json
 {
   "mcpServers": {
     "ghl": {
-      "command": "node",
-      "args": ["/absolute/path/to/ghl-mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "@nerdsnipe-inc/ghl-mcp-server"],
       "env": {
         "GHL_PIT_TOKEN": "your_token_here",
         "GHL_LOCATION": "your_location_id_here"
@@ -161,9 +159,7 @@ Or add it manually to `~/.claude/mcp_servers.json` (or your project's `.mcp.json
 }
 ```
 
-> **Project-scoped tip:** If you use a `.mcp.json` in your project root and load credentials from `.env`, you can omit the `env` block completely and just commit the `.mcp.json` safely (no secrets in it).
-
-**Project-scoped (recommended for teams):** Add a `.mcp.json` file in your project root so everyone on the team picks it up automatically. Add `.mcp.json` to `.gitignore` so tokens aren't committed.
+> **Project-scoped tip:** Add a `.mcp.json` in your project root so everyone on the team picks it up automatically — no local install required. Add `.mcp.json` to `.gitignore` so tokens aren't committed. If you store credentials in a `.env` file you can omit the `env` block entirely.
 
 ---
 
@@ -175,8 +171,8 @@ Or add it manually to `~/.claude/mcp_servers.json` (or your project's `.mcp.json
 ```json
 {
   "name": "ghl",
-  "command": "node",
-  "args": ["/absolute/path/to/ghl-mcp-server/dist/index.js"],
+  "command": "npx",
+  "args": ["-y", "@nerdsnipe-inc/ghl-mcp-server"],
   "env": {
     "GHL_PIT_TOKEN": "your_token_here",
     "GHL_LOCATION": "your_location_id_here"
@@ -196,8 +192,8 @@ Open `~/.codeium/windsurf/mcp_config.json` and add:
 {
   "mcpServers": {
     "ghl": {
-      "command": "node",
-      "args": ["/absolute/path/to/ghl-mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "@nerdsnipe-inc/ghl-mcp-server"],
       "env": {
         "GHL_PIT_TOKEN": "your_token_here",
         "GHL_LOCATION": "your_location_id_here"
@@ -211,19 +207,27 @@ Open `~/.codeium/windsurf/mcp_config.json` and add:
 
 ### Any other MCP-compatible client
 
-This server uses **stdio transport** — the standard for local MCP servers. Your client needs to:
+This server uses **stdio transport** — the standard for local MCP servers. Your client needs:
 
-- **Command**: `node`
-- **Args**: `["/absolute/path/to/ghl-mcp-server/dist/index.js"]`
-- **Env**: `GHL_PIT_TOKEN` and `GHL_LOCATION` (and optionally the workflow IDs)
+- **Command**: `npx`
+- **Args**: `["-y", "@nerdsnipe-inc/ghl-mcp-server"]`
+- **Env**: `GHL_PIT_TOKEN` and `GHL_LOCATION`
 
 Refer to your client's MCP documentation for exact config syntax.
 
 ---
 
-## Optional: Use without building (via tsx)
+## Running from source (contributors)
 
-If you don't want to compile TypeScript, you can run the server directly using `tsx`:
+If you've cloned the repo and want to run directly from TypeScript without a build step:
+
+```bash
+git clone https://github.com/Nerdsnipe-Inc/ghl-mcp-server.git
+cd ghl-mcp-server
+npm install
+```
+
+Then point your MCP client at the source via `tsx`:
 
 ```json
 {
@@ -232,11 +236,17 @@ If you don't want to compile TypeScript, you can run the server directly using `
 }
 ```
 
-This is slower to start but useful during development.
+Or build first for production use:
+
+```bash
+npm run build
+# then run:
+node dist/index.js
+```
 
 ---
 
-## All 100 Tools — Full Reference
+## All 127 Tools — Full Reference
 
 ### Contacts
 
@@ -314,6 +324,45 @@ This is slower to start but useful during development.
 
 > Enrolling contacts in workflows is done via `ghl_add_contact_to_workflow`.
 
+### Email Marketing
+
+| Tool                              | Description                                                              |
+|-----------------------------------|--------------------------------------------------------------------------|
+| `ghl_get_email_builder_templates` | List all email builder templates in the location                         |
+| `ghl_get_email_builder_template`  | Get a single email builder template by ID                                |
+| `ghl_create_email_builder_template` | Create a new email builder template with HTML content                  |
+| `ghl_update_email_builder_template` | Update an existing email builder template's HTML content               |
+| `ghl_delete_email_builder_template` | Delete an email builder template by ID                                 |
+| `ghl_get_email_campaigns`         | List all email campaigns in the location                                 |
+| `ghl_get_email_campaign`          | Get details of a single email campaign by ID                             |
+| `ghl_create_email_campaign`       | Create a new email campaign                                              |
+| `ghl_delete_email_campaign`       | Delete an email campaign by ID                                           |
+
+### Funnels
+
+| Tool                      | Description                                        |
+|---------------------------|----------------------------------------------------|
+| `ghl_get_funnels`         | List all funnels in the location                   |
+| `ghl_get_funnel_pages`    | List all pages in a specific funnel                |
+| `ghl_get_funnel_page_count` | Get the total count of pages in a funnel         |
+
+### Phone Numbers
+
+| Tool                             | Description                                                                   |
+|----------------------------------|-------------------------------------------------------------------------------|
+| `ghl_get_phone_numbers`          | List all purchased/active phone numbers in the location                       |
+| `ghl_search_available_phone_numbers` | Search for available numbers to purchase (filter by area code, country, type) |
+| `ghl_purchase_phone_number`      | Purchase a phone number for the location (E.164 format, e.g. `+16135550100`) |
+| `ghl_update_phone_number`        | Update settings for a phone number (assignment, call forwarding)              |
+| `ghl_release_phone_number`       | Release (delete) a phone number from the location                             |
+
+### Surveys
+
+| Tool                        | Description                                          |
+|-----------------------------|------------------------------------------------------|
+| `ghl_get_surveys`           | List all surveys created in the location             |
+| `ghl_get_survey_submissions`| Get submissions for a survey, with optional filters  |
+
 ### Location Settings
 
 | Tool                       | Description                                   |
@@ -326,14 +375,22 @@ This is slower to start but useful during development.
 | `ghl_create_custom_field`  | Create a custom field                         |
 | `ghl_update_custom_field`  | Update a custom field                         |
 | `ghl_delete_custom_field`  | Delete a custom field                         |
-| `ghl_get_custom_values`    | List custom values (location-level variables) |
-| `ghl_create_custom_value`  | Create a custom value                         |
-| `ghl_update_custom_value`  | Update a custom value                         |
-| `ghl_get_users`            | List all team members                         |
-| `ghl_search_users`         | Search users by name or email                 |
-| `ghl_get_templates`        | Get SMS/email templates                       |
-| `ghl_get_forms`            | List all forms                                |
-| `ghl_get_form_submissions` | Get form submissions                          |
+| `ghl_get_custom_values`    | List custom values (location-level variables)                   |
+| `ghl_create_custom_value`  | Create a custom value                                           |
+| `ghl_update_custom_value`  | Update a custom value                                           |
+| `ghl_delete_custom_value`  | Delete a custom value by ID                                     |
+| `ghl_get_users`            | List all team members                                           |
+| `ghl_search_users`         | Search users by name or email                                   |
+| `ghl_get_user`             | Get a single team member by user ID                             |
+| `ghl_create_user`          | Create a new team member in the location                        |
+| `ghl_update_user`          | Update an existing team member                                  |
+| `ghl_delete_user`          | Remove a team member from the location                          |
+| `ghl_get_templates`        | List SMS/email/WhatsApp templates                               |
+| `ghl_create_template`      | Create a new SMS/email/WhatsApp template                        |
+| `ghl_update_template`      | Update an existing template                                     |
+| `ghl_delete_template`      | Delete a template by ID                                         |
+| `ghl_get_forms`            | List all forms                                                  |
+| `ghl_get_form_submissions` | Get form submissions                                            |
 
 ### Payments & Invoices
 
@@ -481,6 +538,10 @@ ghl-mcp-server/
 │       ├── locations.ts      # 16 location settings tools
 │       ├── payments.ts       # 12 payment & invoice tools
 │       ├── social.ts         #  8 social, media & trigger link tools
+│       ├── emails.ts         #  9 email builder & campaign tools
+│       ├── funnels.ts        #  3 funnel tools
+│       ├── phone_numbers.ts  #  5 phone number tools
+│       ├── surveys.ts        #  2 survey tools
 │       └── knowledge_base.ts # 14 knowledge base, FAQ & web crawler tools
 ├── dist/                 # Compiled output (generated by npm run build)
 ├── .env.example          # Environment variable template

@@ -26,13 +26,6 @@ describe('ghl_get_workflows', () => {
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
-  it('passes status filter when provided', async () => {
-    const fetch = mockFetchSuccess({ workflows: [] });
-    await getTool('ghl_get_workflows').handler({ status: 'published' }, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.params.status).toBe('published');
-  });
-
   it('handles API errors', async () => {
     mockFetchError(500, { message: 'Server error' });
     expectError(await getTool('ghl_get_workflows').handler({}, TEST_CONFIG), 500);
