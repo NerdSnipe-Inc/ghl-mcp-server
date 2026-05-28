@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish Package
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # required for OIDC trusted publishing
+  packages: write  # required for GitHub Packages
+  id-token: write  # required for npm provenance
 
 jobs:
   publish:
@@ -15,18 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
-
-      - name: Upgrade npm (≥11.5.1 required for OIDC)
-        run: npm install -g npm@latest
-
-      - name: Install dependencies
-        run: npm ci
 
       - name: Verify tag matches package.json version
         run: |
@@ -38,11 +27,31 @@ jobs:
           fi
           echo "✅ Version match: $PKG"
 
-      - name: Build
-        run: npm run build
+      # ── Publish to npmjs.com ──────────────────────────────────────────────────
 
-      - name: Test
-        run: npm test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Publish
-        run: npm publish --provenance --access public
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+      - name: Publish to npmjs.com
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ── Publish to GitHub Packages ────────────────────────────────────────────
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@nerdsnipe-inc'
+
+      - name: Publish to GitHub Packages
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
