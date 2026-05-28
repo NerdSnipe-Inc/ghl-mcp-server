@@ -1,6 +1,6 @@
 {
   "name": "@nerdsnipe-inc/ghl-mcp-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A Model Context Protocol (MCP) server for GoHighLevel API v2 — giving any AI agent full access to your GHL location.",
   "keywords": [
     "mcp",
@@ -14,7 +14,7 @@
     "cursor",
     "automation"
   ],
-  "homepage": "https://nerdsnipe.cc",
+  "homepage": "https://github.com/Nerdsnipe-Inc/ghl-mcp-server#readme",
   "bugs": {
     "url": "https://github.com/Nerdsnipe-Inc/ghl-mcp-server/issues"
   },
@@ -29,11 +29,12 @@
   },
   "type": "module",
   "bin": {
-    "ghl-mcp-server": "./dist/index.js"
+    "ghl-mcp-server": "./bin/ghl-mcp-server.js"
   },
   "main": "./dist/index.js",
   "files": [
     "dist",
+    "bin",
     "README.md",
     "LICENSE"
   ],
