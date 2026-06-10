@@ -46,7 +46,7 @@ Once installed, you can talk to your CRM naturally:
 Before you begin, make sure you have:
 
 - **Node.js 18 or later** — [download here](https://nodejs.org/en/download)
-- **A GoHighLevel account** with sub-account access
+- **A [GoHighLevel](https://www.gohighlevel.com/?fp_ref=nerdsnipe-inc) account** with sub-account access
 - **A GHL Private Integration Token** (takes ~2 minutes to create — see below)
 
 ### How to get your GHL credentials
