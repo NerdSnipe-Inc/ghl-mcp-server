@@ -8,6 +8,7 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple)](https://modelcontextprotocol.io)
 [![GoHighLevel](https://img.shields.io/badge/API-GHL%20v2-orange)](https://marketplace.gohighlevel.com/docs/)
+[![MCP Badge](https://lobehub.com/badge/mcp/nerdsnipe-inc-ghl-mcp-server)](https://lobehub.com/mcp/nerdsnipe-inc-ghl-mcp-server)
 
 ---
 
