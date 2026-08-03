@@ -25,6 +25,7 @@ import { affiliateManagerTools } from '../src/tools/affiliate_manager.js';
 import { emailIsvTools } from '../src/tools/email_isv.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
+import { blogTools } from '../src/tools/blogs.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -48,6 +49,7 @@ const ALL_TOOLS = [
   ...emailBuilderTools,
   ...emailCampaignTools,
   ...funnelTools,
+  ...blogTools,
 
   // Communications
   ...phoneNumberTools,
@@ -75,8 +77,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 178 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(178);
+  it('registers exactly 185 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(185);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -132,6 +134,7 @@ describe('Tool counts per module', () => {
   it('emailBuilder has 5 tools', () => expect(emailBuilderTools).toHaveLength(5));
   it('emailCampaign has 5 tools', () => expect(emailCampaignTools).toHaveLength(5));
   it('funnels has 3 tools', () => expect(funnelTools).toHaveLength(3));
+  it('blogs has 7 tools', () => expect(blogTools).toHaveLength(7));
   it('phoneNumbers has 5 tools', () => expect(phoneNumberTools).toHaveLength(5));
   it('payments has 6 tools', () => expect(paymentTools).toHaveLength(6));
   it('invoices has 6 tools', () => expect(invoiceTools).toHaveLength(6));
@@ -205,6 +208,10 @@ describe('Specific tool existence', () => {
     'ghl_create_email_campaign', 'ghl_schedule_email_campaign', 'ghl_delete_email_campaign',
     // Funnels (3)
     'ghl_get_funnels', 'ghl_get_funnel_pages', 'ghl_get_funnel_page_count',
+    // Blogs (7)
+    'ghl_get_blog_authors', 'ghl_get_blog_categories', 'ghl_get_blogs',
+    'ghl_get_blog_posts', 'ghl_check_blog_url_slug', 'ghl_create_blog_post',
+    'ghl_update_blog_post',
     // Phone numbers (5)
     'ghl_get_phone_numbers', 'ghl_search_available_phone_numbers',
     'ghl_purchase_phone_number', 'ghl_release_phone_number', 'ghl_update_phone_number',
@@ -260,10 +267,10 @@ describe('Specific tool existence', () => {
     'ghl_verify_email',
   ];
 
-  it('all 178 expected tools are present', () => {
+  it('all 185 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(178);
+    expect(expectedTools).toHaveLength(185);
   });
 });
