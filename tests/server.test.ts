@@ -33,6 +33,7 @@ import { customMenuTools } from '../src/tools/custom_menus.js';
 import { conversationAiTools } from '../src/tools/conversation_ai.js';
 import { voiceAiTools } from '../src/tools/voice_ai.js';
 import { chatWidgetTools } from '../src/tools/chat_widget.js';
+import { agentStudioTools } from '../src/tools/agent_studio.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -90,11 +91,12 @@ const ALL_TOOLS = [
   ...conversationAiTools,
   ...voiceAiTools,
   ...chatWidgetTools,
+  ...agentStudioTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 237 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(237);
+    expect(ALL_TOOLS).toHaveLength(245);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -174,6 +176,7 @@ describe('Tool counts per module', () => {
   it('conversationAi has 12 tools', () => expect(conversationAiTools).toHaveLength(12));
   it('voiceAi has 11 tools', () => expect(voiceAiTools).toHaveLength(11));
   it('chatWidget has 8 tools', () => expect(chatWidgetTools).toHaveLength(8));
+  it('agentStudio has 8 tools', () => expect(agentStudioTools).toHaveLength(8));
 });
 
 describe('Specific tool existence', () => {
@@ -318,12 +321,17 @@ describe('Specific tool existence', () => {
     'ghl_create_chat_widget', 'ghl_clone_chat_widget', 'ghl_get_chat_widget',
     'ghl_update_chat_widget', 'ghl_patch_chat_widget', 'ghl_list_chat_widgets',
     'ghl_get_chat_widget_config', 'ghl_delete_chat_widget',
+    // Agent Studio (8)
+    'ghl_create_agent_studio_agent', 'ghl_list_agent_studio_agents',
+    'ghl_get_agent_studio_agent', 'ghl_update_agent_studio_agent_metadata',
+    'ghl_delete_agent_studio_agent', 'ghl_update_agent_studio_agent_version',
+    'ghl_publish_agent_studio_agent', 'ghl_execute_agent_studio_agent',
   ];
 
-  it('all 237 expected tools are present', () => {
+  it('all 245 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(237);
+    expect(expectedTools).toHaveLength(245);
   });
 });
