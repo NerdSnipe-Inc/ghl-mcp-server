@@ -60,6 +60,7 @@ import {
   crawlerTools,
 } from "./tools/knowledge_base.js";
 import { blogTools } from "./tools/blogs.js";
+import { courseTools } from "./tools/courses.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...emailCampaignTools,
   ...funnelTools,
   ...blogTools,
+  ...courseTools,
 
   // Communications infrastructure
   ...phoneNumberTools,
