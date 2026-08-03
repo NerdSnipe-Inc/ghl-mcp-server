@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { conversationTools } from '../../src/tools/conversations.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -24,6 +25,7 @@ describe('ghl_search_conversations', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/conversations/search');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -59,6 +61,7 @@ describe('ghl_get_conversation', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/conversations/conv-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -74,6 +77,7 @@ describe('ghl_create_conversation', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/conversations/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.contactId).toBe('contact-abc');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
   });
@@ -91,6 +95,7 @@ describe('ghl_get_messages', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/conversations/conv-1/messages');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('passes pagination params', async () => {
@@ -117,6 +122,7 @@ describe('ghl_send_message', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/conversations/messages');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.contactId).toBe('contact-abc');
     expect(call.body?.type).toBe('SMS');
     expect(call.body?.message).toBe('Hello!');
@@ -168,6 +174,7 @@ describe('ghl_send_email', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/conversations/conv-1/messages/email');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.subject).toBe('Hello');
     expect(call.body?.to).toEqual(['jane@example.com']);
     expect(call.body?.conversationId).toBeUndefined();
@@ -186,6 +193,7 @@ describe('ghl_update_message_status', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/conversations/messages/msg-1/status');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.status).toBe('read');
   });
 });
@@ -202,6 +210,7 @@ describe('ghl_cancel_scheduled_message', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/conversations/messages/msg-scheduled-1/schedule');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -217,6 +226,7 @@ describe('ghl_add_inbound_message', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/conversations/messages/inbound');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.type).toBe('SMS');
     expect(call.body?.message).toBe('Reply text');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
