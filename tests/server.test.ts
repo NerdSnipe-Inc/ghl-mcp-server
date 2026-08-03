@@ -85,7 +85,7 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 201 tools', () => {
+  it('registers exactly 206 tools', () => {
     expect(ALL_TOOLS).toHaveLength(206);
   });
 
@@ -293,7 +293,7 @@ describe('Specific tool existence', () => {
     'ghl_verify_email',
   ];
 
-  it('all 201 expected tools are present', () => {
+  it('all 206 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
