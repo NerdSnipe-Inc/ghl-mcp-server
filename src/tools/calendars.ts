@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const calendarTools = [
   {
@@ -12,6 +12,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("GET", "/calendars/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId, groupId: args.groupId },
         });
         return JSON.stringify(result, null, 2);
@@ -30,6 +31,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("GET", `/calendars/${args.calendarId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -61,6 +63,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("GET", `/calendars/${args.calendarId}/free-slots`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             startDate: args.startDate,
             endDate: args.endDate,
@@ -91,6 +94,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("GET", "/calendars/events", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             startTime: args.startTime as number,
@@ -136,6 +140,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("POST", "/calendars/events/appointments", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -155,7 +160,7 @@ export const calendarTools = [
         const result = await ghlRequest(
           "GET",
           `/calendars/events/appointments/${args.eventId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -184,7 +189,7 @@ export const calendarTools = [
         const result = await ghlRequest(
           "PUT",
           `/calendars/events/appointments/${eventId}`,
-          { token: config.token, body: updateData }
+          { token: config.token, version: GHL_VERSION_V3, body: updateData }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -202,6 +207,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("DELETE", `/calendars/events/${args.eventId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -223,6 +229,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("POST", "/calendars/events/block-slots", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -239,6 +246,7 @@ export const calendarTools = [
       try {
         const result = await ghlRequest("GET", "/calendars/groups", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
