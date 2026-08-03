@@ -31,6 +31,7 @@ import { proposalTools } from '../src/tools/proposals.js';
 import { brandBoardTools } from '../src/tools/brand_boards.js';
 import { customMenuTools } from '../src/tools/custom_menus.js';
 import { conversationAiTools } from '../src/tools/conversation_ai.js';
+import { voiceAiTools } from '../src/tools/voice_ai.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -86,11 +87,12 @@ const ALL_TOOLS = [
 
   // AI / Communication
   ...conversationAiTools,
+  ...voiceAiTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 218 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(218);
+  it('registers exactly 229 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(229);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -168,6 +170,7 @@ describe('Tool counts per module', () => {
   it('affiliateManager has 4 tools', () => expect(affiliateManagerTools).toHaveLength(4));
   it('emailIsv has 1 tool', () => expect(emailIsvTools).toHaveLength(1));
   it('conversationAi has 12 tools', () => expect(conversationAiTools).toHaveLength(12));
+  it('voiceAi has 11 tools', () => expect(voiceAiTools).toHaveLength(11));
 });
 
 describe('Specific tool existence', () => {
@@ -303,12 +306,17 @@ describe('Specific tool existence', () => {
     'ghl_list_conversation_ai_agent_actions', 'ghl_get_conversation_ai_agent_action',
     'ghl_update_conversation_ai_agent_action', 'ghl_remove_conversation_ai_agent_action',
     'ghl_update_conversation_ai_followup_settings', 'ghl_get_conversation_ai_generation',
+    // Voice AI (11)
+    'ghl_create_voice_ai_action', 'ghl_update_voice_ai_action', 'ghl_get_voice_ai_action',
+    'ghl_delete_voice_ai_action', 'ghl_create_voice_ai_agent', 'ghl_get_voice_ai_agents',
+    'ghl_update_voice_ai_agent', 'ghl_get_voice_ai_agent', 'ghl_delete_voice_ai_agent',
+    'ghl_get_voice_ai_call_logs', 'ghl_get_voice_ai_call_log',
   ];
 
-  it('all 218 expected tools are present', () => {
+  it('all 229 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(218);
+    expect(expectedTools).toHaveLength(229);
   });
 });

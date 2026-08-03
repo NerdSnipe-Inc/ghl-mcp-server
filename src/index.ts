@@ -65,6 +65,7 @@ import { proposalTools } from "./tools/proposals.js";
 import { brandBoardTools } from "./tools/brand_boards.js";
 import { customMenuTools } from "./tools/custom_menus.js";
 import { conversationAiTools } from "./tools/conversation_ai.js";
+import { voiceAiTools } from "./tools/voice_ai.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -136,6 +137,7 @@ const ALL_TOOLS: ToolDef[] = [
 
   // AI / Communication
   ...conversationAiTools,
+  ...voiceAiTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
