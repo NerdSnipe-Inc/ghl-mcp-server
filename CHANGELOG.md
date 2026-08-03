@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased — Phase 2a — Commerce
+
+Adds GHL API v3 Commerce coverage — 50 new tools across 7 new modules:
+
+- `products.ts` (14 tools) — products, prices, and inventory CRUD, including bulk product/price updates
+- `product_collections.ts` (5 tools) — product collection CRUD
+- `product_reviews.ts` (5 tools) — review listing, counting, bulk status updates, update, and delete
+- `product_store.ts` (3 tools) — storefront visibility, sort priority, and stats
+- `store.ts` (18 tools) — shipping carriers, zones, rates, and store settings
+- `affiliate_manager.ts` (4 tools) — affiliates, commissions, and payouts (read-only)
+- `email_isv.ts` (1 tool) — single-use email deliverability verification
+
+Total tool count: 128 → 178.
+
+`saas.ts` (agency-level SaaS management — mode toggling, billing plans, rebilling, wallets)
+was intentionally not built: this server authenticates via a location-scoped Private
+Integration Token with no agency-level identity, so agency-only `saas` endpoints are
+unreachable. See `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md`.
+
 ## Unreleased — Phase 1 follow-ups
 
 Fixes and completions from the post-migration follow-up pass:

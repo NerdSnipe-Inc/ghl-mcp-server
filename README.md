@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**128 tools** covering the full GHL API:
+**178 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -39,6 +39,12 @@ Once installed, you can talk to your CRM naturally:
 | Payments & Invoices            | Orders, transactions, subscriptions, coupons, invoices, payments            |
 | Social & Media                 | Social posts, media library, trigger links                                  |
 | Knowledge Base, FAQs & Crawler | Create/manage knowledge bases, FAQ pairs, and AI-train websites via crawler |
+| Products, Collections & Reviews | Products, prices, inventory, collections, reviews, store visibility & priority |
+| Store & Shipping               | Shipping carriers, zones, rates, and store settings                        |
+| Affiliates                     | List affiliates, commissions, and payouts                                  |
+| Email Verification             | Single-use email address verification (deliverability check)               |
+
+> **Scope note:** GHL API v3's `saas` resource (agency-level SaaS mode, rebilling, wallets) was intentionally not built — this server authenticates with a location-scoped Private Integration Token that has no agency identity, so agency-only endpoints are out of reach. See `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md` for details.
 
 ---
 
@@ -249,7 +255,7 @@ node dist/index.js
 
 ---
 
-## All 128 Tools — Full Reference
+## All 178 Tools — Full Reference
 
 ### Contacts
 
@@ -458,6 +464,76 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_train_crawler_urls`  | Ingest discovered pages into the knowledge base for AI training using `urlIds` from the crawler                      |
 | `ghl_delete_crawler_urls` | Remove previously trained page URLs from a knowledge base by `urlIds`                                                |
 
+### Products, Collections & Reviews
+
+| Tool                               | Description                                                    |
+|-------------------------------------|------------------------------------------------------------------|
+| `ghl_get_products`                 | List/search products in the location                           |
+| `ghl_get_product`                  | Get a single product by ID                                     |
+| `ghl_create_product`               | Create a new product                                            |
+| `ghl_update_product`               | Update an existing product                                      |
+| `ghl_delete_product`               | Delete a product                                                 |
+| `ghl_bulk_update_products`         | Bulk-update multiple products (e.g. availability) at once       |
+| `ghl_bulk_edit_product_prices`     | Bulk-edit prices across multiple products                       |
+| `ghl_get_product_prices`           | List prices for a product                                       |
+| `ghl_get_product_price`            | Get a single price by ID                                        |
+| `ghl_create_product_price`         | Add a new price to a product                                    |
+| `ghl_update_product_price`         | Update an existing price                                        |
+| `ghl_delete_product_price`         | Delete a price                                                  |
+| `ghl_get_product_inventory`        | Get inventory levels for products                               |
+| `ghl_update_product_inventory`     | Update inventory counts for products                            |
+| `ghl_get_product_collections`      | List product collections                                        |
+| `ghl_get_product_collection`       | Get a single collection by ID                                   |
+| `ghl_create_product_collection`    | Create a new product collection                                 |
+| `ghl_update_product_collection`    | Update a product collection                                     |
+| `ghl_delete_product_collection`    | Delete a product collection                                     |
+| `ghl_get_product_reviews`          | List reviews for a product                                      |
+| `ghl_get_product_review_count`     | Get the total review count (with optional filters)              |
+| `ghl_bulk_update_product_reviews`  | Bulk-update review status (e.g. publish/hide) across reviews     |
+| `ghl_update_product_review`        | Update a single review                                          |
+| `ghl_delete_product_review`        | Delete a review                                                  |
+| `ghl_set_product_store_visibility` | Show/hide a product in the storefront                           |
+| `ghl_update_product_store_priority`| Change a product's sort priority in the storefront               |
+| `ghl_get_product_store_stats`      | Get storefront stats for products                                |
+
+### Store & Shipping
+
+| Tool                              | Description                                    |
+|------------------------------------|-------------------------------------------------|
+| `ghl_get_shipping_carriers`       | List shipping carriers configured for the store |
+| `ghl_create_shipping_carrier`     | Add a new shipping carrier                      |
+| `ghl_get_shipping_carrier`        | Get a single shipping carrier by ID             |
+| `ghl_update_shipping_carrier`     | Update a shipping carrier                       |
+| `ghl_delete_shipping_carrier`     | Delete a shipping carrier                       |
+| `ghl_get_shipping_zones`          | List shipping zones                             |
+| `ghl_create_shipping_zone`        | Create a new shipping zone                      |
+| `ghl_get_shipping_zone`           | Get a single shipping zone by ID                |
+| `ghl_update_shipping_zone`        | Update a shipping zone                          |
+| `ghl_delete_shipping_zone`        | Delete a shipping zone                          |
+| `ghl_get_available_shipping_rates`| Get rates available for a given shipment        |
+| `ghl_get_shipping_rates`          | List configured shipping rates                  |
+| `ghl_create_shipping_rate`        | Create a new shipping rate                      |
+| `ghl_get_shipping_rate`           | Get a single shipping rate by ID                |
+| `ghl_update_shipping_rate`        | Update a shipping rate                          |
+| `ghl_delete_shipping_rate`        | Delete a shipping rate                          |
+| `ghl_get_store_settings`          | Get store-wide settings                         |
+| `ghl_update_store_settings`       | Update store-wide settings                      |
+
+### Affiliates
+
+| Tool                            | Description                          |
+|----------------------------------|---------------------------------------|
+| `ghl_get_affiliates`            | List affiliates in the location       |
+| `ghl_get_affiliate`             | Get a single affiliate by ID          |
+| `ghl_get_affiliate_commissions` | List commissions earned by affiliates |
+| `ghl_get_affiliate_payouts`     | List payouts made to affiliates       |
+
+### Email Verification
+
+| Tool               | Description                                              |
+|---------------------|------------------------------------------------------------|
+| `ghl_verify_email`  | Verify an email address's deliverability (single-use ISV check) |
+
 ---
 
 ## Example Prompts
@@ -546,7 +622,14 @@ ghl-mcp-server/
 │       ├── funnels.ts        #  3 funnel tools
 │       ├── phone_numbers.ts  #  5 phone number tools
 │       ├── surveys.ts        #  2 survey tools
-│       └── knowledge_base.ts # 14 knowledge base, FAQ & web crawler tools
+│       ├── knowledge_base.ts # 14 knowledge base, FAQ & web crawler tools
+│       ├── products.ts       # 14 product, price & inventory tools
+│       ├── product_collections.ts #  5 product collection tools
+│       ├── product_reviews.ts #  5 product review tools
+│       ├── product_store.ts  #  3 storefront visibility & stats tools
+│       ├── store.ts          # 18 shipping & store settings tools
+│       ├── affiliate_manager.ts #  4 affiliate tools
+│       └── email_isv.ts      #  1 email verification tool
 ├── dist/                 # Compiled output (generated by npm run build)
 ├── .env.example          # Environment variable template
 ├── package.json
