@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const opportunityTools = [
   {
@@ -10,6 +10,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("GET", "/opportunities/pipelines", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -39,6 +40,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("GET", "/opportunities/search", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             location_id: config.locationId,
             q: args.query as string | undefined,
@@ -67,6 +69,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("GET", `/opportunities/${args.opportunityId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -97,6 +100,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("POST", "/opportunities/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -128,6 +132,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("PUT", `/opportunities/${opportunityId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: updateData,
         });
         return JSON.stringify(result, null, 2);
@@ -153,6 +158,7 @@ export const opportunityTools = [
           `/opportunities/${args.opportunityId}/status`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: { status: args.status },
           }
         );
@@ -178,6 +184,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("POST", "/opportunities/upsert", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -196,6 +203,7 @@ export const opportunityTools = [
       try {
         const result = await ghlRequest("DELETE", `/opportunities/${args.opportunityId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
