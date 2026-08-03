@@ -203,40 +203,10 @@ describe('ghl_update_custom_value', () => {
   });
 });
 
-// ── ghl_get_users ─────────────────────────────────────────────────────────────
-
-describe('ghl_get_users', () => {
-  it('calls GET /users/ with locationId', async () => {
-    const fetch = mockFetchSuccess({ users: [] });
-    await getTool('ghl_get_users').handler({}, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/users/');
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
-  });
-
-  it('passes limit and skip params', async () => {
-    const fetch = mockFetchSuccess({ users: [] });
-    await getTool('ghl_get_users').handler({ limit: 10, skip: 20 }, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.params.limit).toBe('10');
-    expect(call.params.skip).toBe('20');
-  });
-});
-
-// ── ghl_search_users ──────────────────────────────────────────────────────────
-
-describe('ghl_search_users', () => {
-  it('calls GET /users/search with locationId and query', async () => {
-    const fetch = mockFetchSuccess({ users: [] });
-    await getTool('ghl_search_users').handler({ query: 'admin' }, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/users/search');
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
-    expect(call.params.query).toBe('admin');
-  });
-});
+// ── ghl_get_users / ghl_search_users ────────────────────────────────────────
+// Covered in tests/tools/users.test.ts (v3 migration in Task 5 requires a
+// two-call companyId derivation flow not exercised by this file's simple
+// single-call helpers).
 
 // ── ghl_get_templates ─────────────────────────────────────────────────────────
 
