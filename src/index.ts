@@ -52,6 +52,7 @@ import { productReviewTools } from "./tools/product_reviews.js";
 import { productStoreTools } from "./tools/product_store.js";
 import { storeTools } from "./tools/store.js";
 import { affiliateManagerTools } from "./tools/affiliate_manager.js";
+import { emailIsvTools } from "./tools/email_isv.js";
 import { socialTools, mediaTools, triggerLinkTools } from "./tools/social.js";
 import {
   knowledgeBaseTools,
@@ -110,6 +111,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...productStoreTools,
   ...storeTools,
   ...affiliateManagerTools,
+  ...emailIsvTools,
 
   // Social & media
   ...socialTools,

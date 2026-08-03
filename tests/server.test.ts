@@ -22,6 +22,7 @@ import { productReviewTools } from '../src/tools/product_reviews.js';
 import { productStoreTools } from '../src/tools/product_store.js';
 import { storeTools } from '../src/tools/store.js';
 import { affiliateManagerTools } from '../src/tools/affiliate_manager.js';
+import { emailIsvTools } from '../src/tools/email_isv.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -60,6 +61,7 @@ const ALL_TOOLS = [
   ...productStoreTools,
   ...storeTools,
   ...affiliateManagerTools,
+  ...emailIsvTools,
 
   // Social & media
   ...socialTools,
@@ -73,8 +75,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 177 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(177);
+  it('registers exactly 178 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(178);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -145,6 +147,7 @@ describe('Tool counts per module', () => {
   it('faq has 4 tools', () => expect(faqTools).toHaveLength(4));
   it('crawler has 5 tools', () => expect(crawlerTools).toHaveLength(5));
   it('affiliateManager has 4 tools', () => expect(affiliateManagerTools).toHaveLength(4));
+  it('emailIsv has 1 tool', () => expect(emailIsvTools).toHaveLength(1));
 });
 
 describe('Specific tool existence', () => {
@@ -253,12 +256,14 @@ describe('Specific tool existence', () => {
     // Affiliate manager (4)
     'ghl_get_affiliates', 'ghl_get_affiliate', 'ghl_get_affiliate_commissions',
     'ghl_get_affiliate_payouts',
+    // Email ISV (1)
+    'ghl_verify_email',
   ];
 
-  it('all 177 expected tools are present', () => {
+  it('all 178 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(177);
+    expect(expectedTools).toHaveLength(178);
   });
 });
