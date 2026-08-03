@@ -72,7 +72,7 @@ const ALL_TOOLS = [
 
 describe('Tool registry', () => {
   it('registers exactly 166 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(166);
+    expect(ALL_TOOLS).toHaveLength(173);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -135,7 +135,7 @@ describe('Tool counts per module', () => {
   it('productCollections has 5 tools', () => expect(productCollectionTools).toHaveLength(5));
   it('productReviews has 5 tools', () => expect(productReviewTools).toHaveLength(5));
   it('productStore has 3 tools', () => expect(productStoreTools).toHaveLength(3));
-  it('store has 11 tools', () => expect(storeTools).toHaveLength(11));
+  it('store has 18 tools', () => expect(storeTools).toHaveLength(18));
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
@@ -228,6 +228,10 @@ describe('Specific tool existence', () => {
     'ghl_update_shipping_carrier', 'ghl_delete_shipping_carrier',
     'ghl_get_shipping_zones', 'ghl_create_shipping_zone', 'ghl_get_shipping_zone',
     'ghl_update_shipping_zone', 'ghl_delete_shipping_zone', 'ghl_get_available_shipping_rates',
+    // Store — shipping rates & settings (7)
+    'ghl_get_shipping_rates', 'ghl_create_shipping_rate', 'ghl_get_shipping_rate',
+    'ghl_update_shipping_rate', 'ghl_delete_shipping_rate',
+    'ghl_get_store_settings', 'ghl_update_store_settings',
     // Social (4)
     'ghl_get_social_accounts', 'ghl_get_social_posts', 'ghl_create_social_post',
     'ghl_delete_social_post',
@@ -245,10 +249,10 @@ describe('Specific tool existence', () => {
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 166 expected tools are present', () => {
+  it('all 173 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(166);
+    expect(expectedTools).toHaveLength(173);
   });
 });
