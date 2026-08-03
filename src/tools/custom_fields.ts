@@ -1,10 +1,6 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig, GHL_VERSION_LEGACY } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
-// v3 custom-fields API (apps/v3/custom-fields-v3.json) requires a breaking redesign for this
-// resource — no list-all endpoint, new required objectKey/locationId fields, id param renamed.
-// Staying on legacy until that redesign is scoped as its own task. See apps/custom-fields.json
-// for the v2 shape these calls still use.
 export const customFieldTools = [
   {
     name: "ghl_get_custom_fields",
@@ -16,7 +12,7 @@ export const customFieldTools = [
         const result = await ghlRequest(
           "GET",
           `/locations/${config.locationId}/customFields`,
-          { token: config.token, version: GHL_VERSION_LEGACY }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -70,7 +66,7 @@ export const customFieldTools = [
       try {
         const result = await ghlRequest("POST", `/locations/${config.locationId}/customFields`, {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
+          version: GHL_VERSION_V3,
           body: args,
         });
         return JSON.stringify(result, null, 2);
@@ -94,7 +90,7 @@ export const customFieldTools = [
       try {
         const result = await ghlRequest("PUT", `/locations/${config.locationId}/customFields/${fieldId}`, {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
+          version: GHL_VERSION_V3,
           body: updateData,
         });
         return JSON.stringify(result, null, 2);
@@ -113,7 +109,7 @@ export const customFieldTools = [
       try {
         const result = await ghlRequest("DELETE", `/locations/${config.locationId}/customFields/${args.fieldId}`, {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { customFieldTools } from '../../src/tools/custom_fields.js';
-import { GHL_VERSION_LEGACY } from '../../src/client.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -26,7 +26,7 @@ describe('ghl_get_custom_fields', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/customFields`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expectSuccess(result, { customFields: [] });
   });
 
@@ -49,7 +49,7 @@ describe('ghl_create_custom_field', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/customFields`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.name).toBe('Favorite Color');
     expect(call.body?.dataType).toBe('TEXT');
   });
@@ -78,7 +78,7 @@ describe('ghl_update_custom_field', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/customFields/field-1`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.name).toBe('Updated Name');
     expect(call.body?.fieldId).toBeUndefined();
   });
@@ -104,7 +104,7 @@ describe('ghl_delete_custom_field', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/customFields/field-1`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('handles API errors', async () => {
