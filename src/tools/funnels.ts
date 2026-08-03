@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const funnelTools = [
   {
@@ -14,6 +14,7 @@ export const funnelTools = [
       try {
         const result = await ghlRequest("GET", "/funnels/funnel/list", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             limit: args.limit as number | undefined,
@@ -40,6 +41,7 @@ export const funnelTools = [
       try {
         const result = await ghlRequest("GET", "/funnels/page", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             funnelId: args.funnelId as string,
@@ -65,6 +67,7 @@ export const funnelTools = [
       try {
         const result = await ghlRequest("GET", "/funnels/page/count", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             funnelId: args.funnelId as string,
