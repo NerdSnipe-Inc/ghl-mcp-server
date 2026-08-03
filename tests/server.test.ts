@@ -19,6 +19,7 @@ import { paymentTools, invoiceTools } from '../src/tools/payments.js';
 import { productTools } from '../src/tools/products.js';
 import { productCollectionTools } from '../src/tools/product_collections.js';
 import { productReviewTools } from '../src/tools/product_reviews.js';
+import { productStoreTools } from '../src/tools/product_store.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -54,6 +55,7 @@ const ALL_TOOLS = [
   ...productTools,
   ...productCollectionTools,
   ...productReviewTools,
+  ...productStoreTools,
 
   // Social & media
   ...socialTools,
@@ -67,8 +69,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 152 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(152);
+  it('registers exactly 155 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(155);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -130,6 +132,7 @@ describe('Tool counts per module', () => {
   it('products has 14 tools', () => expect(productTools).toHaveLength(14));
   it('productCollections has 5 tools', () => expect(productCollectionTools).toHaveLength(5));
   it('productReviews has 5 tools', () => expect(productReviewTools).toHaveLength(5));
+  it('productStore has 3 tools', () => expect(productStoreTools).toHaveLength(3));
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
