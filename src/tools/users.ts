@@ -1,11 +1,18 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
-// v3 (apps/v3/users-v3.json) drops the list-all endpoint and requires an
-// agency-level `companyId` on search/create that this codebase has no source
-// for (GHLConfig only carries token + locationId). Staying on legacy for
-// list/search/create until a companyId/agency-ID source is plumbed into
-// GHLConfig as its own task. get/update/delete map cleanly to v3.
+// v3 (apps/v3/users-v3.json) requires an agency-level `companyId` on
+// /users/search and POST /users/ that GHLConfig doesn't carry directly.
+// We derive it by looking up the location first (GET /locations/{locationId}
+// returns `location.companyId`), then use it in the subsequent v3 call.
+async function getCompanyId(config: GHLConfig): Promise<string> {
+  const result = await ghlRequest<{ location: { companyId: string } }>(
+    "GET",
+    `/locations/${config.locationId}`,
+    { token: config.token, version: GHL_VERSION_V3 }
+  );
+  return result.location.companyId;
+}
 
 const permissionsSchema = z
   .object({
@@ -50,10 +57,12 @@ export const userTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        const result = await ghlRequest("GET", "/users/", {
+        const companyId = await getCompanyId(config);
+        const result = await ghlRequest("GET", "/users/search", {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
+          version: GHL_VERSION_V3,
           params: {
+            companyId,
             locationId: config.locationId,
             limit: args.limit as number | undefined,
             skip: args.skip as number | undefined,
@@ -73,10 +82,11 @@ export const userTools = [
     }),
     handler: async (args: { query?: string }, config: GHLConfig) => {
       try {
+        const companyId = await getCompanyId(config);
         const result = await ghlRequest("GET", "/users/search", {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
-          params: { locationId: config.locationId, query: args.query },
+          version: GHL_VERSION_V3,
+          params: { companyId, locationId: config.locationId, query: args.query },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -109,16 +119,34 @@ export const userTools = [
       firstName: z.string(),
       lastName: z.string(),
       email: z.string().email(),
-      phone: z.string().optional().describe("E.164 format preferred, e.g. +16135550100"),
+      password: z
+        .string()
+        .describe(
+          "Min 12 characters, at least one uppercase, one lowercase, one number, one special character"
+        ),
+      type: z
+        .enum(["account", "agency"])
+        .default("account")
+        .describe("account for sub-account users, agency for agency-level users"),
       role: z.enum(["admin", "user"]).optional().default("user"),
+      locationIds: z
+        .array(z.string())
+        .optional()
+        .describe("Location IDs to assign the user to. Defaults to the current location if omitted."),
+      phone: z.string().optional().describe("E.164 format preferred, e.g. +16135550100"),
       permissions: permissionsSchema,
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
+        const companyId = await getCompanyId(config);
         const result = await ghlRequest("POST", "/users/", {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
-          body: { ...args, locationId: config.locationId, type: "account" },
+          version: GHL_VERSION_V3,
+          body: {
+            ...args,
+            companyId,
+            locationIds: (args.locationIds as string[] | undefined) ?? [config.locationId],
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
