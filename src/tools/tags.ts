@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const tagTools = [
   {
@@ -10,6 +10,7 @@ export const tagTools = [
       try {
         const result = await ghlRequest("GET", `/locations/${config.locationId}/tags`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -27,6 +28,7 @@ export const tagTools = [
       try {
         const result = await ghlRequest("POST", `/locations/${config.locationId}/tags`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { name: args.name },
         });
         return JSON.stringify(result, null, 2);
@@ -46,7 +48,7 @@ export const tagTools = [
         const result = await ghlRequest(
           "DELETE",
           `/locations/${config.locationId}/tags/${args.tagId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {

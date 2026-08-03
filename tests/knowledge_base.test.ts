@@ -36,13 +36,14 @@ vi.mock("../src/client.js", () => ({
   },
   getConfig: vi.fn(),
   GHL_BASE_URL: "https://services.leadconnectorhq.com",
-  GHL_VERSION: "2021-07-28",
+  GHL_VERSION_V3: "v3",
+  GHL_VERSION_LEGACY: "2021-07-28",
   buildHeaders: vi.fn(),
 }));
 
 // ── Import after mock ─────────────────────────────────────────────────────────
 
-import { ghlRequest, formatError } from "../src/client.js";
+import { ghlRequest, formatError, GHL_VERSION_V3 } from "../src/client.js";
 import {
   knowledgeBaseTools,
   faqTools,
@@ -79,6 +80,7 @@ describe("knowledgeBaseTools", () => {
 
       expect(mockGhlRequest).toHaveBeenCalledWith("GET", "/knowledge-bases/", {
         token: CONFIG.token,
+        version: GHL_VERSION_V3,
         params: {
           locationId: CONFIG.locationId,
           query: undefined,
@@ -129,7 +131,7 @@ describe("knowledgeBaseTools", () => {
       expect(mockGhlRequest).toHaveBeenCalledWith(
         "GET",
         "/knowledge-bases/kb-abc",
-        { token: CONFIG.token }
+        { token: CONFIG.token, version: GHL_VERSION_V3 }
       );
     });
 
@@ -146,6 +148,7 @@ describe("knowledgeBaseTools", () => {
 
       expect(mockGhlRequest).toHaveBeenCalledWith("POST", "/knowledge-bases/", {
         token: CONFIG.token,
+        version: GHL_VERSION_V3,
         body: { name: "My KB", locationId: CONFIG.locationId },
       });
     });
@@ -186,6 +189,7 @@ describe("knowledgeBaseTools", () => {
         "/knowledge-bases/kb-abc",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: { name: "Renamed KB" },
         }
       );
@@ -205,7 +209,7 @@ describe("knowledgeBaseTools", () => {
       expect(mockGhlRequest).toHaveBeenCalledWith(
         "DELETE",
         "/knowledge-bases/kb-abc",
-        { token: CONFIG.token }
+        { token: CONFIG.token, version: GHL_VERSION_V3 }
       );
     });
 
@@ -234,6 +238,7 @@ describe("faqTools", () => {
         "/knowledge-bases/faqs",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -282,6 +287,7 @@ describe("faqTools", () => {
         "/knowledge-bases/faqs",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -341,6 +347,7 @@ describe("faqTools", () => {
         "/knowledge-bases/faqs/faq-abc",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: { question: "Updated Q?", answer: "Updated A" },
         }
       );
@@ -363,7 +370,7 @@ describe("faqTools", () => {
       expect(mockGhlRequest).toHaveBeenCalledWith(
         "DELETE",
         "/knowledge-bases/faqs/faq-abc",
-        { token: CONFIG.token }
+        { token: CONFIG.token, version: GHL_VERSION_V3 }
       );
     });
 
@@ -392,6 +399,7 @@ describe("crawlerTools", () => {
         "/knowledge-bases/crawler",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -426,6 +434,7 @@ describe("crawlerTools", () => {
         "/knowledge-bases/crawler",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -477,6 +486,7 @@ describe("crawlerTools", () => {
         "/knowledge-bases/crawler/status",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -512,6 +522,7 @@ describe("crawlerTools", () => {
         "/knowledge-bases/crawler/train",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",
@@ -541,6 +552,7 @@ describe("crawlerTools", () => {
         "/knowledge-bases/crawler",
         {
           token: CONFIG.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: CONFIG.locationId,
             knowledgeBaseId: "kb-abc",

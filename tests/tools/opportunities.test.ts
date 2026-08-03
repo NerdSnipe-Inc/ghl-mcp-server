@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { opportunityTools } from '../../src/tools/opportunities.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -24,6 +25,7 @@ describe('ghl_get_pipelines', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/opportunities/pipelines');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -42,6 +44,7 @@ describe('ghl_search_opportunities', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/opportunities/search');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.location_id).toBe(TEST_CONFIG.locationId);
   });
 
@@ -74,6 +77,7 @@ describe('ghl_get_opportunity', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/opportunities/opp-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -94,6 +98,7 @@ describe('ghl_create_opportunity', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/opportunities/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.pipelineId).toBe('pipe-1');
     expect(call.body?.pipelineStageId).toBe('stage-1');
     expect(call.body?.contactId).toBe('contact-abc');
@@ -134,6 +139,7 @@ describe('ghl_update_opportunity', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/opportunities/opp-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.pipelineStageId).toBe('stage-2');
     expect(call.body?.monetaryValue).toBe(7500);
     expect(call.body?.opportunityId).toBeUndefined();
@@ -152,6 +158,7 @@ describe('ghl_update_opportunity_status', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/opportunities/opp-1/status');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.status).toBe('won');
   });
 
@@ -184,6 +191,7 @@ describe('ghl_upsert_opportunity', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/opportunities/upsert');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
   });
 });
@@ -200,6 +208,7 @@ describe('ghl_delete_opportunity', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/opportunities/opp-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('handles 404', async () => {

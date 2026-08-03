@@ -1,13 +1,16 @@
 /**
- * GoHighLevel API v2 HTTP Client
+ * GoHighLevel API HTTP Client
  *
  * Base URL : https://services.leadconnectorhq.com
- * Auth     : Bearer PIT token + Version: 2021-07-28 header
+ * Auth     : Bearer PIT token + Version header (v3 preferred, legacy fallback for subset of operations)
  * Docs     : https://marketplace.gohighlevel.com/docs/
  */
 
 export const GHL_BASE_URL = "https://services.leadconnectorhq.com";
-export const GHL_VERSION = "2021-07-28";
+/** GHL API v3 — use for every endpoint that has a v3 spec (the default going forward). */
+export const GHL_VERSION_V3 = "v3";
+/** Legacy GHL API version header — only for the small number of operations with no v3 equivalent yet. */
+export const GHL_VERSION_LEGACY = "2021-07-28";
 
 export interface GHLConfig {
   token: string;
@@ -32,10 +35,10 @@ export function getConfig(): GHLConfig {
   return { token, locationId };
 }
 
-export function buildHeaders(token: string): Record<string, string> {
+export function buildHeaders(token: string, version: string): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
-    Version: GHL_VERSION,
+    Version: version,
     "Content-Type": "application/json",
     Accept: "application/json",
   };
@@ -58,11 +61,12 @@ export async function ghlRequest<T = unknown>(
   path: string,
   options: {
     token: string;
+    version: string;
     body?: unknown;
     params?: Record<string, string | number | boolean | undefined>;
   }
 ): Promise<T> {
-  const { token, body, params } = options;
+  const { token, version, body, params } = options;
 
   let url = `${GHL_BASE_URL}${path}`;
 
@@ -79,7 +83,7 @@ export async function ghlRequest<T = unknown>(
 
   const response = await fetch(url, {
     method,
-    headers: buildHeaders(token),
+    headers: buildHeaders(token, version),
     body: body ? JSON.stringify(body) : undefined,
   });
 

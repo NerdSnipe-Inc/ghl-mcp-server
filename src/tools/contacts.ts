@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const contactTools = [
   {
@@ -17,6 +17,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("GET", "/contacts/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             query: args.query as string | undefined,
@@ -42,6 +43,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("GET", `/contacts/${args.contactId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -77,6 +79,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", "/contacts/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -114,6 +117,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("PUT", `/contacts/${contactId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: fields,
         });
         return JSON.stringify(result, null, 2);
@@ -142,6 +146,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", "/contacts/upsert", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -160,6 +165,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("DELETE", `/contacts/${args.contactId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -191,6 +197,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", "/contacts/search", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -211,6 +218,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", `/contacts/${args.contactId}/tags`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { tags: args.tags },
         });
         return JSON.stringify(result, null, 2);
@@ -230,6 +238,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("DELETE", `/contacts/${args.contactId}/tags`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { tags: args.tags },
         });
         return JSON.stringify(result, null, 2);
@@ -249,6 +258,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("GET", `/contacts/${args.contactId}/notes`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -268,6 +278,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", `/contacts/${args.contactId}/notes`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { body: args.body, userId: args.userId },
         });
         return JSON.stringify(result, null, 2);
@@ -288,6 +299,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("PUT", `/contacts/${args.contactId}/notes/${args.noteId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { body: args.body },
         });
         return JSON.stringify(result, null, 2);
@@ -307,6 +319,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("DELETE", `/contacts/${args.contactId}/notes/${args.noteId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -325,6 +338,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("GET", `/contacts/${args.contactId}/tasks`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -348,6 +362,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("POST", `/contacts/${contactId}/tasks`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: taskData,
         });
         return JSON.stringify(result, null, 2);
@@ -373,6 +388,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("PUT", `/contacts/${contactId}/tasks/${taskId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: taskData,
         });
         return JSON.stringify(result, null, 2);
@@ -392,6 +408,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("DELETE", `/contacts/${args.contactId}/tasks/${args.taskId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -426,6 +443,7 @@ export const contactTools = [
           `/contacts/${args.contactId}/workflow/${args.workflowId}`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: args.eventStartTime ? { eventStartTime: args.eventStartTime } : {},
           }
         );
@@ -447,7 +465,7 @@ export const contactTools = [
         const result = await ghlRequest(
           "DELETE",
           `/contacts/${args.contactId}/workflow/${args.workflowId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -466,6 +484,7 @@ export const contactTools = [
       try {
         const result = await ghlRequest("GET", `/contacts/${args.contactId}/appointments`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

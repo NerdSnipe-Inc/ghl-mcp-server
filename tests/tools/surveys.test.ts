@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { surveyTools } from '../../src/tools/surveys.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   mockFetchSuccess,
@@ -23,6 +24,7 @@ describe('ghl_get_surveys', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/surveys/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -53,6 +55,7 @@ describe('ghl_get_survey_submissions', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/surveys/submissions');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 

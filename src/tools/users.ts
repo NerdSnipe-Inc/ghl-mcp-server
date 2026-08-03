@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY } from "../client.js";
+
+// v3 (apps/v3/users-v3.json) drops the list-all endpoint and requires an
+// agency-level `companyId` on search/create that this codebase has no source
+// for (GHLConfig only carries token + locationId). Staying on legacy for
+// list/search/create until a companyId/agency-ID source is plumbed into
+// GHLConfig as its own task. get/update/delete map cleanly to v3.
 
 const permissionsSchema = z
   .object({
@@ -46,6 +52,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("GET", "/users/", {
           token: config.token,
+          version: GHL_VERSION_LEGACY,
           params: {
             locationId: config.locationId,
             limit: args.limit as number | undefined,
@@ -68,6 +75,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("GET", "/users/search", {
           token: config.token,
+          version: GHL_VERSION_LEGACY,
           params: { locationId: config.locationId, query: args.query },
         });
         return JSON.stringify(result, null, 2);
@@ -86,6 +94,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("GET", `/users/${args.userId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -108,6 +117,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("POST", "/users/", {
           token: config.token,
+          version: GHL_VERSION_LEGACY,
           body: { ...args, locationId: config.locationId, type: "account" },
         });
         return JSON.stringify(result, null, 2);
@@ -123,7 +133,7 @@ export const userTools = [
       userId: z.string().describe("User ID to update"),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
-      email: z.string().email().optional(),
+      email: z.string().email().optional().describe("Note: ignored by the v3 API — GHL deprecated updating email via this endpoint; the call succeeds but email will not change."),
       phone: z.string().optional(),
       role: z.enum(["admin", "user"]).optional(),
       permissions: permissionsSchema,
@@ -133,6 +143,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("PUT", `/users/${userId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: updateData,
         });
         return JSON.stringify(result, null, 2);
@@ -151,6 +162,7 @@ export const userTools = [
       try {
         const result = await ghlRequest("DELETE", `/users/${args.userId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

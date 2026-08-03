@@ -7,6 +7,7 @@ import {
   parseLastFetchCall,
   expectError,
 } from '../helpers.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 
 const getTool = (name: string) => {
   const tool = workflowTools.find((t) => t.name === name);
@@ -23,6 +24,7 @@ describe('ghl_get_workflows', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/workflows/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -41,6 +43,7 @@ describe('ghl_get_campaigns', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/campaigns/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const socialTools = [
   {
@@ -11,7 +11,7 @@ export const socialTools = [
         const result = await ghlRequest(
           "GET",
           `/social-media-posting/${config.locationId}/accounts`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -37,6 +37,7 @@ export const socialTools = [
           `/social-media-posting/${config.locationId}/posts/list`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: {
               skip: args.skip,
               limit: args.limit,
@@ -72,7 +73,7 @@ export const socialTools = [
         const result = await ghlRequest(
           "POST",
           `/social-media-posting/${config.locationId}/posts`,
-          { token: config.token, body: args }
+          { token: config.token, version: GHL_VERSION_V3, body: args }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -91,7 +92,7 @@ export const socialTools = [
         const result = await ghlRequest(
           "DELETE",
           `/social-media-posting/${config.locationId}/posts/${args.postId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -129,6 +130,7 @@ export const mediaTools = [
       try {
         const result = await ghlRequest("GET", "/medias/files", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             altType: "location",
@@ -158,6 +160,7 @@ export const mediaTools = [
       try {
         const result = await ghlRequest("DELETE", `/medias/${args.fileId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             altType: "location",
             altId: config.locationId,
@@ -180,6 +183,7 @@ export const triggerLinkTools = [
       try {
         const result = await ghlRequest("GET", "/links/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -199,6 +203,7 @@ export const triggerLinkTools = [
       try {
         const result = await ghlRequest("POST", "/links/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -217,6 +222,7 @@ export const triggerLinkTools = [
       try {
         const result = await ghlRequest("DELETE", `/links/${args.linkId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {

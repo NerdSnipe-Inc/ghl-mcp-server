@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { funnelTools } from '../../src/tools/funnels.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -24,6 +25,7 @@ describe('ghl_get_funnels', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/funnels/funnel/list');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -57,6 +59,7 @@ describe('ghl_get_funnel_pages', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/funnels/page');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.params.funnelId).toBe('funnel-1');
   });
@@ -96,6 +99,7 @@ describe('ghl_get_funnel_page_count', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/funnels/page/count');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.params.funnelId).toBe('funnel-1');
   });

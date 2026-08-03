@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY } from "../client.js";
 
 /**
  * Location Templates — quick-reply style SMS/email/WhatsApp templates.
@@ -9,6 +9,13 @@ import { ghlRequest, formatError, GHLConfig } from "../client.js";
  *
  * For full visual/HTML email marketing templates used in campaigns,
  * see emails.ts (ghl_create_email_builder_template).
+ *
+ * v3 (apps/v3/locations-v3.json) only exposes GET (requires an unexplained
+ * "originId" param not in our contract) and DELETE for
+ * /locations/{locationId}/templates — no v3 POST/PUT exists. Staying on
+ * legacy for get/create/update until GHL documents originId or adds
+ * create/update endpoints. See apps/locations.json for the v2 shape these
+ * calls still use.
  */
 export const templateTools = [
   {
@@ -24,6 +31,7 @@ export const templateTools = [
       try {
         const result = await ghlRequest("GET", `/locations/${config.locationId}/templates`, {
           token: config.token,
+          version: GHL_VERSION_LEGACY,
           params: {
             type: args.type as string | undefined,
             limit: args.limit as number | undefined,
@@ -51,6 +59,7 @@ export const templateTools = [
       try {
         const result = await ghlRequest("POST", `/locations/${config.locationId}/templates`, {
           token: config.token,
+          version: GHL_VERSION_LEGACY,
           body: args,
         });
         return JSON.stringify(result, null, 2);
@@ -75,7 +84,7 @@ export const templateTools = [
         const result = await ghlRequest(
           "PUT",
           `/locations/${config.locationId}/templates/${templateId}`,
-          { token: config.token, body: updateData }
+          { token: config.token, version: GHL_VERSION_LEGACY, body: updateData }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -94,7 +103,7 @@ export const templateTools = [
         const result = await ghlRequest(
           "DELETE",
           `/locations/${config.locationId}/templates/${args.templateId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {

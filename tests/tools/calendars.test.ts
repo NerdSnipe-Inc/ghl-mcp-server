@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calendarTools } from '../../src/tools/calendars.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -24,6 +25,7 @@ describe('ghl_get_calendars', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -49,6 +51,7 @@ describe('ghl_get_calendar', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/cal-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -66,6 +69,7 @@ describe('ghl_get_free_slots', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/cal-1/free-slots');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.startDate).toBe(String(startDate));
     expect(call.params.endDate).toBe(String(endDate));
   });
@@ -98,6 +102,7 @@ describe('ghl_get_calendar_events', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/events');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.params.startTime).toBe('1700000000000');
     expect(call.params.endTime).toBe('1700086400000');
@@ -131,6 +136,7 @@ describe('ghl_create_appointment', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/calendars/events/appointments');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.calendarId).toBe('cal-1');
     expect(call.body?.contactId).toBe('contact-abc');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
@@ -163,6 +169,7 @@ describe('ghl_get_appointment', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/events/appointments/evt-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -182,6 +189,7 @@ describe('ghl_update_appointment', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/calendars/events/appointments/evt-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.appointmentStatus).toBe('confirmed');
     expect(call.body?.startTime).toBe('2024-12-16T14:00:00Z');
     expect(call.body?.eventId).toBeUndefined();
@@ -200,6 +208,7 @@ describe('ghl_delete_calendar_event', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/calendars/events/evt-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -219,6 +228,7 @@ describe('ghl_create_block_slot', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/calendars/events/block-slots');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.calendarId).toBe('cal-1');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
   });
@@ -233,6 +243,7 @@ describe('ghl_get_calendar_groups', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/calendars/groups');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 });

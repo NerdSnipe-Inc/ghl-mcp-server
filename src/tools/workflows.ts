@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const workflowTools = [
   {
@@ -11,6 +11,7 @@ export const workflowTools = [
       try {
         const result = await ghlRequest("GET", "/workflows/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -29,6 +30,7 @@ export const workflowTools = [
       try {
         const result = await ghlRequest("GET", "/campaigns/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { locationId: config.locationId, status: args.status },
         });
         return JSON.stringify(result, null, 2);

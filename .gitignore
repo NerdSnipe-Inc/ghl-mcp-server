@@ -22,3 +22,6 @@ npm-debug.log*
 
 # Local dev notes (private reference, not for repo)
 _DEV_NOTES.md
+
+# Subagent-driven-development scratch workspace
+.superpowers/

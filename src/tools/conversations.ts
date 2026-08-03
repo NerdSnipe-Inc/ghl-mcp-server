@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const conversationTools = [
   {
@@ -23,6 +23,7 @@ export const conversationTools = [
       try {
         const result = await ghlRequest("GET", "/conversations/search", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             contactId: args.contactId as string | undefined,
@@ -48,6 +49,7 @@ export const conversationTools = [
       try {
         const result = await ghlRequest("GET", `/conversations/${args.conversationId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -65,6 +67,7 @@ export const conversationTools = [
       try {
         const result = await ghlRequest("POST", "/conversations/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { contactId: args.contactId, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -91,6 +94,7 @@ export const conversationTools = [
           `/conversations/${args.conversationId}/messages`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             params: { limit: args.limit, lastMessageId: args.lastMessageId },
           }
         );
@@ -138,6 +142,7 @@ export const conversationTools = [
       try {
         const result = await ghlRequest("POST", "/conversations/messages", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -171,6 +176,7 @@ export const conversationTools = [
           `/conversations/${conversationId}/messages/email`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: emailData,
           }
         );
@@ -196,6 +202,7 @@ export const conversationTools = [
           `/conversations/messages/${args.messageId}/status`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: { status: args.status },
           }
         );
@@ -216,7 +223,7 @@ export const conversationTools = [
         const result = await ghlRequest(
           "DELETE",
           `/conversations/messages/${args.messageId}/schedule`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -237,6 +244,7 @@ export const conversationTools = [
       try {
         const result = await ghlRequest("POST", "/conversations/messages/inbound", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);

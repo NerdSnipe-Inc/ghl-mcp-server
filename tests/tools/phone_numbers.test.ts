@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { phoneNumberTools } from '../../src/tools/phone_numbers.js';
+import { GHL_VERSION_LEGACY } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -26,6 +27,7 @@ describe('ghl_get_phone_numbers', () => {
     expect(call.pathname).toBe(
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}`
     );
+    expect(call.headers.Version).toBe('v3');
   });
 
   it('passes pageSize, page, and searchFilter params', async () => {
@@ -64,6 +66,7 @@ describe('ghl_search_available_phone_numbers', () => {
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/available`
     );
     expect(call.params.countryCode).toBe('US');
+    expect(call.headers.Version).toBe('v3');
   });
 
   it('passes optional params: numberTypes, firstPart, smsEnabled', async () => {
@@ -106,6 +109,7 @@ describe('ghl_purchase_phone_number', () => {
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/purchase`
     );
     expect(call.body?.phoneNumber).toBe('+16135550100');
+    expect(call.headers.Version).toBe('v3');
   });
 
   it('handles errors', async () => {
@@ -134,6 +138,7 @@ describe('ghl_release_phone_number', () => {
     expect(call.pathname).toBe(
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/num-abc123`
     );
+    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
   });
 
   it('handles errors', async () => {
@@ -164,6 +169,7 @@ describe('ghl_update_phone_number', () => {
     );
     expect(call.body?.friendlyName).toBe('Sales Line');
     expect(call.body?.callForwardingNumber).toBe('+15550001111');
+    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
   });
 
   it('handles errors', async () => {

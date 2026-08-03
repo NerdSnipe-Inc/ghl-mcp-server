@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const paymentTools = [
   // --- Orders ---
@@ -20,6 +20,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("GET", "/payments/orders", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { altId: config.locationId, altType: "location", ...args as Record<string, string | number | boolean | undefined> },
         });
         return JSON.stringify(result, null, 2);
@@ -38,6 +39,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("GET", `/payments/orders/${args.orderId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
@@ -61,6 +63,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("GET", "/payments/transactions", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { altId: config.locationId, altType: "location", ...args as Record<string, string | number | boolean | undefined> },
         });
         return JSON.stringify(result, null, 2);
@@ -82,6 +85,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("GET", "/payments/subscriptions", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { altId: config.locationId, altType: "location", ...args as Record<string, string | number | boolean | undefined> },
         });
         return JSON.stringify(result, null, 2);
@@ -104,6 +108,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("GET", "/payments/coupon/list", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             altId: config.locationId,
             altType: "location",
@@ -136,6 +141,7 @@ export const paymentTools = [
       try {
         const result = await ghlRequest("POST", "/payments/coupon", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
@@ -165,6 +171,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("GET", "/invoices/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             altId: config.locationId,
             altType: "location",
@@ -193,6 +200,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("GET", `/invoices/${args.invoiceId}`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: { altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
@@ -232,6 +240,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("POST", "/invoices/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
@@ -254,6 +263,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("POST", `/invoices/${invoiceId}/send`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { altId: config.locationId, altType: "location", ...sendData },
         });
         return JSON.stringify(result, null, 2);
@@ -272,6 +282,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("POST", `/invoices/${args.invoiceId}/void`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
@@ -296,6 +307,7 @@ export const invoiceTools = [
       try {
         const result = await ghlRequest("POST", `/invoices/${invoiceId}/record-payment`, {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: paymentData,
         });
         return JSON.stringify(result, null, 2);
