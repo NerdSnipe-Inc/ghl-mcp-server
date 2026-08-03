@@ -62,6 +62,7 @@ import {
 import { blogTools } from "./tools/blogs.js";
 import { courseTools } from "./tools/courses.js";
 import { proposalTools } from "./tools/proposals.js";
+import { brandBoardTools } from "./tools/brand_boards.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -104,6 +105,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...blogTools,
   ...courseTools,
   ...proposalTools,
+  ...brandBoardTools,
 
   // Communications infrastructure
   ...phoneNumberTools,
