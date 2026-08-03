@@ -32,8 +32,19 @@ describe('ghl_get_templates', () => {
     expect(call.params.type).toBe('sms');
     expect(call.params.limit).toBe('10');
     expect(call.params.skip).toBe('0');
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
+    expect(call.params.originId).toBe(TEST_CONFIG.locationId);
     expectSuccess(result, { templates: [] });
+  });
+
+  it('uses an explicit originId override when provided', async () => {
+    const fetch = mockFetchSuccess({ templates: [] });
+    await getTool('ghl_get_templates').handler(
+      { originId: 'origin-override' },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.originId).toBe('origin-override');
   });
 
   it('handles API errors', async () => {

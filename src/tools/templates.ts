@@ -10,12 +10,15 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY 
  * For full visual/HTML email marketing templates used in campaigns,
  * see emails.ts (ghl_create_email_builder_template).
  *
- * v3 (apps/v3/locations-v3.json) only exposes GET (requires an unexplained
- * "originId" param not in our contract) and DELETE for
- * /locations/{locationId}/templates — no v3 POST/PUT exists. Staying on
- * legacy for get/create/update until GHL documents originId or adds
- * create/update endpoints. See apps/locations.json for the v2 shape these
- * calls still use.
+ * v3 status (confirmed via a full sweep of every file in apps/v3/, not just
+ * locations-v3.json): GET and DELETE map cleanly to v3
+ * (/locations/{locationId}/templates[/{id}]). GET requires an `originId`
+ * query param — defaulted here to config.locationId, matching how "origin"
+ * is used elsewhere in GHL's API for location-native (non-integration)
+ * resources. There is no v3 POST/PUT for this path anywhere in the spec
+ * tree — ghl_create_template/ghl_update_template stay on GHL_VERSION_LEGACY
+ * permanently until GHL ships one. See apps/locations.json for the v2 shape
+ * those two calls still use.
  */
 export const templateTools = [
   {
@@ -26,16 +29,21 @@ export const templateTools = [
       type: z.enum(["sms", "email", "whatsapp"]).optional().describe("Filter by template type"),
       limit: z.number().optional().default(25),
       skip: z.number().optional().default(0),
+      originId: z
+        .string()
+        .optional()
+        .describe("Origin ID to scope templates to. Defaults to the location itself if omitted."),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", `/locations/${config.locationId}/templates`, {
           token: config.token,
-          version: GHL_VERSION_LEGACY,
+          version: GHL_VERSION_V3,
           params: {
             type: args.type as string | undefined,
             limit: args.limit as number | undefined,
             skip: args.skip as number | undefined,
+            originId: (args.originId as string | undefined) ?? config.locationId,
           },
         });
         return JSON.stringify(result, null, 2);
