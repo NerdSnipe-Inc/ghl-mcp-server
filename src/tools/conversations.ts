@@ -153,33 +153,33 @@ export const conversationTools = [
   },
   {
     name: "ghl_send_email",
-    description: "Send an email within an existing conversation.",
+    description:
+      "Send an email to a contact. Creates or continues the contact's email conversation thread.",
     inputSchema: z.object({
-      conversationId: z.string(),
+      contactId: z.string().describe("The contact to email"),
       subject: z.string(),
-      body: z.string().describe("Plain text body"),
+      message: z
+        .string()
+        .optional()
+        .describe("Plain text body (fallback for non-HTML clients)"),
       html: z.string().optional().describe("HTML body"),
-      to: z.array(z.string()).describe("Recipient email addresses"),
-      from: z.string().optional().describe("Sender email"),
-      fromName: z.string().optional(),
-      cc: z.array(z.string()).optional(),
-      bcc: z.array(z.string()).optional(),
-      replyToMessageId: z.string().optional().describe("Reply to a specific message"),
+      emailFrom: z.string().optional().describe("Sender email address"),
+      emailTo: z
+        .string()
+        .optional()
+        .describe("Recipient email address, if different from the contact's primary email"),
+      emailCc: z.array(z.string()).optional(),
+      emailBcc: z.array(z.string()).optional(),
+      attachments: z.array(z.string()).optional().describe("Array of attachment URLs"),
+      replyMessageId: z.string().optional().describe("Reply to a specific message"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      const { conversationId, ...emailData } = args as {
-        conversationId: string;
-      } & Record<string, unknown>;
       try {
-        const result = await ghlRequest(
-          "POST",
-          `/conversations/${conversationId}/messages/email`,
-          {
-            token: config.token,
-            version: GHL_VERSION_V3,
-            body: emailData,
-          }
-        );
+        const result = await ghlRequest("POST", "/conversations/messages", {
+          token: config.token,
+          version: GHL_VERSION_V3,
+          body: { ...args, type: "Email", locationId: config.locationId },
+        });
         return JSON.stringify(result, null, 2);
       } catch (e) {
         return formatError(e);

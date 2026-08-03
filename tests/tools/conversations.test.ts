@@ -160,24 +160,46 @@ describe('ghl_send_message', () => {
 // ── ghl_send_email ────────────────────────────────────────────────────────────
 
 describe('ghl_send_email', () => {
-  it('calls POST /conversations/:id/messages/email', async () => {
+  it('calls POST /conversations/messages with type Email', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_send_email').handler(
       {
-        conversationId: 'conv-1',
+        contactId: 'contact-abc',
         subject: 'Hello',
-        body: 'Email body',
-        to: ['jane@example.com'],
+        message: 'Email body',
+        html: '<p>Email body</p>',
+        emailFrom: 'sender@example.com',
+        emailTo: 'jane@example.com',
+        emailCc: ['cc@example.com'],
+        emailBcc: ['bcc@example.com'],
       },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
-    expect(call.pathname).toBe('/conversations/conv-1/messages/email');
+    expect(call.pathname).toBe('/conversations/messages');
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
+    expect(call.body?.type).toBe('Email');
+    expect(call.body?.contactId).toBe('contact-abc');
     expect(call.body?.subject).toBe('Hello');
-    expect(call.body?.to).toEqual(['jane@example.com']);
-    expect(call.body?.conversationId).toBeUndefined();
+    expect(call.body?.message).toBe('Email body');
+    expect(call.body?.html).toBe('<p>Email body</p>');
+    expect(call.body?.emailFrom).toBe('sender@example.com');
+    expect(call.body?.emailTo).toBe('jane@example.com');
+    expect(call.body?.emailCc).toEqual(['cc@example.com']);
+    expect(call.body?.emailBcc).toEqual(['bcc@example.com']);
+    expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
+  });
+
+  it('handles send errors', async () => {
+    mockFetchError(422, { message: 'Invalid contact' });
+    expectError(
+      await getTool('ghl_send_email').handler(
+        { contactId: 'bad', subject: 'Hi', message: 'Body' },
+        TEST_CONFIG
+      ),
+      422
+    );
   });
 });
 
