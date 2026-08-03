@@ -18,6 +18,7 @@ import { phoneNumberTools } from '../src/tools/phone_numbers.js';
 import { paymentTools, invoiceTools } from '../src/tools/payments.js';
 import { productTools } from '../src/tools/products.js';
 import { productCollectionTools } from '../src/tools/product_collections.js';
+import { productReviewTools } from '../src/tools/product_reviews.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -52,6 +53,7 @@ const ALL_TOOLS = [
   ...invoiceTools,
   ...productTools,
   ...productCollectionTools,
+  ...productReviewTools,
 
   // Social & media
   ...socialTools,
@@ -65,8 +67,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 147 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(147);
+  it('registers exactly 152 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(152);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -127,6 +129,7 @@ describe('Tool counts per module', () => {
   it('invoices has 6 tools', () => expect(invoiceTools).toHaveLength(6));
   it('products has 14 tools', () => expect(productTools).toHaveLength(14));
   it('productCollections has 5 tools', () => expect(productCollectionTools).toHaveLength(5));
+  it('productReviews has 5 tools', () => expect(productReviewTools).toHaveLength(5));
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
@@ -208,6 +211,9 @@ describe('Specific tool existence', () => {
     // Product collections (5)
     'ghl_get_product_collections', 'ghl_get_product_collection', 'ghl_create_product_collection',
     'ghl_update_product_collection', 'ghl_delete_product_collection',
+    // Product reviews (5)
+    'ghl_get_product_reviews', 'ghl_get_product_review_count', 'ghl_bulk_update_product_reviews',
+    'ghl_update_product_review', 'ghl_delete_product_review',
     // Social (4)
     'ghl_get_social_accounts', 'ghl_get_social_posts', 'ghl_create_social_post',
     'ghl_delete_social_post',
@@ -225,10 +231,10 @@ describe('Specific tool existence', () => {
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 142 expected tools are present', () => {
+  it('all 152 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(147);
+    expect(expectedTools).toHaveLength(152);
   });
 });
