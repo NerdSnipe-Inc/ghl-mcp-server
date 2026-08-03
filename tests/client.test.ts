@@ -6,7 +6,8 @@ import {
   formatError,
   GHLApiError,
   GHL_BASE_URL,
-  GHL_VERSION,
+  GHL_VERSION_V3,
+  GHL_VERSION_LEGACY,
 } from '../src/client.js';
 import { mockFetchSuccess, mockFetchError } from './helpers.js';
 
@@ -48,18 +49,17 @@ describe('getConfig', () => {
 
 describe('buildHeaders', () => {
   it('includes Authorization Bearer token', () => {
-    const headers = buildHeaders('my-secret-token');
+    const headers = buildHeaders('my-secret-token', GHL_VERSION_V3);
     expect(headers['Authorization']).toBe('Bearer my-secret-token');
   });
 
-  it('includes correct GHL Version header', () => {
-    const headers = buildHeaders('tok');
-    expect(headers['Version']).toBe(GHL_VERSION);
-    expect(headers['Version']).toBe('2021-07-28');
+  it('sends the exact version string it is given', () => {
+    expect(buildHeaders('tok', GHL_VERSION_V3)['Version']).toBe('v3');
+    expect(buildHeaders('tok', GHL_VERSION_LEGACY)['Version']).toBe('2021-07-28');
   });
 
   it('includes JSON Content-Type and Accept', () => {
-    const headers = buildHeaders('tok');
+    const headers = buildHeaders('tok', GHL_VERSION_V3);
     expect(headers['Content-Type']).toBe('application/json');
     expect(headers['Accept']).toBe('application/json');
   });
@@ -70,7 +70,7 @@ describe('buildHeaders', () => {
 describe('ghlRequest', () => {
   it('builds correct URL from path', async () => {
     const fetch = mockFetchSuccess({ contacts: [] });
-    await ghlRequest('GET', '/contacts/', { token: 'tok' });
+    await ghlRequest('GET', '/contacts/', { token: 'tok', version: GHL_VERSION_V3 });
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining(`${GHL_BASE_URL}/contacts/`),
       expect.any(Object)
@@ -81,6 +81,7 @@ describe('ghlRequest', () => {
     const fetch = mockFetchSuccess({});
     await ghlRequest('GET', '/contacts/', {
       token: 'tok',
+      version: GHL_VERSION_V3,
       params: { locationId: 'loc-1', limit: 10, active: true },
     });
     const [url] = fetch.mock.calls[0] as [string, RequestInit];
@@ -94,6 +95,7 @@ describe('ghlRequest', () => {
     const fetch = mockFetchSuccess({});
     await ghlRequest('GET', '/contacts/', {
       token: 'tok',
+      version: GHL_VERSION_V3,
       params: { locationId: 'loc-1', query: undefined },
     });
     const [url] = fetch.mock.calls[0] as [string, RequestInit];
@@ -105,6 +107,7 @@ describe('ghlRequest', () => {
     const fetch = mockFetchSuccess({ id: '1' });
     await ghlRequest('POST', '/contacts/', {
       token: 'tok',
+      version: GHL_VERSION_V3,
       body: { firstName: 'Jane', locationId: 'loc-1' },
     });
     const [, options] = fetch.mock.calls[0] as [string, RequestInit];
@@ -117,7 +120,7 @@ describe('ghlRequest', () => {
 
   it('sends no body for GET requests', async () => {
     const fetch = mockFetchSuccess({});
-    await ghlRequest('GET', '/contacts/abc', { token: 'tok' });
+    await ghlRequest('GET', '/contacts/abc', { token: 'tok', version: GHL_VERSION_V3 });
     const [, options] = fetch.mock.calls[0] as [string, RequestInit];
     expect(options.body).toBeUndefined();
   });
@@ -129,21 +132,21 @@ describe('ghlRequest', () => {
       statusText: 'No Content',
       json: () => Promise.reject(new Error('no body')),
     }));
-    const result = await ghlRequest('DELETE', '/contacts/abc', { token: 'tok' });
+    const result = await ghlRequest('DELETE', '/contacts/abc', { token: 'tok', version: GHL_VERSION_V3 });
     expect(result).toEqual({});
   });
 
   it('throws GHLApiError on non-ok response', async () => {
     mockFetchError(404, { message: 'Contact not found' });
     await expect(
-      ghlRequest('GET', '/contacts/bad-id', { token: 'tok' })
+      ghlRequest('GET', '/contacts/bad-id', { token: 'tok', version: GHL_VERSION_V3 })
     ).rejects.toThrow(GHLApiError);
   });
 
   it('throws GHLApiError with correct status and endpoint', async () => {
     mockFetchError(401, { message: 'Unauthorized' });
     try {
-      await ghlRequest('GET', '/contacts/', { token: 'bad-tok' });
+      await ghlRequest('GET', '/contacts/', { token: 'bad-tok', version: GHL_VERSION_V3 });
     } catch (e) {
       expect(e).toBeInstanceOf(GHLApiError);
       expect((e as GHLApiError).status).toBe(401);
