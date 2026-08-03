@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**178 tools** covering the full GHL API:
+**206 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -43,6 +43,10 @@ Once installed, you can talk to your CRM naturally:
 | Store & Shipping               | Shipping carriers, zones, rates, and store settings                        |
 | Affiliates                     | List affiliates, commissions, and payouts                                  |
 | Email Verification             | Single-use email address verification (deliverability check)               |
+| Blogs                           | Authors, categories, sites, posts, slug checks, create/update posts        |
+| Courses & Proposals             | Import courses; proposal/estimate documents and templates                  |
+| Brand Boards & Voices           | Brand boards (logos/colors/fonts) and brand voices, incl. defaults         |
+| Custom Menus                    | Custom menu links: list, get, create, update, delete                       |
 
 > **Not yet covered:** the following GHL API v3 resources require credentials this
 > server doesn't have (agency-level or Marketplace-app-developer identity, not a
@@ -264,7 +268,7 @@ node dist/index.js
 
 ---
 
-## All 178 Tools — Full Reference
+## All 206 Tools — Full Reference
 
 ### Contacts
 
@@ -542,6 +546,54 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | Tool               | Description                                              |
 |---------------------|------------------------------------------------------------|
 | `ghl_verify_email`  | Verify an email address's deliverability (single-use ISV check) |
+
+### Blogs
+
+| Tool                      | Description                                                     |
+|---------------------------|-------------------------------------------------------------------|
+| `ghl_get_blog_authors`    | List blog authors for the location                                |
+| `ghl_get_blog_categories` | List blog categories for the location                             |
+| `ghl_get_blogs`           | List blog sites for the location                                  |
+| `ghl_get_blog_posts`      | List posts for a blog, with search and status filtering           |
+| `ghl_check_blog_url_slug` | Check whether a URL slug is already in use by another blog post   |
+| `ghl_create_blog_post`    | Create a new blog post                                            |
+| `ghl_update_blog_post`    | Update an existing blog post                                      |
+
+### Courses & Proposals
+
+| Tool                          | Description                                                        |
+|-------------------------------|-----------------------------------------------------------------------|
+| `ghl_import_courses`          | Import courses with lessons and modules from product objects          |
+| `ghl_get_proposal_documents`  | List proposal/estimate documents, with status/date/search filtering   |
+| `ghl_send_proposal_document`  | Send a proposal/estimate document to a client                         |
+| `ghl_get_proposal_templates`  | List proposal/estimate document templates                             |
+| `ghl_send_proposal_template`  | Send a proposal/estimate document template to a client contact        |
+
+### Brand Boards & Voices
+
+| Tool                          | Description                                                    |
+|-------------------------------|--------------------------------------------------------------------|
+| `ghl_create_brand_board`      | Create a brand board (logos, colors, fonts) — blank, from template, snapshot, or extracted from a URL |
+| `ghl_get_brand_boards`        | List brand boards for the location                                 |
+| `ghl_get_brand_board`         | Get a single brand board by ID                                     |
+| `ghl_update_brand_board`      | Update a brand board by ID                                         |
+| `ghl_delete_brand_board`      | Delete a brand board by ID                                         |
+| `ghl_get_brand_voices`        | List brand voices for the location                                 |
+| `ghl_create_brand_voice`      | Create a brand voice                                                |
+| `ghl_get_brand_voice`         | Get a brand voice by ID                                             |
+| `ghl_update_brand_voice`      | Update a brand voice by ID                                          |
+| `ghl_delete_brand_voice`      | Delete a brand voice by ID                                          |
+| `ghl_set_default_brand_voice` | Set a brand voice as the default for the location                   |
+
+### Custom Menus
+
+| Tool                     | Description                                                     |
+|--------------------------|---------------------------------------------------------------------|
+| `ghl_get_custom_menus`   | List custom menu links, with search, pagination, and agency filter  |
+| `ghl_get_custom_menu`    | Get a single custom menu link by ID                                 |
+| `ghl_create_custom_menu` | Create a custom menu link                                           |
+| `ghl_update_custom_menu` | Update a custom menu link by ID                                     |
+| `ghl_delete_custom_menu` | Delete a custom menu link by ID                                     |
 
 ---
 

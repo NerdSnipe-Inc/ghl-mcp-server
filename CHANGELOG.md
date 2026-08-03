@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased — Phase 2b — Marketing/Content
+
+Adds GHL API v3 Marketing/Content coverage — 28 new tools across 5 new modules:
+
+- `blogs.ts` (7 tools) — blog authors, categories, sites, posts, slug checks, create/update posts
+- `courses.ts` (1 tool) — course import (lessons and modules from product objects)
+- `proposals.ts` (4 tools) — proposal/estimate documents and templates, listing and sending
+- `brand_boards.ts` (11 tools) — brand boards (logos/colors/fonts) and brand voices, including defaults
+- `custom_menus.ts` (5 tools) — custom menu link CRUD
+
+Total tool count: 178 → 206.
+
+`marketplace.ts` (app installs/uninstalls, billing-wallet charges, rebilling config)
+was intentionally not built, for the same reason as `saas.ts` in Phase 2a: this server
+authenticates via a location-scoped Private Integration Token with no Marketplace-app-developer
+identity, so these endpoints are unreachable. See
+`docs/superpowers/specs/2026-08-04-v3-phase2b-marketing-design.md`.
+
 ## Unreleased — Phase 2a — Commerce
 
 Adds GHL API v3 Commerce coverage — 50 new tools across 7 new modules:
