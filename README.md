@@ -599,6 +599,65 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_update_custom_menu` | Update a custom menu link by ID                                     |
 | `ghl_delete_custom_menu` | Delete a custom menu link by ID                                     |
 
+### Conversation AI
+
+| Tool                                              | Description                                                                |
+|----------------------------------------------------|-----------------------------------------------------------------------------|
+| `ghl_create_conversation_ai_agent`                 | Create a new Conversation AI agent (name, personality, goal, instructions)  |
+| `ghl_search_conversation_ai_agents`                | Search Conversation AI agents by name, with pagination                      |
+| `ghl_get_conversation_ai_agent`                    | Get a Conversation AI agent by ID                                           |
+| `ghl_update_conversation_ai_agent`                 | Update a Conversation AI agent's configuration                              |
+| `ghl_delete_conversation_ai_agent`                 | Delete a Conversation AI agent by ID                                        |
+| `ghl_attach_conversation_ai_action`                | Attach a new action (workflow trigger, field update, booking, etc.) to an agent |
+| `ghl_list_conversation_ai_agent_actions`           | List all actions attached to a Conversation AI agent                        |
+| `ghl_get_conversation_ai_agent_action`             | Get a single action attached to a Conversation AI agent                     |
+| `ghl_update_conversation_ai_agent_action`          | Update an existing action attached to a Conversation AI agent               |
+| `ghl_remove_conversation_ai_agent_action`          | Remove an action from a Conversation AI agent                               |
+| `ghl_update_conversation_ai_followup_settings`     | Update the follow-up settings (channel switching, working hours) for an agent |
+| `ghl_get_conversation_ai_generation`               | Get an AI-generated message for a conversation or workflow message          |
+
+### Voice AI
+
+| Tool                            | Description                                                              |
+|----------------------------------|---------------------------------------------------------------------------|
+| `ghl_create_voice_ai_action`     | Create a new Voice AI action attached to an agent                        |
+| `ghl_update_voice_ai_action`     | Update a Voice AI action                                                  |
+| `ghl_get_voice_ai_action`        | Get a single Voice AI action by ID                                       |
+| `ghl_delete_voice_ai_action`     | Delete a Voice AI action                                                  |
+| `ghl_create_voice_ai_agent`      | Create a new Voice AI agent (greeting, prompt, voice, working hours, etc.) |
+| `ghl_get_voice_ai_agents`        | List Voice AI agents for the location, with search and pagination        |
+| `ghl_update_voice_ai_agent`      | Update a Voice AI agent's configuration                                  |
+| `ghl_get_voice_ai_agent`         | Get a Voice AI agent by ID                                               |
+| `ghl_delete_voice_ai_agent`      | Delete a Voice AI agent by ID                                            |
+| `ghl_get_voice_ai_call_logs`     | Get the Voice AI call-log dashboard, with filters and pagination         |
+| `ghl_get_voice_ai_call_log`      | Get a single Voice AI call log entry by call ID                          |
+
+### Chat Widget
+
+| Tool                          | Description                                                                 |
+|--------------------------------|-------------------------------------------------------------------------------|
+| `ghl_create_chat_widget`       | Create a new chat widget for the sub-account                                 |
+| `ghl_clone_chat_widget`        | Create a copy of an existing chat widget in the same sub-account             |
+| `ghl_get_chat_widget`          | Get a single chat widget by ID                                               |
+| `ghl_update_chat_widget`       | Full update (PUT) of a chat widget resource                                  |
+| `ghl_patch_chat_widget`        | Partial update (PATCH) of a chat widget resource                             |
+| `ghl_list_chat_widgets`        | List chat widgets for the sub-account, with pagination and filters           |
+| `ghl_get_chat_widget_config`   | Get a widget's display/behavior configuration by ID                          |
+| `ghl_delete_chat_widget`       | Soft-delete a chat widget                                                    |
+
+### Agent Studio
+
+| Tool                                        | Description                                                                |
+|-----------------------------------------------|-------------------------------------------------------------------------------|
+| `ghl_create_agent_studio_agent`               | Create a new Agent Studio agent with an initial staging version              |
+| `ghl_list_agent_studio_agents`                | List Agent Studio agents for the sub-account, with pagination                |
+| `ghl_get_agent_studio_agent`                  | Get a single Agent Studio agent by ID, including its non-deleted versions    |
+| `ghl_update_agent_studio_agent_metadata`      | Update an agent's top-level metadata (name, description, status)             |
+| `ghl_delete_agent_studio_agent`               | Delete an Agent Studio agent and all of its versions                         |
+| `ghl_update_agent_studio_agent_version`       | Update a version's workflow definition (nodes, edges, variables)             |
+| `ghl_publish_agent_studio_agent`              | Promote a draft version to production, publishing it                         |
+| `ghl_execute_agent_studio_agent`              | Execute an Agent Studio agent and get a non-streaming JSON response          |
+
 ---
 
 ## Example Prompts
