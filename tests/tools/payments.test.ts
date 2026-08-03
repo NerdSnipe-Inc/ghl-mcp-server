@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { paymentTools, invoiceTools } from '../../src/tools/payments.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -26,6 +27,7 @@ describe('ghl_get_orders', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/payments/orders');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -56,6 +58,7 @@ describe('ghl_get_order', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/payments/orders/ord-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -70,6 +73,7 @@ describe('ghl_get_transactions', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/payments/transactions');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -84,6 +88,7 @@ describe('ghl_get_subscriptions', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/payments/subscriptions');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -98,6 +103,7 @@ describe('ghl_get_coupons', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/payments/coupon/list');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -120,6 +126,7 @@ describe('ghl_create_coupon', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/payments/coupon');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.code).toBe('SAVE20');
     expect(call.body?.discountType).toBe('percentage');
     expect(call.body?.discount).toBe(20);
@@ -137,6 +144,7 @@ describe('ghl_get_invoices', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/invoices/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
     expect(call.params.altType).toBe('location');
   });
@@ -167,6 +175,7 @@ describe('ghl_get_invoice', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/invoices/inv-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -186,6 +195,7 @@ describe('ghl_create_invoice', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/invoices/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.contactId).toBe('contact-abc');
     expect(call.body?.name).toBe('Invoice #001');
     expect(call.body?.altId).toBe(TEST_CONFIG.locationId);
@@ -203,6 +213,7 @@ describe('ghl_send_invoice', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/invoices/inv-1/send');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.altId).toBe(TEST_CONFIG.locationId);
   });
 });
@@ -216,6 +227,7 @@ describe('ghl_void_invoice', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/invoices/inv-1/void');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -231,6 +243,7 @@ describe('ghl_record_invoice_payment', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/invoices/inv-1/record-payment');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.amount).toBe(50000);
     expect(call.body?.invoiceId).toBeUndefined();
   });
