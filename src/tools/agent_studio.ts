@@ -8,6 +8,12 @@ const AGENT_STATUS_ENUM = ["active", "inactive", "archived"] as const;
 // workflow-graph structures (node configs, LLM prompts, branching edges, etc.).
 // Modeled permissively as z.record(z.unknown()) items rather than fully typed,
 // matching Phase 2a/2b precedent for deeply nested bodies.
+//
+// Note: ghl_create_agent_studio_agent's input schema intentionally omits the
+// top-level nodes/edges fields present in the spec's create-agent request body
+// (CreatePublicAgentDTO) — the spec marks them deprecated in favor of
+// version.nodes/version.edges (which this tool does accept via `version`, and
+// which ghl_update_agent_studio_agent_version also uses).
 const workflowGraphField = z
   .array(z.record(z.string(), z.unknown()))
   .optional();

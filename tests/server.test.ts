@@ -95,7 +95,7 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 237 tools', () => {
+  it('registers exactly 245 tools', () => {
     expect(ALL_TOOLS).toHaveLength(245);
   });
 
