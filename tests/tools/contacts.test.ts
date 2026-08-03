@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { contactTools } from '../../src/tools/contacts.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -25,6 +26,7 @@ describe('ghl_get_contacts', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/contacts/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
@@ -59,6 +61,7 @@ describe('ghl_get_contact', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/contacts/abc');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expectSuccess(result, { contact: { id: 'abc' } });
   });
 
@@ -83,6 +86,7 @@ describe('ghl_create_contact', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.body?.firstName).toBe('Jane');
     expect(call.body?.email).toBe('jane@example.com');
@@ -109,6 +113,7 @@ describe('ghl_update_contact', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/contacts/abc');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.firstName).toBe('Updated');
     expect(call.body?.contactId).toBeUndefined();
   });
@@ -126,6 +131,7 @@ describe('ghl_upsert_contact', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/upsert');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.body?.email).toBe('jane@example.com');
   });
@@ -140,6 +146,7 @@ describe('ghl_delete_contact', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/contacts/abc');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -155,6 +162,7 @@ describe('ghl_search_contacts', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/search');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.body?.query).toBe('Jane');
   });
@@ -180,6 +188,7 @@ describe('ghl_add_contact_tags', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/abc/tags');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.tags).toEqual(['vip', 'hot-lead']);
   });
 });
@@ -196,6 +205,7 @@ describe('ghl_remove_contact_tags', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/contacts/abc/tags');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.tags).toEqual(['old-tag']);
   });
 });
@@ -209,6 +219,7 @@ describe('ghl_get_contact_notes', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/contacts/abc/notes');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -224,6 +235,7 @@ describe('ghl_create_contact_note', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/abc/notes');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.body).toBe('Called, left voicemail');
   });
 
@@ -250,6 +262,7 @@ describe('ghl_update_contact_note', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/contacts/abc/notes/note-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.body).toBe('Updated note');
   });
 });
@@ -266,6 +279,7 @@ describe('ghl_delete_contact_note', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/contacts/abc/notes/note-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -278,6 +292,7 @@ describe('ghl_get_contact_tasks', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/contacts/abc/tasks');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -297,6 +312,7 @@ describe('ghl_create_contact_task', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/abc/tasks');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.title).toBe('Follow up');
     expect(call.body?.dueDate).toBe('2024-12-31T17:00:00Z');
     expect(call.body?.contactId).toBeUndefined();
@@ -315,6 +331,7 @@ describe('ghl_update_contact_task', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('PUT');
     expect(call.pathname).toBe('/contacts/abc/tasks/task-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.status).toBe('completed');
     expect(call.body?.contactId).toBeUndefined();
     expect(call.body?.taskId).toBeUndefined();
@@ -333,6 +350,7 @@ describe('ghl_delete_contact_task', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/contacts/abc/tasks/task-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -348,6 +366,7 @@ describe('ghl_add_contact_to_workflow', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/contacts/abc/workflow/wf-123');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body).toEqual({});
   });
 
@@ -378,6 +397,7 @@ describe('ghl_remove_contact_from_workflow', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/contacts/abc/workflow/wf-123');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -393,5 +413,6 @@ describe('ghl_get_contact_appointments', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/contacts/abc/appointments');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
