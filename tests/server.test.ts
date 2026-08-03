@@ -16,6 +16,7 @@ import { emailBuilderTools, emailCampaignTools } from '../src/tools/emails.js';
 import { funnelTools } from '../src/tools/funnels.js';
 import { phoneNumberTools } from '../src/tools/phone_numbers.js';
 import { paymentTools, invoiceTools } from '../src/tools/payments.js';
+import { productTools } from '../src/tools/products.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -48,6 +49,7 @@ const ALL_TOOLS = [
   // Commerce
   ...paymentTools,
   ...invoiceTools,
+  ...productTools,
 
   // Social & media
   ...socialTools,
@@ -61,8 +63,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 127 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(128);
+  it('registers exactly 142 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(142);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -121,6 +123,7 @@ describe('Tool counts per module', () => {
   it('phoneNumbers has 5 tools', () => expect(phoneNumberTools).toHaveLength(5));
   it('payments has 6 tools', () => expect(paymentTools).toHaveLength(6));
   it('invoices has 6 tools', () => expect(invoiceTools).toHaveLength(6));
+  it('products has 14 tools', () => expect(productTools).toHaveLength(14));
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
@@ -193,6 +196,12 @@ describe('Specific tool existence', () => {
     // Invoices (6)
     'ghl_get_invoices', 'ghl_get_invoice', 'ghl_create_invoice',
     'ghl_send_invoice', 'ghl_void_invoice', 'ghl_record_invoice_payment',
+    // Products (14)
+    'ghl_get_products', 'ghl_get_product', 'ghl_create_product',
+    'ghl_update_product', 'ghl_delete_product', 'ghl_bulk_update_products',
+    'ghl_bulk_edit_product_prices', 'ghl_get_product_prices', 'ghl_get_product_price',
+    'ghl_create_product_price', 'ghl_update_product_price', 'ghl_delete_product_price',
+    'ghl_get_product_inventory', 'ghl_update_product_inventory',
     // Social (4)
     'ghl_get_social_accounts', 'ghl_get_social_posts', 'ghl_create_social_post',
     'ghl_delete_social_post',
@@ -210,10 +219,10 @@ describe('Specific tool existence', () => {
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 128 expected tools are present', () => {
+  it('all 142 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(128);
+    expect(expectedTools).toHaveLength(142);
   });
 });
