@@ -20,6 +20,7 @@ import { productTools } from '../src/tools/products.js';
 import { productCollectionTools } from '../src/tools/product_collections.js';
 import { productReviewTools } from '../src/tools/product_reviews.js';
 import { productStoreTools } from '../src/tools/product_store.js';
+import { storeTools } from '../src/tools/store.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -56,6 +57,7 @@ const ALL_TOOLS = [
   ...productCollectionTools,
   ...productReviewTools,
   ...productStoreTools,
+  ...storeTools,
 
   // Social & media
   ...socialTools,
@@ -69,8 +71,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 155 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(155);
+  it('registers exactly 166 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(166);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -133,6 +135,7 @@ describe('Tool counts per module', () => {
   it('productCollections has 5 tools', () => expect(productCollectionTools).toHaveLength(5));
   it('productReviews has 5 tools', () => expect(productReviewTools).toHaveLength(5));
   it('productStore has 3 tools', () => expect(productStoreTools).toHaveLength(3));
+  it('store has 11 tools', () => expect(storeTools).toHaveLength(11));
   it('social has 4 tools', () => expect(socialTools).toHaveLength(4));
   it('media has 2 tools', () => expect(mediaTools).toHaveLength(2));
   it('triggerLinks has 3 tools', () => expect(triggerLinkTools).toHaveLength(3));
@@ -217,6 +220,11 @@ describe('Specific tool existence', () => {
     // Product reviews (5)
     'ghl_get_product_reviews', 'ghl_get_product_review_count', 'ghl_bulk_update_product_reviews',
     'ghl_update_product_review', 'ghl_delete_product_review',
+    // Store — shipping carriers & zones (11)
+    'ghl_get_shipping_carriers', 'ghl_create_shipping_carrier', 'ghl_get_shipping_carrier',
+    'ghl_update_shipping_carrier', 'ghl_delete_shipping_carrier',
+    'ghl_get_shipping_zones', 'ghl_create_shipping_zone', 'ghl_get_shipping_zone',
+    'ghl_update_shipping_zone', 'ghl_delete_shipping_zone', 'ghl_get_available_shipping_rates',
     // Social (4)
     'ghl_get_social_accounts', 'ghl_get_social_posts', 'ghl_create_social_post',
     'ghl_delete_social_post',
@@ -238,6 +246,6 @@ describe('Specific tool existence', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(152);
+    expect(expectedTools).toHaveLength(163);
   });
 });
