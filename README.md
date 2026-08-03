@@ -44,7 +44,16 @@ Once installed, you can talk to your CRM naturally:
 | Affiliates                     | List affiliates, commissions, and payouts                                  |
 | Email Verification             | Single-use email address verification (deliverability check)               |
 
-> **Scope note:** GHL API v3's `saas` resource (agency-level SaaS mode, rebilling, wallets) was intentionally not built — this server authenticates with a location-scoped Private Integration Token that has no agency identity, so agency-only endpoints are out of reach. See `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md` for details.
+> **Not yet covered:** the following GHL API v3 resources require credentials this
+> server doesn't have (agency-level or Marketplace-app-developer identity, not a
+> location-scoped Private Integration Token) and are intentionally left unbuilt:
+> - `saas` — agency-level SaaS mode, rebilling, wallet balances. See
+>   `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md`.
+> - `marketplace` — app installs/uninstalls, billing-wallet charges, rebilling config.
+>   See `docs/superpowers/specs/2026-08-04-v3-phase2b-marketing-design.md`.
+>
+> If you need either of these and have the right credential type, please
+> [open an issue](https://github.com/NerdSnipe-Inc/ghl-mcp-server/issues) requesting it.
 
 ---
 
