@@ -108,6 +108,7 @@ export const phoneNumberTools = [
     }),
     handler: async (args: { numberId: string }, config: GHLConfig) => {
       try {
+        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified, follows v3 pattern by convention.
         const result = await ghlRequest(
           "DELETE",
           `/phone-system/numbers/location/${config.locationId}/${args.numberId}`,
@@ -133,6 +134,7 @@ export const phoneNumberTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
+        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified, follows v3 pattern by convention.
         const result = await ghlRequest(
           "PUT",
           `/phone-system/numbers/location/${config.locationId}/${args.numberId as string}`,
