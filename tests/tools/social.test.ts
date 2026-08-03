@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { socialTools, mediaTools, triggerLinkTools } from '../../src/tools/social.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -28,6 +29,7 @@ describe('ghl_get_social_accounts', () => {
     expect(call.pathname).toBe(
       `/social-media-posting/${TEST_CONFIG.locationId}/accounts`
     );
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('handles errors', async () => {
@@ -47,6 +49,7 @@ describe('ghl_get_social_posts', () => {
     expect(call.pathname).toBe(
       `/social-media-posting/${TEST_CONFIG.locationId}/posts/list`
     );
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('passes skip, limit, and status in the request body', async () => {
@@ -81,6 +84,7 @@ describe('ghl_create_social_post', () => {
     );
     expect(call.body?.content).toBe('Check out our new offer!');
     expect(call.body?.accountIds).toEqual(['acc-1', 'acc-2']);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('includes scheduledAt when provided', async () => {
@@ -109,6 +113,7 @@ describe('ghl_delete_social_post', () => {
     expect(call.pathname).toBe(
       `/social-media-posting/${TEST_CONFIG.locationId}/posts/post-1`
     );
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -122,6 +127,7 @@ describe('ghl_get_media_files', () => {
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/medias/files');
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('passes type filter when provided', async () => {
@@ -143,6 +149,7 @@ describe('ghl_delete_media_file', () => {
     expect(call.pathname).toBe('/medias/file-1');
     expect(call.params.altType).toBe('location');
     expect(call.params.altId).toBe(TEST_CONFIG.locationId);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
   it('handles errors', async () => {
@@ -164,6 +171,7 @@ describe('ghl_get_trigger_links', () => {
     expect(call.method).toBe('GET');
     expect(call.pathname).toBe('/links/');
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -182,6 +190,7 @@ describe('ghl_create_trigger_link', () => {
     expect(call.body?.name).toBe('Download Guide');
     expect(call.body?.redirectTo).toBe('https://example.com/guide');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
 
@@ -194,5 +203,6 @@ describe('ghl_delete_trigger_link', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('DELETE');
     expect(call.pathname).toBe('/links/link-1');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 });
