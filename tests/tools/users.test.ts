@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { userTools } from '../../src/tools/users.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { userTools, __resetCompanyIdCacheForTests } from '../../src/tools/users.js';
 import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
@@ -19,6 +19,14 @@ const getTool = (name: string) => {
 };
 
 const COMPANY_ID = 'company-abc';
+
+// getCompanyId() memoizes the resolved companyId per locationId in a
+// module-level cache. Clear it before every test so each test that expects
+// a location lookup (mockTwoCalls / mockLocationOkThenError) actually gets
+// one, regardless of test execution order within this file.
+beforeEach(() => {
+  __resetCompanyIdCacheForTests();
+});
 
 /** Mock two sequential fetch calls: location lookup, then the real request. */
 function mockTwoCalls(secondResponseData: unknown) {

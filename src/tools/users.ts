@@ -5,13 +5,27 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js
 // /users/search and POST /users/ that GHLConfig doesn't carry directly.
 // We derive it by looking up the location first (GET /locations/{locationId}
 // returns `location.companyId`), then use it in the subsequent v3 call.
+// A location's companyId is immutable for the process's lifetime, so the
+// result is memoized per locationId to avoid a redundant API call (and
+// point of failure) on every users tool invocation.
+const companyIdCache = new Map<string, string>();
+
 async function getCompanyId(config: GHLConfig): Promise<string> {
+  const cached = companyIdCache.get(config.locationId);
+  if (cached) return cached;
   const result = await ghlRequest<{ location: { companyId: string } }>(
     "GET",
     `/locations/${config.locationId}`,
     { token: config.token, version: GHL_VERSION_V3 }
   );
+  companyIdCache.set(config.locationId, result.location.companyId);
   return result.location.companyId;
+}
+
+/** Test-only escape hatch: clears the module-level companyId cache so each
+ * test can assert on a fresh location lookup. Not used by production code. */
+export function __resetCompanyIdCacheForTests(): void {
+  companyIdCache.clear();
 }
 
 const permissionsSchema = z
@@ -50,7 +64,7 @@ const permissionsSchema = z
 export const userTools = [
   {
     name: "ghl_get_users",
-    description: "List all team members in the GHL location.",
+    description: "List all team members in the GHL location. Resolves the account's company ID via a location lookup first.",
     inputSchema: z.object({
       limit: z.number().optional().describe("Max results"),
       skip: z.number().optional().describe("Number of results to skip"),
@@ -76,7 +90,7 @@ export const userTools = [
   },
   {
     name: "ghl_search_users",
-    description: "Search team members by name or email.",
+    description: "Search team members by name or email. Resolves the account's company ID via a location lookup first.",
     inputSchema: z.object({
       query: z.string().optional().describe("Search query"),
     }),
@@ -114,7 +128,7 @@ export const userTools = [
   },
   {
     name: "ghl_create_user",
-    description: "Create a new team member in the location.",
+    description: "Create a new team member in the location. Resolves the account's company ID via a location lookup first.",
     inputSchema: z.object({
       firstName: z.string(),
       lastName: z.string(),
