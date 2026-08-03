@@ -10,7 +10,7 @@
  */
 
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 // ── Knowledge Base CRUD ───────────────────────────────────────────────────────
 
@@ -40,6 +40,7 @@ export const knowledgeBaseTools = [
       try {
         const result = await ghlRequest("GET", "/knowledge-bases/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             query: args.query as string | undefined,
@@ -73,7 +74,7 @@ export const knowledgeBaseTools = [
         const result = await ghlRequest(
           "GET",
           `/knowledge-bases/${args.knowledgeBaseId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -97,6 +98,7 @@ export const knowledgeBaseTools = [
       try {
         const result = await ghlRequest("POST", "/knowledge-bases/", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: { ...args, locationId: config.locationId },
         });
         return JSON.stringify(result, null, 2);
@@ -131,7 +133,7 @@ export const knowledgeBaseTools = [
         const result = await ghlRequest(
           "PUT",
           `/knowledge-bases/${knowledgeBaseId}`,
-          { token: config.token, body: fields }
+          { token: config.token, version: GHL_VERSION_V3, body: fields }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -157,7 +159,7 @@ export const knowledgeBaseTools = [
         const result = await ghlRequest(
           "DELETE",
           `/knowledge-bases/${args.knowledgeBaseId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -194,6 +196,7 @@ export const faqTools = [
       try {
         const result = await ghlRequest("GET", "/knowledge-bases/faqs", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             knowledgeBaseId: args.knowledgeBaseId as string,
@@ -230,6 +233,7 @@ export const faqTools = [
       try {
         const result = await ghlRequest("POST", "/knowledge-bases/faqs", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: config.locationId,
             knowledgeBaseId: args.knowledgeBaseId,
@@ -263,6 +267,7 @@ export const faqTools = [
           `/knowledge-bases/faqs/${args.faqId}`,
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: { question: args.question, answer: args.answer },
           }
         );
@@ -285,7 +290,7 @@ export const faqTools = [
         const result = await ghlRequest(
           "DELETE",
           `/knowledge-bases/faqs/${args.faqId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -323,6 +328,7 @@ export const crawlerTools = [
       try {
         const result = await ghlRequest("GET", "/knowledge-bases/crawler", {
           token: config.token,
+          version: GHL_VERSION_V3,
           params: {
             locationId: config.locationId,
             knowledgeBaseId: args.knowledgeBaseId as string,
@@ -360,6 +366,7 @@ export const crawlerTools = [
       try {
         const result = await ghlRequest("POST", "/knowledge-bases/crawler", {
           token: config.token,
+          version: GHL_VERSION_V3,
           body: {
             locationId: config.locationId,
             knowledgeBaseId: args.knowledgeBaseId,
@@ -396,6 +403,7 @@ export const crawlerTools = [
           "/knowledge-bases/crawler/status",
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             params: {
               locationId: config.locationId,
               knowledgeBaseId: args.knowledgeBaseId,
@@ -439,6 +447,7 @@ export const crawlerTools = [
           "/knowledge-bases/crawler/train",
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: {
               locationId: config.locationId,
               knowledgeBaseId: args.knowledgeBaseId,
@@ -476,6 +485,7 @@ export const crawlerTools = [
           "/knowledge-bases/crawler",
           {
             token: config.token,
+            version: GHL_VERSION_V3,
             body: {
               locationId: config.locationId,
               knowledgeBaseId: args.knowledgeBaseId,
