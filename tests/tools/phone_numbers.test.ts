@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { phoneNumberTools } from '../../src/tools/phone_numbers.js';
+import { GHL_VERSION_LEGACY } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -137,7 +138,7 @@ describe('ghl_release_phone_number', () => {
     expect(call.pathname).toBe(
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/num-abc123`
     );
-    expect(call.headers.Version).toBe('v3');
+    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
   });
 
   it('handles errors', async () => {
@@ -168,7 +169,7 @@ describe('ghl_update_phone_number', () => {
     );
     expect(call.body?.friendlyName).toBe('Sales Line');
     expect(call.body?.callForwardingNumber).toBe('+15550001111');
-    expect(call.headers.Version).toBe('v3');
+    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
   });
 
   it('handles errors', async () => {

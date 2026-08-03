@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY } from "../client.js";
 
 export const phoneNumberTools = [
   {
@@ -108,11 +108,11 @@ export const phoneNumberTools = [
     }),
     handler: async (args: { numberId: string }, config: GHLConfig) => {
       try {
-        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified, follows v3 pattern by convention.
+        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified; staying on legacy to preserve pre-migration behavior rather than guessing forward.
         const result = await ghlRequest(
           "DELETE",
           `/phone-system/numbers/location/${config.locationId}/${args.numberId}`,
-          { token: config.token, version: GHL_VERSION_V3 }
+          { token: config.token, version: GHL_VERSION_LEGACY }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -134,13 +134,13 @@ export const phoneNumberTools = [
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
-        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified, follows v3 pattern by convention.
+        // Undocumented in both v2 (apps/phone-system.json) and v3 (apps/v3/phone-system-v3.json) specs — version unverified; staying on legacy to preserve pre-migration behavior rather than guessing forward.
         const result = await ghlRequest(
           "PUT",
           `/phone-system/numbers/location/${config.locationId}/${args.numberId as string}`,
           {
             token: config.token,
-            version: GHL_VERSION_V3,
+            version: GHL_VERSION_LEGACY,
             body: {
               ...(args.friendlyName !== undefined ? { friendlyName: args.friendlyName } : {}),
               ...(args.callForwardingNumber !== undefined ? { callForwardingNumber: args.callForwardingNumber } : {}),
