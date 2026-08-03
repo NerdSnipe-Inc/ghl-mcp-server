@@ -220,6 +220,9 @@ describe('Specific tool existence', () => {
     // Product reviews (5)
     'ghl_get_product_reviews', 'ghl_get_product_review_count', 'ghl_bulk_update_product_reviews',
     'ghl_update_product_review', 'ghl_delete_product_review',
+    // Product store (3)
+    'ghl_set_product_store_visibility', 'ghl_update_product_store_priority',
+    'ghl_get_product_store_stats',
     // Store — shipping carriers & zones (11)
     'ghl_get_shipping_carriers', 'ghl_create_shipping_carrier', 'ghl_get_shipping_carrier',
     'ghl_update_shipping_carrier', 'ghl_delete_shipping_carrier',
@@ -242,10 +245,10 @@ describe('Specific tool existence', () => {
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 152 expected tools are present', () => {
+  it('all 166 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(163);
+    expect(expectedTools).toHaveLength(166);
   });
 });
