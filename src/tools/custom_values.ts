@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 export const customValueTools = [
   {
@@ -11,7 +11,7 @@ export const customValueTools = [
         const result = await ghlRequest(
           "GET",
           `/locations/${config.locationId}/customValues`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -31,7 +31,7 @@ export const customValueTools = [
         const result = await ghlRequest(
           "POST",
           `/locations/${config.locationId}/customValues`,
-          { token: config.token, body: args }
+          { token: config.token, version: GHL_VERSION_V3, body: args }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -53,7 +53,7 @@ export const customValueTools = [
         const result = await ghlRequest(
           "PUT",
           `/locations/${config.locationId}/customValues/${valueId}`,
-          { token: config.token, body: updateData }
+          { token: config.token, version: GHL_VERSION_V3, body: updateData }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -72,7 +72,7 @@ export const customValueTools = [
         const result = await ghlRequest(
           "DELETE",
           `/locations/${config.locationId}/customValues/${args.valueId}`,
-          { token: config.token }
+          { token: config.token, version: GHL_VERSION_V3 }
         );
         return JSON.stringify(result, null, 2);
       } catch (e) {
