@@ -36,6 +36,7 @@ describe('ghl_verify_email', () => {
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe('/email/verify');
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
+    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.body.type).toBe('email');
     expect(call.body.verify).toBe('test@example.com');
     expectSuccess(result, {

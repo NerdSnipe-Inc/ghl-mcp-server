@@ -27,6 +27,9 @@ export const emailIsvTools = [
           {
             token: config.token,
             version: GHL_VERSION_V3,
+            params: {
+              locationId: config.locationId,
+            },
             body: {
               type: args.type,
               verify: args.verify,
