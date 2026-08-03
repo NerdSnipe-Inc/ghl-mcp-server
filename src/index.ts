@@ -61,6 +61,7 @@ import {
 } from "./tools/knowledge_base.js";
 import { blogTools } from "./tools/blogs.js";
 import { courseTools } from "./tools/courses.js";
+import { proposalTools } from "./tools/proposals.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...funnelTools,
   ...blogTools,
   ...courseTools,
+  ...proposalTools,
 
   // Communications infrastructure
   ...phoneNumberTools,
