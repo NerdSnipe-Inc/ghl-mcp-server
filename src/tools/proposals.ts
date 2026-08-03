@@ -62,6 +62,9 @@ export const proposalTools = [
       }
     },
   },
+  // Note: the two "send" endpoints below have different required fields per the real spec
+  // (/document/send requires sentBy; /templates/send requires userId + contactId instead) —
+  // this is intentional, not a copy-paste inconsistency.
   {
     name: "ghl_send_proposal_document",
     description: "Send a proposal/estimate document to a client.",
@@ -109,6 +112,7 @@ export const proposalTools = [
         .optional()
         .describe("If the docForm is a DocForm"),
       userId: z.string().optional().describe("User Id, required when isPublicDocument is true"),
+      // Upstream spec declares limit/skip as string here (vs. number on /proposals/document) — kept as-is to match the real API.
       limit: z.string().optional().describe("Limit"),
       skip: z.string().optional().describe("Skip"),
     }),
