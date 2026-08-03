@@ -47,6 +47,7 @@ import { funnelTools } from "./tools/funnels.js";
 import { phoneNumberTools } from "./tools/phone_numbers.js";
 import { paymentTools, invoiceTools } from "./tools/payments.js";
 import { productTools } from "./tools/products.js";
+import { productCollectionTools } from "./tools/product_collections.js";
 import { socialTools, mediaTools, triggerLinkTools } from "./tools/social.js";
 import {
   knowledgeBaseTools,
@@ -100,6 +101,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...paymentTools,
   ...invoiceTools,
   ...productTools,
+  ...productCollectionTools,
 
   // Social & media
   ...socialTools,
