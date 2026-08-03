@@ -21,6 +21,7 @@ import { productCollectionTools } from '../src/tools/product_collections.js';
 import { productReviewTools } from '../src/tools/product_reviews.js';
 import { productStoreTools } from '../src/tools/product_store.js';
 import { storeTools } from '../src/tools/store.js';
+import { affiliateManagerTools } from '../src/tools/affiliate_manager.js';
 import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.js';
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 
@@ -58,6 +59,7 @@ const ALL_TOOLS = [
   ...productReviewTools,
   ...productStoreTools,
   ...storeTools,
+  ...affiliateManagerTools,
 
   // Social & media
   ...socialTools,
@@ -71,8 +73,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 166 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(173);
+  it('registers exactly 177 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(177);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -142,6 +144,7 @@ describe('Tool counts per module', () => {
   it('knowledgeBase has 5 tools', () => expect(knowledgeBaseTools).toHaveLength(5));
   it('faq has 4 tools', () => expect(faqTools).toHaveLength(4));
   it('crawler has 5 tools', () => expect(crawlerTools).toHaveLength(5));
+  it('affiliateManager has 4 tools', () => expect(affiliateManagerTools).toHaveLength(4));
 });
 
 describe('Specific tool existence', () => {
@@ -247,12 +250,15 @@ describe('Specific tool existence', () => {
     // Crawler (5)
     'ghl_list_crawler_urls', 'ghl_discover_website', 'ghl_get_crawler_status',
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
+    // Affiliate manager (4)
+    'ghl_get_affiliates', 'ghl_get_affiliate', 'ghl_get_affiliate_commissions',
+    'ghl_get_affiliate_payouts',
   ];
 
-  it('all 173 expected tools are present', () => {
+  it('all 177 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(173);
+    expect(expectedTools).toHaveLength(177);
   });
 });
