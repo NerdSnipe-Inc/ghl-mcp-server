@@ -29,6 +29,7 @@ import { blogTools } from '../src/tools/blogs.js';
 import { courseTools } from '../src/tools/courses.js';
 import { proposalTools } from '../src/tools/proposals.js';
 import { brandBoardTools } from '../src/tools/brand_boards.js';
+import { customMenuTools } from '../src/tools/custom_menus.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -56,6 +57,7 @@ const ALL_TOOLS = [
   ...courseTools,
   ...proposalTools,
   ...brandBoardTools,
+  ...customMenuTools,
 
   // Communications
   ...phoneNumberTools,
@@ -84,7 +86,7 @@ const ALL_TOOLS = [
 
 describe('Tool registry', () => {
   it('registers exactly 201 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(201);
+    expect(ALL_TOOLS).toHaveLength(206);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -144,6 +146,7 @@ describe('Tool counts per module', () => {
   it('courses has 1 tool', () => expect(courseTools).toHaveLength(1));
   it('proposals has 4 tools', () => expect(proposalTools).toHaveLength(4));
   it('brandBoards has 11 tools', () => expect(brandBoardTools).toHaveLength(11));
+  it('customMenus has 5 tools', () => expect(customMenuTools).toHaveLength(5));
   it('phoneNumbers has 5 tools', () => expect(phoneNumberTools).toHaveLength(5));
   it('payments has 6 tools', () => expect(paymentTools).toHaveLength(6));
   it('invoices has 6 tools', () => expect(invoiceTools).toHaveLength(6));
@@ -232,6 +235,9 @@ describe('Specific tool existence', () => {
     // Brand voices (6)
     'ghl_get_brand_voices', 'ghl_create_brand_voice', 'ghl_get_brand_voice',
     'ghl_update_brand_voice', 'ghl_delete_brand_voice', 'ghl_set_default_brand_voice',
+    // Custom menus (5)
+    'ghl_get_custom_menus', 'ghl_get_custom_menu', 'ghl_create_custom_menu',
+    'ghl_update_custom_menu', 'ghl_delete_custom_menu',
     // Phone numbers (5)
     'ghl_get_phone_numbers', 'ghl_search_available_phone_numbers',
     'ghl_purchase_phone_number', 'ghl_release_phone_number', 'ghl_update_phone_number',
@@ -291,6 +297,6 @@ describe('Specific tool existence', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(201);
+    expect(expectedTools).toHaveLength(206);
   });
 });
