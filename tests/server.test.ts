@@ -30,6 +30,7 @@ import { courseTools } from '../src/tools/courses.js';
 import { proposalTools } from '../src/tools/proposals.js';
 import { brandBoardTools } from '../src/tools/brand_boards.js';
 import { customMenuTools } from '../src/tools/custom_menus.js';
+import { conversationAiTools } from '../src/tools/conversation_ai.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -82,11 +83,14 @@ const ALL_TOOLS = [
   ...knowledgeBaseTools,
   ...faqTools,
   ...crawlerTools,
+
+  // AI / Communication
+  ...conversationAiTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 206 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(206);
+  it('registers exactly 218 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(218);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -163,6 +167,7 @@ describe('Tool counts per module', () => {
   it('crawler has 5 tools', () => expect(crawlerTools).toHaveLength(5));
   it('affiliateManager has 4 tools', () => expect(affiliateManagerTools).toHaveLength(4));
   it('emailIsv has 1 tool', () => expect(emailIsvTools).toHaveLength(1));
+  it('conversationAi has 12 tools', () => expect(conversationAiTools).toHaveLength(12));
 });
 
 describe('Specific tool existence', () => {
@@ -291,12 +296,19 @@ describe('Specific tool existence', () => {
     'ghl_get_affiliate_payouts',
     // Email ISV (1)
     'ghl_verify_email',
+    // Conversation AI (12)
+    'ghl_create_conversation_ai_agent', 'ghl_search_conversation_ai_agents',
+    'ghl_get_conversation_ai_agent', 'ghl_update_conversation_ai_agent',
+    'ghl_delete_conversation_ai_agent', 'ghl_attach_conversation_ai_action',
+    'ghl_list_conversation_ai_agent_actions', 'ghl_get_conversation_ai_agent_action',
+    'ghl_update_conversation_ai_agent_action', 'ghl_remove_conversation_ai_agent_action',
+    'ghl_update_conversation_ai_followup_settings', 'ghl_get_conversation_ai_generation',
   ];
 
-  it('all 206 expected tools are present', () => {
+  it('all 218 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(206);
+    expect(expectedTools).toHaveLength(218);
   });
 });

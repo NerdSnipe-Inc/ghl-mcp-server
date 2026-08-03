@@ -64,6 +64,7 @@ import { courseTools } from "./tools/courses.js";
 import { proposalTools } from "./tools/proposals.js";
 import { brandBoardTools } from "./tools/brand_boards.js";
 import { customMenuTools } from "./tools/custom_menus.js";
+import { conversationAiTools } from "./tools/conversation_ai.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -132,6 +133,9 @@ const ALL_TOOLS: ToolDef[] = [
   ...knowledgeBaseTools,
   ...faqTools,
   ...crawlerTools,
+
+  // AI / Communication
+  ...conversationAiTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
