@@ -19,6 +19,13 @@ was intentionally not built: this server authenticates via a location-scoped Pri
 Integration Token with no agency-level identity, so agency-only `saas` endpoints are
 unreachable. See `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md`.
 
+### Known limitations
+
+- `ghl_get_products`'s `expand`/`productIds` array-filter params use comma-joined
+  serialization, unverified against the live v3 API — if filtering by these params
+  doesn't work as expected, this is the suspect. Fixing this properly likely requires
+  extending `src/client.ts`'s query-param serialization to support repeated keys.
+
 ## Unreleased — Phase 1 follow-ups
 
 Fixes and completions from the post-migration follow-up pass:

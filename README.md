@@ -473,7 +473,7 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_create_product`               | Create a new product                                            |
 | `ghl_update_product`               | Update an existing product                                      |
 | `ghl_delete_product`               | Delete a product                                                 |
-| `ghl_bulk_update_products`         | Bulk-update multiple products (e.g. availability) at once       |
+| `ghl_bulk_update_products`         | Bulk-update multiple products (price, availability, etc.) — also supports bulk-delete |
 | `ghl_bulk_edit_product_prices`     | Bulk-edit prices across multiple products                       |
 | `ghl_get_product_prices`           | List prices for a product                                       |
 | `ghl_get_product_price`            | Get a single price by ID                                        |

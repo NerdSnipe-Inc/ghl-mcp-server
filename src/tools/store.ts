@@ -182,6 +182,7 @@ export const storeTools = [
       countries: z
         .array(
           z.object({
+            // Spec types this "number" with a malformed enum — the real API expects a string.
             code: z.string().describe("Country code, e.g. US, CA"),
             states: z
               .array(z.object({ code: z.string().describe("State code, e.g. CA, NY") }))
@@ -245,6 +246,7 @@ export const storeTools = [
       countries: z
         .array(
           z.object({
+            // Spec types this "number" with a malformed enum — the real API expects a string.
             code: z.string().describe("Country code, e.g. US, CA"),
             states: z
               .array(z.object({ code: z.string().describe("State code, e.g. CA, NY") }))
@@ -307,6 +309,7 @@ export const storeTools = [
         .record(z.unknown())
         .optional()
         .describe("Address of the customer (ContactAddress shape)"),
+      // Spec types this "string" with a copy-pasted country-code enum, but the description is boolean semantics — the real API expects a boolean.
       amountAvailable: z
         .boolean()
         .optional()
@@ -590,6 +593,7 @@ export const storeTools = [
       shippingOrigin: z
         .object({
           name: z.string().describe("Name of the store / company"),
+          // Spec types this "number" with a malformed nested-array enum of country codes — the real API expects a string.
           country: z.string().describe("Country code, e.g. US"),
           state: z.string().optional().describe("State code, e.g. CA"),
           city: z.string().describe("City name"),

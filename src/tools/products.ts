@@ -31,6 +31,7 @@ export const productTools = [
             search: args.search as string | undefined,
             collectionIds: args.collectionIds as string | undefined,
             collectionSlug: args.collectionSlug as string | undefined,
+            // UNVERIFIED: comma-joining these array params assumes GHL wants "a,b" not repeated "?key=a&key=b" — needs a live API call to confirm; src/client.ts's params type can't emit repeated keys either way. See CHANGELOG.
             expand: (args.expand as string[] | undefined)?.join(","),
             productIds: (args.productIds as string[] | undefined)?.join(","),
             storeId: args.storeId as string | undefined,
@@ -179,7 +180,7 @@ export const productTools = [
           "bulk-update-currency",
         ])
         .describe("Type of bulk update operation"),
-      productIds: z.array(z.string()).describe("Array of product IDs to update"),
+      productIds: z.array(z.string()).min(1).describe("Array of product IDs to update"),
       filters: z.record(z.unknown()).optional().describe("Filters to apply when selecting all matching products"),
       price: z.record(z.unknown()).optional().describe("Price update configuration"),
       compareAtPrice: z.record(z.unknown()).optional().describe("Compare-at price update configuration"),
