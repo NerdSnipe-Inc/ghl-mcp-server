@@ -133,7 +133,7 @@ export const userTools = [
       userId: z.string().describe("User ID to update"),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
-      email: z.string().email().optional(),
+      email: z.string().email().optional().describe("Note: ignored by the v3 API — GHL deprecated updating email via this endpoint; the call succeeds but email will not change."),
       phone: z.string().optional(),
       role: z.enum(["admin", "user"]).optional(),
       permissions: permissionsSchema,

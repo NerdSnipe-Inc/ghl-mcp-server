@@ -338,7 +338,7 @@ node dist/index.js
 | `ghl_delete_email_builder_template` | Delete an email builder template by ID                                 |
 | `ghl_get_email_campaigns`         | List all email campaigns in the location                                 |
 | `ghl_get_email_campaign`          | Get details of a single email campaign by ID                             |
-| `ghl_create_email_campaign`       | Create a new email campaign                                              |
+| `ghl_create_email_campaign`       | Create a new email campaign as a **draft** (v3 does not accept `subject`/`scheduledAt` in this call — scheduling/sending requires a separate step not yet implemented as a tool); `userId` is required |
 | `ghl_delete_email_campaign`       | Delete an email campaign by ID                                           |
 
 ### Funnels
