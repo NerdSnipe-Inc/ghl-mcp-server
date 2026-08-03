@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — Phase 2c — AI/Communication
+
+Adds GHL API v3 AI/Communication coverage — 39 new tools across 4 new modules:
+
+- `conversation_ai.ts` (12 tools) — conversation AI agent CRUD, agent actions (attach/list/get/update/remove), follow-up settings, and generation
+- `voice_ai.ts` (11 tools) — voice AI agent CRUD, voice AI actions CRUD, and call logs
+- `chat_widget.ts` (8 tools) — chat widget CRUD, clone, config, and listing
+- `agent_studio.ts` (8 tools) — Agent Studio agent CRUD, metadata/version updates, publish, and execute
+
+Total tool count: 206 → 245.
+
+`agent-studio`'s 3 `public-api/*` operations (`GET /agent-studio/public-api/agents`,
+`GET /agent-studio/public-api/agents/{agentId}`,
+`POST /agent-studio/public-api/agents/{agentId}/execute`) were intentionally excluded —
+they're marked `"deprecated": true` in the v3 spec's operation summaries in favor of
+the non-`public-api` Agent Studio endpoints already covered above.
+
 ## Unreleased — Phase 2b — Marketing/Content
 
 Adds GHL API v3 Marketing/Content coverage — 28 new tools across 5 new modules:

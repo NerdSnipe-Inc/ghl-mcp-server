@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**206 tools** covering the full GHL API:
+**245 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -47,6 +47,10 @@ Once installed, you can talk to your CRM naturally:
 | Courses & Proposals             | Import courses; proposal/estimate documents and templates                  |
 | Brand Boards & Voices           | Brand boards (logos/colors/fonts) and brand voices, incl. defaults         |
 | Custom Menus                    | Custom menu links: list, get, create, update, delete                       |
+| Conversation AI                 | CRUD conversation AI agents, attach/manage agent actions, follow-up settings, generation |
+| Voice AI                        | CRUD voice AI agents & actions, call logs                                  |
+| Chat Widget                     | CRUD chat widgets, clone, config, list                                     |
+| Agent Studio                    | CRUD Agent Studio agents, versioning, publish, execute                     |
 
 > **Not yet covered:** the following GHL API v3 resources require credentials this
 > server doesn't have (agency-level or Marketplace-app-developer identity, not a
@@ -268,7 +272,7 @@ node dist/index.js
 
 ---
 
-## All 206 Tools — Full Reference
+## All 245 Tools — Full Reference
 
 ### Contacts
 
