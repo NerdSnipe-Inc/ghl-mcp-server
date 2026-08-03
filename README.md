@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**127 tools** covering the full GHL API:
+**128 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -33,7 +33,7 @@ Once installed, you can talk to your CRM naturally:
 | Opportunities / Pipeline       | Pipelines, deals, stage moves, won/lost/abandoned                           |
 | Workflows & Campaigns          | List workflows and campaigns                                                |
 | Location Settings              | Custom fields, custom values, tags, users, templates, forms, surveys        |
-| Email Marketing                | Email builder templates, email campaigns                                    |
+| Email Marketing                | Email builder templates, email campaigns, scheduling                        |
 | Funnels                        | List funnels, pages, page counts                                            |
 | Phone Numbers                  | List, search, purchase, update, release phone numbers                       |
 | Payments & Invoices            | Orders, transactions, subscriptions, coupons, invoices, payments            |
@@ -249,7 +249,7 @@ node dist/index.js
 
 ---
 
-## All 127 Tools — Full Reference
+## All 128 Tools — Full Reference
 
 ### Contacts
 
@@ -338,7 +338,8 @@ node dist/index.js
 | `ghl_delete_email_builder_template` | Delete an email builder template by ID                                 |
 | `ghl_get_email_campaigns`         | List all email campaigns in the location                                 |
 | `ghl_get_email_campaign`          | Get details of a single email campaign by ID                             |
-| `ghl_create_email_campaign`       | Create a new email campaign as a **draft** (v3 does not accept `subject`/`scheduledAt` in this call — scheduling/sending requires a separate step not yet implemented as a tool); `userId` is required |
+| `ghl_create_email_campaign`       | Create a new email campaign as a **draft** (v3 does not accept `subject`/`scheduledAt` in this call); pair with `ghl_schedule_email_campaign` to set the subject, recipients, and send time; `userId` is required |
+| `ghl_schedule_email_campaign`     | Schedule (or immediately send) a draft campaign — sets subject, sender, recipients, and send timing (`immediate`, `scheduled`, `batch`, `rss`, or `smart_send`) |
 | `ghl_delete_email_campaign`       | Delete an email campaign by ID                                           |
 
 ### Funnels

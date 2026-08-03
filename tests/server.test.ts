@@ -62,7 +62,7 @@ const ALL_TOOLS = [
 
 describe('Tool registry', () => {
   it('registers exactly 127 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(127);
+    expect(ALL_TOOLS).toHaveLength(128);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -116,7 +116,7 @@ describe('Tool counts per module', () => {
   it('forms has 2 tools', () => expect(formTools).toHaveLength(2));
   it('surveys has 2 tools', () => expect(surveyTools).toHaveLength(2));
   it('emailBuilder has 5 tools', () => expect(emailBuilderTools).toHaveLength(5));
-  it('emailCampaign has 4 tools', () => expect(emailCampaignTools).toHaveLength(4));
+  it('emailCampaign has 5 tools', () => expect(emailCampaignTools).toHaveLength(5));
   it('funnels has 3 tools', () => expect(funnelTools).toHaveLength(3));
   it('phoneNumbers has 5 tools', () => expect(phoneNumberTools).toHaveLength(5));
   it('payments has 6 tools', () => expect(paymentTools).toHaveLength(6));
@@ -179,9 +179,9 @@ describe('Specific tool existence', () => {
     'ghl_get_email_builder_templates', 'ghl_get_email_builder_template',
     'ghl_create_email_builder_template', 'ghl_update_email_builder_template',
     'ghl_delete_email_builder_template',
-    // Email campaigns (4)
+    // Email campaigns (5)
     'ghl_get_email_campaigns', 'ghl_get_email_campaign',
-    'ghl_create_email_campaign', 'ghl_delete_email_campaign',
+    'ghl_create_email_campaign', 'ghl_schedule_email_campaign', 'ghl_delete_email_campaign',
     // Funnels (3)
     'ghl_get_funnels', 'ghl_get_funnel_pages', 'ghl_get_funnel_page_count',
     // Phone numbers (5)
@@ -210,10 +210,10 @@ describe('Specific tool existence', () => {
     'ghl_train_crawler_urls', 'ghl_delete_crawler_urls',
   ];
 
-  it('all 127 expected tools are present', () => {
+  it('all 128 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(127);
+    expect(expectedTools).toHaveLength(128);
   });
 });

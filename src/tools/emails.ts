@@ -304,6 +304,154 @@ export const emailCampaignTools = [
     },
   },
   {
+    name: "ghl_schedule_email_campaign",
+    description:
+      "Schedule (or immediately send) a draft email campaign created via ghl_create_email_campaign. Sets the subject, sender, recipients, and send timing, and triggers the send. Pair with ghl_create_email_campaign, which only creates the draft.",
+    inputSchema: z.object({
+      campaignId: z.string().describe("Campaign ID to schedule (from ghl_create_email_campaign)"),
+      scheduleType: z
+        .enum(["immediate", "scheduled", "batch", "rss", "smart_send"])
+        .optional()
+        .default("immediate")
+        .describe("How to schedule the campaign"),
+      timeZone: z.string().optional().default("UTC").describe("IANA timezone, e.g. America/New_York"),
+      userId: z.string().describe("GHL user ID performing this action (required by the API)"),
+      userName: z.string().optional().describe("Name of the user performing this action"),
+      subject: z.string().describe("Email subject line"),
+      fromName: z.string().describe("Sender display name"),
+      fromEmail: z.string().describe("Sender email address"),
+      replyToAddress: z.string().optional().describe("Reply-to email address"),
+      previewText: z.string().optional().describe("Preview text shown in inbox after subject"),
+      attachments: z.array(z.string()).optional().describe("Attachment download URLs"),
+      recipientType: z
+        .enum(["contact", "tag", "segment"])
+        .optional()
+        .default("contact")
+        .describe("Recipient selection type"),
+      contactIds: z
+        .array(z.string())
+        .optional()
+        .describe("Contact IDs to send to. Required when recipientType is 'contact'."),
+      tagIds: z
+        .array(z.string())
+        .optional()
+        .describe("Tag IDs to filter recipients by. Required when recipientType is 'tag'."),
+      segment: z
+        .enum([
+          "engaged_last_7_days",
+          "engaged_last_30_days",
+          "engaged_last_60_days",
+          "engaged_last_5_campaigns",
+          "unengaged_last_5_campaigns",
+        ])
+        .optional()
+        .describe("Pre-built segment. Required when recipientType is 'segment'."),
+      freezeList: z
+        .boolean()
+        .optional()
+        .describe("Freeze the contact list at schedule time — new matching contacts won't be added later"),
+      sendAt: z
+        .string()
+        .optional()
+        .describe(
+          "Date/time to send, e.g. '2026-04-01 09:00 AM'. Required when scheduleType is 'scheduled', 'batch', or 'smart_send'. Ignored for 'immediate' and 'rss'."
+        ),
+      sendDays: z
+        .array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
+        .optional()
+        .describe("Days of the week to allow sending. Used for 'batch' and 'rss' scheduleTypes."),
+      rssName: z.string().optional().describe("RSS schedule name. Required when scheduleType is 'rss'."),
+      rssFeedURL: z.string().optional().describe("RSS feed URL. Required when scheduleType is 'rss'."),
+      rssRepeatAfter: z
+        .enum(["every_day", "every_week", "every_month"])
+        .optional()
+        .describe("How often to check the feed. Required when scheduleType is 'rss'."),
+      rssRepeatAfterTime: z
+        .string()
+        .optional()
+        .describe("Time of day to execute, e.g. '09:00 AM'. Required when scheduleType is 'rss'."),
+      scheduleConfigExtra: z
+        .string()
+        .optional()
+        .describe(
+          "JSON-encoded advanced scheduleConfig fields (batch, tracking, resend, emailPreferenceId) — merged in when scheduleType is not 'rss'."
+        ),
+      rssConfigExtra: z
+        .string()
+        .optional()
+        .describe(
+          "JSON-encoded advanced rssConfig fields (rssFeedLimit, startAtDay, startAtMonthDay, firstExecutionDate) — merged in when scheduleType is 'rss'."
+        ),
+    }),
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
+      try {
+        const scheduleType = (args.scheduleType as string | undefined) ?? "immediate";
+        const recipientType = (args.recipientType as string | undefined) ?? "contact";
+
+        const emailMeta = {
+          subject: args.subject,
+          fromName: args.fromName,
+          fromEmail: args.fromEmail,
+          ...(args.replyToAddress ? { replyToAddress: args.replyToAddress } : {}),
+          ...(args.previewText ? { previewText: args.previewText } : {}),
+          ...(args.attachments ? { attachments: args.attachments } : {}),
+        };
+
+        const recipients = {
+          type: recipientType,
+          ...(args.contactIds ? { contactIds: args.contactIds } : {}),
+          ...(args.tagIds ? { tagIds: args.tagIds } : {}),
+          ...(args.segment ? { segment: args.segment } : {}),
+          ...(args.freezeList !== undefined ? { freezeList: args.freezeList } : {}),
+        };
+
+        const scheduleConfigExtra = args.scheduleConfigExtra
+          ? JSON.parse(args.scheduleConfigExtra as string)
+          : {};
+        const rssConfigExtra = args.rssConfigExtra
+          ? JSON.parse(args.rssConfigExtra as string)
+          : {};
+
+        const result = await ghlRequest(
+          "POST",
+          `${campaignsPath(config.locationId)}/${args.campaignId}/schedule`,
+          {
+            token: config.token,
+            version: GHL_VERSION_V3,
+            body: {
+              scheduleType,
+              timeZone: (args.timeZone as string | undefined) ?? "UTC",
+              userId: args.userId,
+              ...(args.userName ? { userName: args.userName } : {}),
+              emailMeta,
+              recipients,
+              ...(args.sendDays ? { sendDays: args.sendDays } : {}),
+              ...(scheduleType === "rss"
+                ? {
+                    rssConfig: {
+                      name: args.rssName,
+                      rssFeedURL: args.rssFeedURL,
+                      repeatAfter: args.rssRepeatAfter,
+                      repeatAfterTime: args.rssRepeatAfterTime,
+                      ...rssConfigExtra,
+                    },
+                  }
+                : {
+                    scheduleConfig: {
+                      ...(args.sendAt ? { sendAt: args.sendAt } : {}),
+                      ...scheduleConfigExtra,
+                    },
+                  }),
+            },
+          }
+        );
+        return JSON.stringify(result, null, 2);
+      } catch (e) {
+        return formatError(e);
+      }
+    },
+  },
+  {
     name: "ghl_delete_email_campaign",
     description: "Delete an email marketing campaign by ID.",
     inputSchema: z.object({

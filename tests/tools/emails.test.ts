@@ -314,6 +314,86 @@ describe('ghl_create_email_campaign', () => {
   });
 });
 
+// ── ghl_schedule_email_campaign ───────────────────────────────────────────────
+
+describe('ghl_schedule_email_campaign', () => {
+  it('calls POST .../campaigns/emails/:campaignId/schedule with v3 body fields', async () => {
+    const fetch = mockFetchSuccess({ success: true });
+    await getTool('ghl_schedule_email_campaign').handler(
+      {
+        campaignId: 'camp-1',
+        scheduleType: 'immediate',
+        timeZone: 'America/New_York',
+        userId: 'user-1',
+        subject: 'Our February Newsletter',
+        fromName: 'John Doe',
+        fromEmail: 'john@example.com',
+        contactIds: ['contact-1', 'contact-2'],
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.method).toBe('POST');
+    expect(call.pathname).toBe(`${CAMPAIGNS_PATH}/camp-1/schedule`);
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
+    expect(call.body?.scheduleType).toBe('immediate');
+    expect(call.body?.timeZone).toBe('America/New_York');
+    expect(call.body?.userId).toBe('user-1');
+    expect(call.body?.emailMeta?.subject).toBe('Our February Newsletter');
+    expect(call.body?.emailMeta?.fromName).toBe('John Doe');
+    expect(call.body?.emailMeta?.fromEmail).toBe('john@example.com');
+    expect(call.body?.recipients?.type).toBe('contact');
+    expect(call.body?.recipients?.contactIds).toEqual(['contact-1', 'contact-2']);
+  });
+
+  it('builds an rssConfig instead of scheduleConfig when scheduleType is rss', async () => {
+    const fetch = mockFetchSuccess({ success: true });
+    await getTool('ghl_schedule_email_campaign').handler(
+      {
+        campaignId: 'camp-1',
+        scheduleType: 'rss',
+        timeZone: 'UTC',
+        userId: 'user-1',
+        subject: 'Weekly Digest',
+        fromName: 'John Doe',
+        fromEmail: 'john@example.com',
+        contactIds: ['contact-1'],
+        rssName: 'Weekly Digest',
+        rssFeedURL: 'https://example.com/rss',
+        rssRepeatAfter: 'every_day',
+        rssRepeatAfterTime: '09:00 AM',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.rssConfig).toEqual({
+      name: 'Weekly Digest',
+      rssFeedURL: 'https://example.com/rss',
+      repeatAfter: 'every_day',
+      repeatAfterTime: '09:00 AM',
+    });
+    expect(call.body).not.toHaveProperty('scheduleConfig');
+  });
+
+  it('handles API errors', async () => {
+    mockFetchError(422, { message: 'Validation error' });
+    expectError(
+      await getTool('ghl_schedule_email_campaign').handler(
+        {
+          campaignId: 'camp-1',
+          userId: 'user-1',
+          subject: 'Bad',
+          fromName: 'John Doe',
+          fromEmail: 'john@example.com',
+          contactIds: ['contact-1'],
+        },
+        TEST_CONFIG
+      ),
+      422
+    );
+  });
+});
+
 // ── ghl_delete_email_campaign ─────────────────────────────────────────────────
 
 describe('ghl_delete_email_campaign', () => {
