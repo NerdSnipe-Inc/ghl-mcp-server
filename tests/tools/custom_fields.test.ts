@@ -35,6 +35,13 @@ describe('ghl_get_custom_fields', () => {
     const result = await getTool('ghl_get_custom_fields').handler({}, TEST_CONFIG);
     expectError(result, 401);
   });
+
+  it('passes model filter when provided', async () => {
+    const fetch = mockFetchSuccess({ customFields: [] });
+    await getTool('ghl_get_custom_fields').handler({ model: 'opportunity' }, TEST_CONFIG);
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.model).toBe('opportunity');
+  });
 });
 
 // ── ghl_create_custom_field ───────────────────────────────────────────────────
@@ -64,6 +71,38 @@ describe('ghl_create_custom_field', () => {
       422
     );
   });
+
+  it('sends picklistOptions (not options) and file/textbox/model fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_create_custom_field').handler(
+      {
+        name: 'Favorite Color',
+        dataType: 'SINGLE_OPTIONS',
+        picklistOptions: ['Red', 'Blue'],
+        acceptedFormat: ['.pdf', '.docx'],
+        isMultipleFile: true,
+        maxNumberOfFiles: 3,
+        textBoxListOptions: [{ label: 'First', prefillValue: '' }],
+        model: 'opportunity',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.picklistOptions).toEqual(['Red', 'Blue']);
+    expect(call.body?.options).toBeUndefined();
+    expect(call.body?.acceptedFormat).toEqual(['.pdf', '.docx']);
+    expect(call.body?.isMultipleFile).toBe(true);
+    expect(call.body?.maxNumberOfFiles).toBe(3);
+    expect(call.body?.textBoxListOptions).toEqual([{ label: 'First', prefillValue: '' }]);
+    expect(call.body?.model).toBe('opportunity');
+  });
+
+  it('no longer accepts fieldKey, showInForms, parentId — not real spec fields', () => {
+    const shape = getTool('ghl_create_custom_field').inputSchema.shape as Record<string, unknown>;
+    expect(shape.fieldKey).toBeUndefined();
+    expect(shape.showInForms).toBeUndefined();
+    expect(shape.parentId).toBeUndefined();
+  });
 });
 
 // ── ghl_update_custom_field ───────────────────────────────────────────────────
@@ -92,6 +131,38 @@ describe('ghl_update_custom_field', () => {
       ),
       404
     );
+  });
+
+  it('requires name — spec keeps it required even on update', () => {
+    const result = getTool('ghl_update_custom_field').inputSchema.safeParse({
+      fieldId: 'field-1',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('sends picklistOptions (not options) and file/textbox/model fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_custom_field').handler(
+      {
+        fieldId: 'field-1',
+        name: 'Updated',
+        picklistOptions: ['Red', 'Blue'],
+        acceptedFormat: ['.pdf'],
+        isMultipleFile: false,
+        maxNumberOfFiles: 1,
+        textBoxListOptions: [{ label: 'First' }],
+        model: 'contact',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.picklistOptions).toEqual(['Red', 'Blue']);
+    expect(call.body?.options).toBeUndefined();
+    expect(call.body?.acceptedFormat).toEqual(['.pdf']);
+    expect(call.body?.isMultipleFile).toBe(false);
+    expect(call.body?.maxNumberOfFiles).toBe(1);
+    expect(call.body?.textBoxListOptions).toEqual([{ label: 'First' }]);
+    expect(call.body?.model).toBe('contact');
   });
 });
 
