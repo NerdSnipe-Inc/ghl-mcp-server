@@ -62,6 +62,7 @@ import {
 import { blogTools } from "./tools/blogs.js";
 import { businessesTools } from "./tools/businesses.js";
 import { associationsTools } from "./tools/associations.js";
+import { objectsTools } from "./tools/objects.js";
 import { courseTools } from "./tools/courses.js";
 import { proposalTools } from "./tools/proposals.js";
 import { brandBoardTools } from "./tools/brand_boards.js";
@@ -112,6 +113,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...blogTools,
   ...businessesTools,
   ...associationsTools,
+  ...objectsTools,
   ...courseTools,
   ...proposalTools,
   ...brandBoardTools,

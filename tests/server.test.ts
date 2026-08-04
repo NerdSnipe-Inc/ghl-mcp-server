@@ -28,6 +28,7 @@ import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowled
 import { blogTools } from '../src/tools/blogs.js';
 import { businessesTools } from '../src/tools/businesses.js';
 import { associationsTools } from '../src/tools/associations.js';
+import { objectsTools } from '../src/tools/objects.js';
 import { courseTools } from '../src/tools/courses.js';
 import { proposalTools } from '../src/tools/proposals.js';
 import { brandBoardTools } from '../src/tools/brand_boards.js';
@@ -87,6 +88,7 @@ const ALL_TOOLS = [
   // Marketing & content (continued)
   ...businessesTools,
   ...associationsTools,
+  ...objectsTools,
 
   // Knowledge base, FAQ, crawler
   ...knowledgeBaseTools,
@@ -101,8 +103,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 260 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(260);
+  it('registers exactly 268 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(268);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -161,6 +163,7 @@ describe('Tool counts per module', () => {
   it('blogs has 7 tools', () => expect(blogTools).toHaveLength(7));
   it('businesses has 5 tools', () => expect(businessesTools).toHaveLength(5));
   it('associations has 10 tools', () => expect(associationsTools).toHaveLength(10));
+  it('objects has 8 tools', () => expect(objectsTools).toHaveLength(8));
   it('courses has 1 tool', () => expect(courseTools).toHaveLength(1));
   it('proposals has 4 tools', () => expect(proposalTools).toHaveLength(4));
   it('brandBoards has 11 tools', () => expect(brandBoardTools).toHaveLength(11));
@@ -255,6 +258,10 @@ describe('Specific tool existence', () => {
     'ghl_get_association_by_object_key', 'ghl_create_association',
     'ghl_get_association', 'ghl_update_association', 'ghl_delete_association',
     'ghl_list_associations',
+    // Objects (8)
+    'ghl_get_object_schema', 'ghl_update_object_schema', 'ghl_get_objects',
+    'ghl_get_object_record', 'ghl_update_object_record', 'ghl_delete_object_record',
+    'ghl_create_object_record', 'ghl_search_object_records',
     // Courses (1)
     'ghl_import_courses',
     // Proposals (4)
@@ -345,10 +352,10 @@ describe('Specific tool existence', () => {
     'ghl_publish_agent_studio_agent', 'ghl_execute_agent_studio_agent',
   ];
 
-  it('all 260 expected tools are present', () => {
+  it('all 268 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(260);
+    expect(expectedTools).toHaveLength(268);
   });
 });
