@@ -60,6 +60,7 @@ import {
   crawlerTools,
 } from "./tools/knowledge_base.js";
 import { blogTools } from "./tools/blogs.js";
+import { businessesTools } from "./tools/businesses.js";
 import { courseTools } from "./tools/courses.js";
 import { proposalTools } from "./tools/proposals.js";
 import { brandBoardTools } from "./tools/brand_boards.js";
@@ -108,6 +109,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...emailCampaignTools,
   ...funnelTools,
   ...blogTools,
+  ...businessesTools,
   ...courseTools,
   ...proposalTools,
   ...brandBoardTools,
