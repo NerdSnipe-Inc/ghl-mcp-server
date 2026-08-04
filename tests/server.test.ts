@@ -45,6 +45,7 @@ import { facebookAccountsTools } from '../src/tools/facebook_accounts.js';
 import { facebookCampaignsTools } from '../src/tools/facebook_campaigns.js';
 import { facebookAudiencesTools } from '../src/tools/facebook_audiences.js';
 import { facebookReportingTools } from '../src/tools/facebook_reporting.js';
+import { googleAccountsTools } from '../src/tools/google_accounts.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -120,11 +121,12 @@ const ALL_TOOLS = [
   ...facebookCampaignsTools,
   ...facebookAudiencesTools,
   ...facebookReportingTools,
+  ...googleAccountsTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 357 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(357);
+  it('registers exactly 364 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(364);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -216,6 +218,7 @@ describe('Tool counts per module', () => {
   it('facebookCampaigns has 18 tools', () => expect(facebookCampaignsTools).toHaveLength(18));
   it('facebookAudiences has 12 tools', () => expect(facebookAudiencesTools).toHaveLength(12));
   it('facebookReporting has 4 tools', () => expect(facebookReportingTools).toHaveLength(4));
+  it('googleAccounts has 7 tools', () => expect(googleAccountsTools).toHaveLength(7));
 });
 
 describe('Specific tool existence', () => {
@@ -421,12 +424,16 @@ describe('Specific tool existence', () => {
     // Ad publishing — Facebook reporting and targeting search (4)
     'ghl_get_facebook_reporting', 'ghl_get_facebook_campaign_reporting',
     'ghl_get_facebook_reporting_list', 'ghl_search_facebook_targeting',
+    // Ad publishing — Google ad account, integration, and identity management (7)
+    'ghl_get_google_ad_accounts', 'ghl_get_google_ad_account', 'ghl_delete_google_ad_account',
+    'ghl_create_google_integration', 'ghl_get_google_integration', 'ghl_get_google_me',
+    'ghl_get_google_entity',
   ];
 
-  it('all 357 expected tools are present', () => {
+  it('all 364 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(357);
+    expect(expectedTools).toHaveLength(364);
   });
 });
