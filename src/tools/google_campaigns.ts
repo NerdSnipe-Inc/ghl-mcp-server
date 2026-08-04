@@ -35,6 +35,10 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_LEGACY } from "../clien
 // and no locationId parameter at all (path param adId only) — verified directly, not
 // assumed. No body is sent.
 
+// Spec quirk: `advertiserOnly` on `GET /ad-publishing/google/assets` is declared as
+// `type: string` (no enum), not boolean — modeled as z.string() to match the spec
+// literally, even though query params serialize to strings regardless at the wire level.
+
 export const googleCampaignsTools = [
   {
     name: "ghl_upsert_google_campaign",
@@ -60,19 +64,75 @@ export const googleCampaignsTools = [
         .optional()
         .describe("Advertising channel sub type"),
       goalType: z.enum(["WEBSITE_TRAFFIC", "LEAD"]).optional().describe("Campaign goal type"),
-      budget: z.record(z.string(), z.unknown()).optional().describe("Campaign budget configuration"),
+      budget: z
+        .object({
+          budgetType: z.enum(["DAILY", "LIFETIME"]).optional().describe("Budget type"),
+          amount: z.number().optional().describe("Budget amount in micros"),
+          scheduleStartDate: z.string().optional().describe("Schedule start date"),
+          scheduleEndDate: z.string().optional().describe("Schedule end date"),
+        })
+        .optional()
+        .describe("Campaign budget configuration"),
       audience: z.record(z.string(), z.unknown()).optional().describe("Targeting audience configuration"),
-      networkSettings: z.record(z.string(), z.unknown()).optional().describe("Network settings configuration"),
-      biddingStrategy: z.record(z.string(), z.unknown()).optional().describe("Bidding strategy configuration"),
+      networkSettings: z
+        .object({
+          targetSearchNetwork: z.boolean().describe("Target Google Search Network"),
+          targetContentNetwork: z.boolean().describe("Target Google Display Network"),
+        })
+        .optional()
+        .describe("Network settings configuration"),
+      biddingStrategy: z
+        .object({
+          type: z.string().optional().describe("Bidding strategy type (e.g. MAXIMIZE_CONVERSIONS)"),
+          value: z.number().optional().describe("Bid value in micros"),
+        })
+        .optional()
+        .describe("Bidding strategy configuration"),
       assets: z.record(z.string(), z.unknown()).optional().describe("Campaign-level assets configuration"),
       isEuPoliticalAds: z.boolean().optional().describe("Whether this is an EU political ad"),
       adGroups: z
         .array(z.record(z.string(), z.unknown()))
         .optional()
         .describe("Ad groups within the campaign"),
-      campaignGoal: z.record(z.string(), z.unknown()).optional().describe("Campaign goal configuration"),
+      campaignGoal: z
+        .object({
+          // Distinct from and easily confused with the top-level `goalType` enum above —
+          // this is the nested campaign-goal object's own `type` enum, verified separately
+          // against GoogleCampaignGoalDTO in the spec.
+          type: z
+            .enum(["CONVERSIONS", "CLICK", "YOUTUBE_ENGAGEMENT"])
+            .describe("Campaign goal type"),
+          value: z.string().optional().describe("Goal value (e.g. conversion action resource name)"),
+          isCustomConversionGoal: z
+            .boolean()
+            .optional()
+            .describe("Whether this is a custom conversion goal"),
+        })
+        .optional()
+        .describe("Campaign goal configuration"),
       adSchedule: z
-        .array(z.record(z.string(), z.unknown()))
+        .array(
+          z.object({
+            dayOfWeek: z
+              .enum([
+                "FRIDAY",
+                "MONDAY",
+                "SATURDAY",
+                "SUNDAY",
+                "THURSDAY",
+                "TUESDAY",
+                "UNKNOWN",
+                "UNSPECIFIED",
+                "WEDNESDAY",
+                "ALL_DAYS",
+                "MONDAY_TO_FRIDAY",
+                "SATURDAY_AND_SUNDAY",
+              ])
+              .describe("Day of week"),
+            from: z.string().describe("Start time (HH:MM)"),
+            to: z.string().describe("End time (HH:MM)"),
+          })
+        )
         .optional()
         .describe("Ad schedule entries"),
       publishingStatus: z
@@ -104,15 +164,40 @@ export const googleCampaignsTools = [
         advertisingChannelType: string;
         advertisingChannelSubType?: string;
         goalType?: string;
-        budget?: Record<string, unknown>;
+        budget?: {
+          budgetType?: "DAILY" | "LIFETIME";
+          amount?: number;
+          scheduleStartDate?: string;
+          scheduleEndDate?: string;
+        };
         audience?: Record<string, unknown>;
-        networkSettings?: Record<string, unknown>;
-        biddingStrategy?: Record<string, unknown>;
+        networkSettings?: { targetSearchNetwork: boolean; targetContentNetwork: boolean };
+        biddingStrategy?: { type?: string; value?: number };
         assets?: Record<string, unknown>;
         isEuPoliticalAds?: boolean;
         adGroups?: Record<string, unknown>[];
-        campaignGoal?: Record<string, unknown>;
-        adSchedule?: Record<string, unknown>[];
+        campaignGoal?: {
+          type: "CONVERSIONS" | "CLICK" | "YOUTUBE_ENGAGEMENT";
+          value?: string;
+          isCustomConversionGoal?: boolean;
+        };
+        adSchedule?: {
+          dayOfWeek:
+            | "FRIDAY"
+            | "MONDAY"
+            | "SATURDAY"
+            | "SUNDAY"
+            | "THURSDAY"
+            | "TUESDAY"
+            | "UNKNOWN"
+            | "UNSPECIFIED"
+            | "WEDNESDAY"
+            | "ALL_DAYS"
+            | "MONDAY_TO_FRIDAY"
+            | "SATURDAY_AND_SUNDAY";
+          from: string;
+          to: string;
+        }[];
         publishingStatus?: string;
         googleAdAccountId?: string;
         unpublishedChanges?: boolean;
@@ -188,10 +273,13 @@ export const googleCampaignsTools = [
         .enum(["CALL", "SITELINK", "LEAD_FORM", "IMAGE", "TEXT"])
         .describe("Asset type to list"),
       id: z.string().optional().describe("Filter by a specific asset ID"),
-      advertiserOnly: z.boolean().optional().describe("Whether to only return advertiser-owned assets"),
+      advertiserOnly: z
+        .string()
+        .optional()
+        .describe("Whether to only return advertiser-owned assets (e.g. \"true\")"),
     }),
     handler: async (
-      args: { type: string; id?: string; advertiserOnly?: boolean },
+      args: { type: string; id?: string; advertiserOnly?: string },
       config: GHLConfig
     ) => {
       try {

@@ -47,6 +47,34 @@ describe('ghl_upsert_google_campaign', () => {
     expect(call.body?.publishingStatus).toBe('DRAFT');
   });
 
+  it('passes nested budget, networkSettings, biddingStrategy, campaignGoal, adSchedule objects through', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_upsert_google_campaign').handler(
+      {
+        name: 'Campaign A',
+        advertisingChannelType: 'SEARCH',
+        budget: { budgetType: 'DAILY', amount: 5000 },
+        networkSettings: { targetSearchNetwork: true, targetContentNetwork: false },
+        biddingStrategy: { type: 'MAXIMIZE_CONVERSIONS', value: 1000000 },
+        campaignGoal: { type: 'CONVERSIONS', value: 'customers/123/conversionActions/456' },
+        adSchedule: [{ dayOfWeek: 'MONDAY', from: '09:00', to: '17:00' }],
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.budget).toEqual({ budgetType: 'DAILY', amount: 5000 });
+    expect(call.body?.networkSettings).toEqual({
+      targetSearchNetwork: true,
+      targetContentNetwork: false,
+    });
+    expect(call.body?.biddingStrategy).toEqual({ type: 'MAXIMIZE_CONVERSIONS', value: 1000000 });
+    expect(call.body?.campaignGoal).toEqual({
+      type: 'CONVERSIONS',
+      value: 'customers/123/conversionActions/456',
+    });
+    expect(call.body?.adSchedule).toEqual([{ dayOfWeek: 'MONDAY', from: '09:00', to: '17:00' }]);
+  });
+
   it('handles API errors', async () => {
     mockFetchError(422, { message: 'Invalid' });
     const result = await getTool('ghl_upsert_google_campaign').handler(
@@ -122,7 +150,7 @@ describe('ghl_get_google_assets', () => {
   it('calls GET /ad-publishing/google/assets with locationId, type, and optional id/advertiserOnly', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     const result = await getTool('ghl_get_google_assets').handler(
-      { type: 'CALL', id: 'asset_1', advertiserOnly: true },
+      { type: 'CALL', id: 'asset_1', advertiserOnly: 'true' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
