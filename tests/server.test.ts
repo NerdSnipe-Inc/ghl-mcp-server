@@ -48,6 +48,7 @@ import { facebookReportingTools } from '../src/tools/facebook_reporting.js';
 import { googleAccountsTools } from '../src/tools/google_accounts.js';
 import { googleCampaignsTools } from '../src/tools/google_campaigns.js';
 import { googleAudiencesTools } from '../src/tools/google_audiences.js';
+import { googleReportingTools } from '../src/tools/google_reporting.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -126,11 +127,12 @@ const ALL_TOOLS = [
   ...googleAccountsTools,
   ...googleCampaignsTools,
   ...googleAudiencesTools,
+  ...googleReportingTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 364 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(384);
+    expect(ALL_TOOLS).toHaveLength(388);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -225,6 +227,7 @@ describe('Tool counts per module', () => {
   it('googleAccounts has 7 tools', () => expect(googleAccountsTools).toHaveLength(7));
   it('googleCampaigns has 6 tools', () => expect(googleCampaignsTools).toHaveLength(6));
   it('googleAudiences has 14 tools', () => expect(googleAudiencesTools).toHaveLength(14));
+  it('googleReporting has 4 tools', () => expect(googleReportingTools).toHaveLength(4));
 });
 
 describe('Specific tool existence', () => {
@@ -444,12 +447,15 @@ describe('Specific tool existence', () => {
     'ghl_get_google_segment', 'ghl_get_google_conversions', 'ghl_upsert_google_conversion',
     'ghl_get_google_conversion', 'ghl_delete_google_conversion',
     'ghl_get_google_conversion_goals', 'ghl_get_google_target_interests',
+    // Ad publishing — Google reporting and targeting search (4)
+    'ghl_get_google_reporting', 'ghl_get_google_campaign_reporting',
+    'ghl_get_google_reporting_list', 'ghl_search_google_targeting',
   ];
 
-  it('all 384 expected tools are present', () => {
+  it('all 388 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(384);
+    expect(expectedTools).toHaveLength(388);
   });
 });
