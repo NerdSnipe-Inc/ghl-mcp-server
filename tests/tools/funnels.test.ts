@@ -41,6 +41,18 @@ describe('ghl_get_funnels', () => {
     expect(call.params.name).toBe('landing');
   });
 
+  it('passes type, category, and parentId filter params', async () => {
+    const fetch = mockFetchSuccess({ funnels: [] });
+    await getTool('ghl_get_funnels').handler(
+      { type: 'sales', category: 'lead-gen', parentId: 'folder-1' },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.type).toBe('sales');
+    expect(call.params.category).toBe('lead-gen');
+    expect(call.params.parentId).toBe('folder-1');
+  });
+
   it('handles API errors', async () => {
     mockFetchError(401, { message: 'Unauthorized' });
     expectError(await getTool('ghl_get_funnels').handler({}, TEST_CONFIG), 401);

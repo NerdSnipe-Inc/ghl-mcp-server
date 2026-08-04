@@ -9,6 +9,9 @@ export const funnelTools = [
       limit: z.number().optional().default(25),
       offset: z.number().optional().default(0),
       name: z.string().optional().describe("Filter funnels by name"),
+      type: z.string().optional().describe("Filter by funnel type"),
+      category: z.string().optional().describe("Filter by funnel category"),
+      parentId: z.string().optional().describe("Filter by parent folder ID"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -20,6 +23,9 @@ export const funnelTools = [
             limit: args.limit as number | undefined,
             offset: args.offset as number | undefined,
             name: args.name as string | undefined,
+            type: args.type as string | undefined,
+            category: args.category as string | undefined,
+            parentId: args.parentId as string | undefined,
           },
         });
         return JSON.stringify(result, null, 2);
