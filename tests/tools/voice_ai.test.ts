@@ -91,6 +91,27 @@ describe('ghl_create_voice_ai_agent', () => {
     expect(call.body.translation).toEqual({ enabled: true, language: 'es' });
   });
 
+  it('rejects incomplete interval shapes and out-of-range dayOfTheWeek', () => {
+    const schema = getTool('ghl_create_voice_ai_agent').inputSchema;
+    expect(
+      schema.safeParse({
+        agentWorkingHours: [{ dayOfTheWeek: 1, intervals: [{ startHour: 9 }] }],
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        agentWorkingHours: [{ dayOfTheWeek: 8, intervals: [] }],
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        agentWorkingHours: [
+          { dayOfTheWeek: 1, intervals: [{ startHour: 9, startMinute: 0, endHour: 17, endMinute: 30 }] },
+        ],
+      }).success
+    ).toBe(true);
+  });
+
   it('handles API errors', async () => {
     mockFetchError(400, { message: 'Bad request' });
     const result = await getTool('ghl_create_voice_ai_agent').handler({}, TEST_CONFIG);

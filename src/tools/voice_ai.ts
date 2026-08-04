@@ -103,9 +103,19 @@ const agentConfigFields = {
       z.object({
         dayOfTheWeek: z
           .number()
+          .int()
+          .min(1)
+          .max(7)
           .describe("Day of week for this configuration (Monday=1 to Sunday=7)"),
         intervals: z
-          .array(z.record(z.string(), z.unknown()))
+          .array(
+            z.object({
+              startHour: z.number(),
+              endHour: z.number(),
+              startMinute: z.number(),
+              endMinute: z.number(),
+            })
+          )
           .describe("Time intervals when the agent is available on this day"),
       })
     )
