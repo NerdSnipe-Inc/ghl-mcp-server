@@ -27,6 +27,7 @@ import { socialTools, mediaTools, triggerLinkTools } from '../src/tools/social.j
 import { knowledgeBaseTools, faqTools, crawlerTools } from '../src/tools/knowledge_base.js';
 import { blogTools } from '../src/tools/blogs.js';
 import { businessesTools } from '../src/tools/businesses.js';
+import { associationsTools } from '../src/tools/associations.js';
 import { courseTools } from '../src/tools/courses.js';
 import { proposalTools } from '../src/tools/proposals.js';
 import { brandBoardTools } from '../src/tools/brand_boards.js';
@@ -85,6 +86,7 @@ const ALL_TOOLS = [
 
   // Marketing & content (continued)
   ...businessesTools,
+  ...associationsTools,
 
   // Knowledge base, FAQ, crawler
   ...knowledgeBaseTools,
@@ -99,8 +101,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 250 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(250);
+  it('registers exactly 260 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(260);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -158,6 +160,7 @@ describe('Tool counts per module', () => {
   it('funnels has 3 tools', () => expect(funnelTools).toHaveLength(3));
   it('blogs has 7 tools', () => expect(blogTools).toHaveLength(7));
   it('businesses has 5 tools', () => expect(businessesTools).toHaveLength(5));
+  it('associations has 10 tools', () => expect(associationsTools).toHaveLength(10));
   it('courses has 1 tool', () => expect(courseTools).toHaveLength(1));
   it('proposals has 4 tools', () => expect(proposalTools).toHaveLength(4));
   it('brandBoards has 11 tools', () => expect(brandBoardTools).toHaveLength(11));
@@ -246,6 +249,12 @@ describe('Specific tool existence', () => {
     // Businesses (5)
     'ghl_get_businesses', 'ghl_get_business', 'ghl_create_business',
     'ghl_update_business', 'ghl_delete_business',
+    // Associations (10)
+    'ghl_create_association_relation', 'ghl_get_association_relations',
+    'ghl_delete_association_relation', 'ghl_get_association_by_key',
+    'ghl_get_association_by_object_key', 'ghl_create_association',
+    'ghl_get_association', 'ghl_update_association', 'ghl_delete_association',
+    'ghl_list_associations',
     // Courses (1)
     'ghl_import_courses',
     // Proposals (4)
@@ -336,10 +345,10 @@ describe('Specific tool existence', () => {
     'ghl_publish_agent_studio_agent', 'ghl_execute_agent_studio_agent',
   ];
 
-  it('all 250 expected tools are present', () => {
+  it('all 260 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(250);
+    expect(expectedTools).toHaveLength(260);
   });
 });

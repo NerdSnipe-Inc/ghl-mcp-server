@@ -61,6 +61,7 @@ import {
 } from "./tools/knowledge_base.js";
 import { blogTools } from "./tools/blogs.js";
 import { businessesTools } from "./tools/businesses.js";
+import { associationsTools } from "./tools/associations.js";
 import { courseTools } from "./tools/courses.js";
 import { proposalTools } from "./tools/proposals.js";
 import { brandBoardTools } from "./tools/brand_boards.js";
@@ -110,6 +111,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...funnelTools,
   ...blogTools,
   ...businessesTools,
+  ...associationsTools,
   ...courseTools,
   ...proposalTools,
   ...brandBoardTools,
