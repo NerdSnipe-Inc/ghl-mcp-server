@@ -41,6 +41,7 @@ import { socialPlannerQueuesTools } from '../src/tools/social_planner_queues.js'
 import { socialPlannerCommentsTools } from '../src/tools/social_planner_comments.js';
 import { socialPlannerAccountsTools } from '../src/tools/social_planner_accounts.js';
 import { socialPlannerPostsTools } from '../src/tools/social_planner_posts.js';
+import { facebookAccountsTools } from '../src/tools/facebook_accounts.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -112,11 +113,12 @@ const ALL_TOOLS = [
   ...socialPlannerCommentsTools,
   ...socialPlannerAccountsTools,
   ...socialPlannerPostsTools,
+  ...facebookAccountsTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 309 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(309);
+    expect(ALL_TOOLS).toHaveLength(323);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -204,6 +206,7 @@ describe('Tool counts per module', () => {
   it('socialPlannerComments has 4 tools', () => expect(socialPlannerCommentsTools).toHaveLength(4));
   it('socialPlannerAccounts has 9 tools', () => expect(socialPlannerAccountsTools).toHaveLength(9));
   it('socialPlannerPosts has 10 tools', () => expect(socialPlannerPostsTools).toHaveLength(10));
+  it('facebookAccounts has 14 tools', () => expect(facebookAccountsTools).toHaveLength(14));
 });
 
 describe('Specific tool existence', () => {
@@ -385,12 +388,18 @@ describe('Specific tool existence', () => {
     'ghl_finalize_social_csv', 'ghl_delete_social_csv', 'ghl_delete_social_csv_post',
     'ghl_bulk_delete_social_posts', 'ghl_get_social_post', 'ghl_update_social_post',
     'ghl_get_social_statistics',
+    // Ad publishing — Facebook accounts, integration, pages (14)
+    'ghl_get_facebook_ad_accounts', 'ghl_get_facebook_ad_account', 'ghl_delete_facebook_ad_account',
+    'ghl_create_facebook_integration', 'ghl_get_facebook_integration', 'ghl_delete_facebook_integration',
+    'ghl_get_facebook_me', 'ghl_get_facebook_entity', 'ghl_get_facebook_pages',
+    'ghl_delete_facebook_page', 'ghl_set_default_facebook_page', 'ghl_get_facebook_page_forms',
+    'ghl_create_facebook_page_form', 'ghl_get_facebook_page_instagram_accounts',
   ];
 
-  it('all 309 expected tools are present', () => {
+  it('all 323 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(309);
+    expect(expectedTools).toHaveLength(323);
   });
 });

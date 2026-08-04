@@ -75,6 +75,7 @@ import { socialPlannerQueuesTools } from "./tools/social_planner_queues.js";
 import { socialPlannerCommentsTools } from "./tools/social_planner_comments.js";
 import { socialPlannerAccountsTools } from "./tools/social_planner_accounts.js";
 import { socialPlannerPostsTools } from "./tools/social_planner_posts.js";
+import { facebookAccountsTools } from "./tools/facebook_accounts.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,9 @@ const ALL_TOOLS: ToolDef[] = [
 
   // Social planner — CSV bulk-import, post operations, and statistics
   ...socialPlannerPostsTools,
+
+  // Ad publishing — Facebook ad account, integration, and page management
+  ...facebookAccountsTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
