@@ -43,6 +43,7 @@ import { socialPlannerAccountsTools } from '../src/tools/social_planner_accounts
 import { socialPlannerPostsTools } from '../src/tools/social_planner_posts.js';
 import { facebookAccountsTools } from '../src/tools/facebook_accounts.js';
 import { facebookCampaignsTools } from '../src/tools/facebook_campaigns.js';
+import { facebookAudiencesTools } from '../src/tools/facebook_audiences.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -116,11 +117,12 @@ const ALL_TOOLS = [
   ...socialPlannerPostsTools,
   ...facebookAccountsTools,
   ...facebookCampaignsTools,
+  ...facebookAudiencesTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 341 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(341);
+  it('registers exactly 353 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(353);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -210,6 +212,7 @@ describe('Tool counts per module', () => {
   it('socialPlannerPosts has 10 tools', () => expect(socialPlannerPostsTools).toHaveLength(10));
   it('facebookAccounts has 14 tools', () => expect(facebookAccountsTools).toHaveLength(14));
   it('facebookCampaigns has 18 tools', () => expect(facebookCampaignsTools).toHaveLength(18));
+  it('facebookAudiences has 12 tools', () => expect(facebookAudiencesTools).toHaveLength(12));
 });
 
 describe('Specific tool existence', () => {
@@ -405,12 +408,19 @@ describe('Specific tool existence', () => {
     'ghl_pause_facebook_adset', 'ghl_resume_facebook_adset',
     'ghl_upsert_facebook_ad', 'ghl_delete_facebook_ad', 'ghl_duplicate_facebook_ad',
     'ghl_pause_facebook_ad', 'ghl_resume_facebook_ad',
+    // Ad publishing — Facebook custom audience, pixel, and lead form management (12)
+    'ghl_get_facebook_custom_audiences', 'ghl_delete_facebook_custom_audience',
+    'ghl_update_facebook_custom_audience', 'ghl_get_facebook_custom_audience',
+    'ghl_add_facebook_custom_audience_member', 'ghl_remove_facebook_custom_audience_member',
+    'ghl_batch_update_facebook_custom_audience_members', 'ghl_get_facebook_pixels',
+    'ghl_upsert_facebook_pixel', 'ghl_get_facebook_conversation_forms',
+    'ghl_create_facebook_conversation_form', 'ghl_get_facebook_lead_form',
   ];
 
-  it('all 341 expected tools are present', () => {
+  it('all 353 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(341);
+    expect(expectedTools).toHaveLength(353);
   });
 });
