@@ -39,14 +39,16 @@ dependencies).
 - **Verify `locationId` presence/placement per endpoint — don't assume.** It appears
   as a path segment, query param, or body field depending on the operation.
 - **CORRECTION found during Task 1, applies to every remaining task in this plan:**
-  despite this spec file being named `ad-publishing-v3.json`, every operation's
-  `Version` header parameter is a fixed-value schema enum containing ONLY
-  `"2021-07-28"` (confirmed directly across GET/PUT/POST samples spanning Facebook,
-  Google, and LinkedIn — not a one-off quirk). Use `GHL_VERSION_LEGACY` (not
-  `GHL_VERSION_V3`) for every `ghlRequest` call in this entire phase. Verify this
-  yourself per-operation as you go (don't assume it without checking your own
-  operations), but expect it to hold universally — no exceptions have been found so
-  far.
+  despite this spec file being named `ad-publishing-v3.json`, 94 of the 95
+  operations' `Version` header parameter is a fixed-value schema enum containing ONLY
+  `"2021-07-28"` — confirmed via an exhaustive sweep of all 95 operations (not a
+  sample). Use `GHL_VERSION_LEGACY` (not `GHL_VERSION_V3`) for every `ghlRequest`
+  call in this phase, EXCEPT the one confirmed exception:
+  `GET /ad-publishing/facebook/campaigns/{campaignId}/publishing-progress`
+  (`ghl_get_facebook_campaign_publishing_progress`, Task 2), whose `Version` enum is
+  `["v3"]` — that single call must use `GHL_VERSION_V3`. Still verify this
+  per-operation yourself as you implement each task rather than trusting this note
+  blindly, but no further exceptions are expected.
 - **Disclose malformed/ambiguous upstream spec fields with a one-line code comment**
   as you write each tool, not as an afterthought.
 - **Do not trim "large" required-field lists.**
