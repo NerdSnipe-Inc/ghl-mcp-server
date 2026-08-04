@@ -69,10 +69,10 @@ describe('ghl_create_custom_value', () => {
 // ── ghl_update_custom_value ───────────────────────────────────────────────────
 
 describe('ghl_update_custom_value', () => {
-  it('calls PUT /locations/:locationId/customValues/:valueId', async () => {
+  it('calls PUT /locations/:locationId/customValues/:valueId with both name and value', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_update_custom_value').handler(
-      { valueId: 'value-1', name: 'Updated Name' },
+      { valueId: 'value-1', name: 'Updated Name', value: 'Updated Value' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -80,6 +80,7 @@ describe('ghl_update_custom_value', () => {
     expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/customValues/value-1`);
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.name).toBe('Updated Name');
+    expect(call.body?.value).toBe('Updated Value');
     expect(call.body?.valueId).toBeUndefined();
   });
 
@@ -87,11 +88,25 @@ describe('ghl_update_custom_value', () => {
     mockFetchError(404, { message: 'Not found' });
     expectError(
       await getTool('ghl_update_custom_value').handler(
-        { valueId: 'bad', name: 'X' },
+        { valueId: 'bad', name: 'X', value: 'Y' },
         TEST_CONFIG
       ),
       404
     );
+  });
+
+  it('requires both name and value — spec uses the same DTO as create, no partial updates', () => {
+    const missingValue = getTool('ghl_update_custom_value').inputSchema.safeParse({
+      valueId: 'value-1',
+      name: 'Updated Name',
+    });
+    expect(missingValue.success).toBe(false);
+
+    const missingName = getTool('ghl_update_custom_value').inputSchema.safeParse({
+      valueId: 'value-1',
+      value: 'Updated Value',
+    });
+    expect(missingName.success).toBe(false);
   });
 });
 

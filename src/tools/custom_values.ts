@@ -41,11 +41,12 @@ export const customValueTools = [
   },
   {
     name: "ghl_update_custom_value",
-    description: "Update an existing custom value.",
+    description:
+      "Update an existing custom value. Spec uses the same DTO as create — both name and value are required; partial updates are not supported.",
     inputSchema: z.object({
       valueId: z.string().describe("Custom value ID to update"),
-      name: z.string().optional(),
-      value: z.string().optional(),
+      name: z.string().describe("Variable name (required — spec has no partial update)"),
+      value: z.string().describe("Variable value (required — spec has no partial update)"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { valueId, ...updateData } = args as { valueId: string } & Record<string, unknown>;
