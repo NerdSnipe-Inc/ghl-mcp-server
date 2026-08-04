@@ -1,5 +1,125 @@
 # Changelog
 
+## Unreleased — Full Spec-Fidelity Remediation
+
+After all 8 sub-phases of the v3 migration were complete (404 tools), a full-project
+audit compared every MCP tool's Zod request schema against the real v3 OpenAPI specs.
+Response handling was confirmed clean project-wide (every handler is a verbatim
+`JSON.stringify(result)` passthrough — no response-side changes were needed). The
+audit found 79 request-schema mismatches (24 Critical, ~35 Important, ~20 Minor)
+across ~30 files, all now fixed:
+
+- **contacts.ts** — `ghl_get_contacts` removed (targeted a nonexistent `GET
+  /contacts/`; `ghl_search_contacts` already covers list/search via the real `POST
+  /contacts/search`); `customFields` items now use `fieldValue` (was `value`) on
+  create/update/upsert; added missing real fields (`name`, `gender`,
+  `inboundDndSettings`, `dateOfBirth`, `assignedTo`, `dndSettings`, plus more on
+  upsert).
+- **calendars.ts** — `meetingLocationType` enum corrected (`gmeet` not
+  `google_meet`, added `address`/`ms_teams`/`google`, removed invalid `default`);
+  `notes` renamed to `description`; added `assignedUserId`, `meetingLocationId`,
+  `overrideLocationConfig`, `ignoreFreeSlotValidation`, `rrule`, `address`,
+  `showDrafted`, `userId`/`userIds`.
+- **conversations.ts** — `ghl_add_inbound_message` now requires
+  `conversationProviderId` and `conversationId`; `ghl_update_message_status`'s
+  invalid `"unread"` enum value removed; `ghl_send_message`'s invalid `"GMB"`/`"Call"`
+  enum values removed; `ghl_search_conversations`'s `lastMessageType` enum expanded
+  to the full ~42-value set with many missing filter params added.
+- **custom_fields.ts** — `options` renamed to `picklistOptions`;
+  `ghl_update_custom_field`'s `name` is now correctly required; added
+  `acceptedFormat`, `isMultipleFile`, `maxNumberOfFiles`, `textBoxListOptions`,
+  `model`; removed fabricated `fieldKey`/`showInForms`/`parentId`.
+- **custom_values.ts** — `ghl_update_custom_value` now correctly requires both
+  `name` and `value` (the real API has no partial-update support here).
+- **opportunities.ts** — `ghl_search_opportunities`'s query params corrected to
+  camelCase (`locationId`, `contactId`, `pipelineId`, `pipelineStageId`,
+  `assignedTo` — previously snake_case and silently ignored by the API);
+  `customFields` now uses `fieldValue`; `ghl_upsert_opportunity` corrected to match
+  the real `UpsertOpportunityDto` (no `contactId` field exists — matching is by
+  optional `id`; added required `followers`/`isRemoveAllFollowers`/
+  `followersActionType`).
+- **payments.ts** — `ghl_get_orders`/`ghl_get_transactions`/
+  `ghl_get_subscriptions` now use `limit`/`offset` (not `page`);
+  `ghl_get_orders`'s `status` filter corrected to `paymentStatus` with the real
+  enum; `ghl_create_coupon` (`discountValue`, valid `discountType`, required
+  `startDate`), `ghl_create_invoice` (required `businessDetails`/`contactDetails`/
+  `issueDate`/`sentTo`/`liveMode`, `amount`/`qty` item fields), `ghl_send_invoice`
+  (valid `action` enum), and `ghl_record_invoice_payment` (`altId`/`altType` now
+  sent, `mode` not `paymentMethod`, valid enum, required `notes`) all corrected.
+- **phone_numbers.ts** — `ghl_search_available_phone_numbers`'s 8 spec-required
+  fields now all required; `ghl_purchase_phone_number` now requires all 12 real
+  fields (was missing 10 of them).
+- **templates.ts** — `ghl_create_template`/`ghl_update_template` removed. Verified
+  (for the third time in this project's history) via exhaustive sweep of every v3
+  and legacy spec file: `/locations/{locationId}/templates` only exposes `GET`/
+  `DELETE`, no `POST`/`PUT` operation exists anywhere. `ghl_get_templates`/
+  `ghl_delete_template` remain fully supported. **Tool count: 404 → 401.**
+- **social.ts** (Phase 1's original 4 tools) — `ghl_get_social_posts`'s filter
+  field corrected from `status` to `type` with the real 10-value enum, plus
+  required `fromDate`/`toDate`/`includeUsers`; `ghl_create_social_post`'s fields
+  corrected (`summary` not `content`, `media` not `mediaUrls`, `scheduleDate` not
+  `scheduledAt`, added required `type`/`userId`) — now field-for-field consistent
+  with the sibling `social_planner_posts.ts` module.
+- **emails.ts** — `ghl_schedule_email_campaign`'s `scheduleConfig`/`rssConfig`
+  properly typed (previously opaque JSON-string params); added `include`,
+  `userName`, `abTestConfig`.
+- **forms.ts** — added missing `q` submission-search filter.
+- **funnels.ts** — added missing `type`/`category`/`parentId` filters.
+- **surveys.ts** — removed nonexistent `contactId` filter param.
+- **users.ts** — `attributionReportEnabled` renamed to
+  `attributionsReportingEnabled`; removed 4 fabricated permission fields; added the
+  15 real missing permission fields plus `scopes`/`scopesAssignedToOnly` and several
+  Minor fields — the corrected `permissions` object is now a verified exact
+  bijection with the real 38-field `PermissionsDto`.
+- **products.ts** — `taxes`/`prices`/`digitalDelivery` corrected from
+  objects/records to arrays of strings (previously a spec-correct API call would
+  have failed Zod validation); `productType`/price `type` properly enum-typed;
+  `label`/`seo`/price `recurring`/`meta`/bulk-update `price`/`compareAtPrice`
+  properly typed as objects; `ghl_get_products`'s `expand`/`productIds` now sent as
+  real repeated-key array query params (see `src/client.ts` change below) instead
+  of comma-joined — resolves the "Known limitations" note under Phase 2a below.
+- **store.ts** — `ghl_get_available_shipping_rates`'s `source.type`/`source.subType`
+  properly enum-typed.
+- **proposals.ts** — `ghl_send_proposal_document`'s `ccRecipients`/
+  `notificationSettings` properly typed as objects; `ghl_get_proposal_documents`'s
+  `status`/`paymentStatus` properly enum-typed.
+- **brand_boards.ts** — `logos`/`colors`/`fonts` on both create/update tools
+  properly typed as objects (`Logo`/`Color`/`Font`) instead of permissive records.
+- **voice_ai.ts** — `agentWorkingHours[].intervals` properly typed as an object
+  (`startHour`/`endHour`/`startMinute`/`endMinute`, all required numbers).
+- **associations.ts** — `ghl_get_association_relations`'s `associationIds` now an
+  array (joined internally), matching the codebase's established array-param
+  convention.
+- **facebook_accounts.ts** — `ghl_create_facebook_page_form`'s `thankYouPage`/
+  `greetingCard`/`customDisclaimer` properly typed as objects matching their real
+  spec schemas.
+- **google_campaigns.ts** — `ghl_upsert_google_campaign`'s `assets` field properly
+  typed as an object.
+
+**`src/client.ts` change:** `ghlRequest`'s `params` option now additionally accepts
+`string[]` values, serialized as repeated query keys (`URLSearchParams.append`) per
+the OpenAPI default array-param style — previously only comma-joined strings could
+be sent for array-shaped filters. This is purely additive; every existing scalar
+`params` usage across all ~401 tools is unaffected (verified via full-suite green
+and a manual audit of every `params:` call site in `src/tools/`).
+
+Several of these fixes are breaking changes for existing callers of this MCP
+server: `ghl_get_social_posts` now requires `fromDate`/`toDate`/`includeUsers`;
+`ghl_schedule_email_campaign` moved `sendAt`/RSS fields into nested
+`scheduleConfig`/`rssConfig` objects; `ghl_create_contact`/`ghl_update_contact`/
+`ghl_upsert_contact`'s `customFields` now use `fieldValue` instead of `value`;
+`ghl_opportunities`' search params are now camelCase; several `payments.ts` and
+`phone_numbers.ts` tools now reject calls missing newly-required fields that were
+previously (incorrectly) optional. All of these bring the tools in line with what
+the real v3 API actually requires — the old behavior was silently failing or
+silently dropping data in every one of these cases.
+
+Bonus fix discovered during remediation: several corrected fields (previously
+`z.record()`) are now proper typed `z.object()`/`z.enum()` schemas. Since
+`src/index.ts`'s `zodToJsonSchema` had no branch for `ZodRecord`, every `z.record()`
+field was being advertised to calling LLMs as a plain `string` in its JSON Schema —
+this fix corrects that AI-facing schema, not just internal validation.
+
 ## Unreleased — Phase 2f — Ad Publishing
 
 Adds GHL API v3 Ad Publishing coverage — 95 new tools across 9 new modules, spanning

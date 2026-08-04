@@ -227,7 +227,8 @@ export const contactTools = [
   },
   {
     name: "ghl_search_contacts",
-    description: "Advanced contact search with filters for tags, pipeline stage, source, etc.",
+    description:
+      "List or search contacts. Call with no arguments to list all contacts (paginated); pass filters for tags, pipeline stage, source, etc. for advanced search.",
     inputSchema: z.object({
       query: z.string().optional().describe("Full-text search query"),
       filters: z

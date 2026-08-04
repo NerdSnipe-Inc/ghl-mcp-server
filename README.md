@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**404 tools** covering the full GHL API:
+**401 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -76,6 +76,14 @@ Once installed, you can talk to your CRM naturally:
 >
 > If you need any of these and have the right credential type, please
 > [open an issue](https://github.com/NerdSnipe-Inc/ghl-mcp-server/issues) requesting it.
+
+> **Also not covered (no credential issue — the endpoint doesn't exist):**
+> `ghl_create_template`/`ghl_update_template` were removed. The v3 (and legacy)
+> `/locations/{locationId}/templates` resource only exposes `GET` (list) and
+> `DELETE`; no `POST`/`PUT` operation exists anywhere in the spec for creating or
+> updating a template. This was verified via an exhaustive sweep of every v3 and
+> legacy spec file. `ghl_get_templates`/`ghl_delete_template` remain fully
+> supported.
 
 ---
 
@@ -286,7 +294,7 @@ node dist/index.js
 
 ---
 
-## All 404 Tools — Full Reference
+## All 401 Tools — Full Reference
 
 ### Contacts
 
@@ -426,8 +434,6 @@ node dist/index.js
 | `ghl_update_user`          | Update an existing team member                                  |
 | `ghl_delete_user`          | Remove a team member from the location                          |
 | `ghl_get_templates`        | List SMS/email/WhatsApp templates                               |
-| `ghl_create_template`      | Create a new SMS/email/WhatsApp template                        |
-| `ghl_update_template`      | Update an existing template                                     |
 | `ghl_delete_template`      | Delete a template by ID                                         |
 | `ghl_get_forms`            | List all forms                                                  |
 | `ghl_get_form_submissions` | Get form submissions                                            |

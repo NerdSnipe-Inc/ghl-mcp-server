@@ -7,7 +7,8 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js
  * These operate on GHL's email marketing system — the visual-builder templates
  * and bulk email campaigns that appear under Marketing → Emails in the GHL UI.
  * They are separate from the simple Location Templates
- * (ghl_create_template / ghl_get_templates).
+ * (ghl_get_templates / ghl_delete_template — the v3 API has no create/update
+ * operation for this resource).
  *
  * v3 replaced the old `/emails/builder*` and `/emails/schedule*` families with
  * location-scoped resources:
