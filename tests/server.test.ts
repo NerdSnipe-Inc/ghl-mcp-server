@@ -37,6 +37,7 @@ import { conversationAiTools } from '../src/tools/conversation_ai.js';
 import { voiceAiTools } from '../src/tools/voice_ai.js';
 import { chatWidgetTools } from '../src/tools/chat_widget.js';
 import { agentStudioTools } from '../src/tools/agent_studio.js';
+import { socialPlannerQueuesTools } from '../src/tools/social_planner_queues.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -100,11 +101,14 @@ const ALL_TOOLS = [
   ...voiceAiTools,
   ...chatWidgetTools,
   ...agentStudioTools,
+
+  // Social planner — content queues
+  ...socialPlannerQueuesTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 268 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(268);
+  it('registers exactly 286 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(286);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -188,6 +192,7 @@ describe('Tool counts per module', () => {
   it('voiceAi has 11 tools', () => expect(voiceAiTools).toHaveLength(11));
   it('chatWidget has 8 tools', () => expect(chatWidgetTools).toHaveLength(8));
   it('agentStudio has 8 tools', () => expect(agentStudioTools).toHaveLength(8));
+  it('socialPlannerQueues has 18 tools', () => expect(socialPlannerQueuesTools).toHaveLength(18));
 });
 
 describe('Specific tool existence', () => {
@@ -350,12 +355,19 @@ describe('Specific tool existence', () => {
     'ghl_get_agent_studio_agent', 'ghl_update_agent_studio_agent_metadata',
     'ghl_delete_agent_studio_agent', 'ghl_update_agent_studio_agent_version',
     'ghl_publish_agent_studio_agent', 'ghl_execute_agent_studio_agent',
+    // Social planner — content queues (18)
+    'ghl_create_social_queue', 'ghl_get_social_queue_categories', 'ghl_list_social_queues',
+    'ghl_get_social_queue_calendar', 'ghl_delete_social_queue_active_post', 'ghl_get_social_queue',
+    'ghl_update_social_queue', 'ghl_create_social_queue_item', 'ghl_get_social_queue_edit_calendar',
+    'ghl_discard_social_queue_edit', 'ghl_save_social_queue_edit', 'ghl_start_social_queue_edit',
+    'ghl_get_social_queue_items', 'ghl_delete_social_queue_item', 'ghl_update_social_queue_item',
+    'ghl_clone_social_queue_item', 'ghl_reset_social_queue_item', 'ghl_get_social_queue_slots',
   ];
 
-  it('all 268 expected tools are present', () => {
+  it('all 286 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(268);
+    expect(expectedTools).toHaveLength(286);
   });
 });
