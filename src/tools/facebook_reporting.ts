@@ -16,14 +16,35 @@ export const facebookReportingTools = [
     description:
       "Get Facebook ad reporting data with aggregation. Required fields: fields (array), groupBy, startDate, endDate, type.",
     inputSchema: z.object({
-      fields: z.array(z.string()).describe("Fields to include in the report (e.g. impressions, clicks)"),
-      groupBy: z.string().describe("Group results by field (e.g. CAMPAIGN, ADSET)"),
+      fields: z
+        .array(
+          z.enum([
+            "impressions",
+            "clicks",
+            "spend",
+            "cpc",
+            "cost_per_conversion",
+            "conversions",
+            "cpm",
+            "reach",
+            "frequency",
+            "ctr",
+          ])
+        )
+        .describe("Fields to include in the report"),
+      groupBy: z.enum(["day", "week", "month"]).describe("Group results by time period"),
       startDate: z.string().describe("Start date for the report (YYYY-MM-DD format)"),
       endDate: z.string().describe("End date for the report (YYYY-MM-DD format)"),
-      type: z.string().describe("Report type (e.g. CAMPAIGN, ADSET)"),
+      type: z.enum(["AD_MANAGER", "INTEGRATION"]).describe("Report type"),
     }),
     handler: async (
-      args: { fields: string[]; groupBy: string; startDate: string; endDate: string; type: string },
+      args: {
+        fields: ("impressions" | "clicks" | "spend" | "cpc" | "cost_per_conversion" | "conversions" | "cpm" | "reach" | "frequency" | "ctr")[];
+        groupBy: "day" | "week" | "month";
+        startDate: string;
+        endDate: string;
+        type: "AD_MANAGER" | "INTEGRATION";
+      },
       config: GHLConfig
     ) => {
       try {
@@ -86,11 +107,11 @@ export const facebookReportingTools = [
       listType: z.string().describe("List type (e.g. CAMPAIGNS, ADSETS, ADS)"),
       startDate: z.string().describe("Start date for the report (YYYY-MM-DD format)"),
       endDate: z.string().describe("End date for the report (YYYY-MM-DD format)"),
-      type: z.string().describe("Report type (e.g. CAMPAIGN, ADSET, AD)"),
+      type: z.enum(["AD_MANAGER", "INTEGRATION"]).describe("Report type"),
       campaignId: z.string().optional().describe("Filter by campaign ID"),
     }),
     handler: async (
-      args: { listType: string; startDate: string; endDate: string; type: string; campaignId?: string },
+      args: { listType: string; startDate: string; endDate: string; type: "AD_MANAGER" | "INTEGRATION"; campaignId?: string },
       config: GHLConfig
     ) => {
       try {
