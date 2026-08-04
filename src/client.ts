@@ -108,6 +108,68 @@ export async function ghlRequest<T = unknown>(
   return response.json() as Promise<T>;
 }
 
+export async function ghlRequestMultipart<T = unknown>(
+  method: "POST",
+  path: string,
+  options: {
+    token: string;
+    version: string;
+    params?: Record<string, string | number | boolean | undefined>;
+    fields: { file: { content: string; filename: string } };
+  }
+): Promise<T> {
+  const { token, version, params, fields } = options;
+
+  let url = `${GHL_BASE_URL}${path}`;
+
+  if (params) {
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        searchParams.set(key, String(value));
+      }
+    }
+    const qs = searchParams.toString();
+    if (qs) url += `?${qs}`;
+  }
+
+  // Omit Content-Type from buildHeaders' output: fetch sets the correct
+  // multipart/form-data boundary automatically when given a FormData body, and an
+  // explicit application/json Content-Type would break the multipart request.
+  const headers = buildHeaders(token, version);
+  delete headers["Content-Type"];
+
+  const formData = new FormData();
+  formData.set(
+    "file",
+    new Blob([fields.file.content], { type: "text/csv" }),
+    fields.file.filename
+  );
+
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let errorBody: unknown;
+    try {
+      errorBody = JSON.parse(text);
+    } catch {
+      errorBody = text;
+    }
+    throw new GHLApiError(response.status, response.statusText, errorBody, path);
+  }
+
+  if (response.status === 204) {
+    return {} as T;
+  }
+
+  return response.json() as Promise<T>;
+}
+
 /** Format a GHLApiError or generic error into a readable MCP tool response string */
 export function formatError(error: unknown): string {
   if (error instanceof GHLApiError) {

@@ -3,6 +3,7 @@ import {
   getConfig,
   buildHeaders,
   ghlRequest,
+  ghlRequestMultipart,
   formatError,
   GHLApiError,
   GHL_BASE_URL,
@@ -152,6 +153,44 @@ describe('ghlRequest', () => {
       expect((e as GHLApiError).status).toBe(401);
       expect((e as GHLApiError).endpoint).toBe('/contacts/');
     }
+  });
+});
+
+// ── ghlRequestMultipart ──────────────────────────────────────────────────────
+
+describe('ghlRequestMultipart', () => {
+  it('sends a multipart/form-data body with the file field', async () => {
+    const fetchMock = mockFetchSuccess({ id: 'csv-123' });
+    await ghlRequestMultipart('POST', '/social-media-posting/loc-1/csv', {
+      token: 'tok',
+      version: GHL_VERSION_V3,
+      fields: { file: { content: 'name,platform\nJohn,facebook', filename: 'posts.csv' } },
+    });
+    const call = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [url, init] = call;
+    expect(url).toBe(`${GHL_BASE_URL}/social-media-posting/loc-1/csv`);
+    expect(init.body).toBeInstanceOf(FormData);
+    const body = init.body as FormData;
+    const file = body.get('file');
+    expect(file).toBeInstanceOf(Blob);
+    expect((file as File).name).toBe('posts.csv');
+    // Content-Type must NOT be manually set to application/json — fetch sets the
+    // correct multipart boundary automatically. Confirm it's absent from our headers.
+    const headers = init.headers as Record<string, string>;
+    expect(headers['Content-Type']).toBeUndefined();
+    expect(headers['Authorization']).toBe('Bearer tok');
+    expect(headers['Version']).toBe(GHL_VERSION_V3);
+  });
+
+  it('throws GHLApiError on non-2xx response', async () => {
+    mockFetchError(400, { message: 'invalid file' });
+    await expect(
+      ghlRequestMultipart('POST', '/social-media-posting/loc-1/csv', {
+        token: 'tok',
+        version: GHL_VERSION_V3,
+        fields: { file: { content: 'bad', filename: 'x.csv' } },
+      })
+    ).rejects.toThrow(GHLApiError);
   });
 });
 
