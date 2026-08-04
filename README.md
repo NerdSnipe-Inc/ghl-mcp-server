@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**309 tools** covering the full GHL API:
+**404 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -55,6 +55,9 @@ Once installed, you can talk to your CRM naturally:
 | Businesses                      | CRUD businesses within a location                                          |
 | Associations                    | CRUD associations and association relations between records                |
 | Objects                         | Get/update custom object schemas, list objects, CRUD & search object records |
+| Facebook Ads                    | Ad accounts, page/Instagram/integration setup, campaigns, ad sets, ads, custom audiences, pixels, lead & conversation forms, reporting, targeting search (48 tools) |
+| Google Ads                      | Ad accounts, integration, campaigns, creative assets, keyword ideas, audiences, segments, conversion actions, reporting, targeting search (31 tools) |
+| LinkedIn Ads                    | Ad accounts, integration, campaign groups, lead forms, reporting, targeting search (16 tools) |
 
 > **Not yet covered:** the following GHL API v3 resources require credentials this
 > server doesn't have (agency-level or Marketplace-app-developer identity, not a
@@ -283,7 +286,7 @@ node dist/index.js
 
 ---
 
-## All 309 Tools — Full Reference
+## All 404 Tools — Full Reference
 
 ### Contacts
 
@@ -783,6 +786,153 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_delete_object_record`       | Delete a custom object record                                                |
 | `ghl_create_object_record`       | Create a new custom object record                                            |
 | `ghl_search_object_records`      | Search custom object records                                                 |
+
+### Facebook Accounts
+
+> Note: all `ad-publishing` operations hit paths under `/ad-publishing/<platform>/...`.
+> Despite the `ad-publishing-v3.json` spec filename, 94 of these 95 operations declare a
+> legacy `Version: 2021-07-28` header rather than a v3 header — the sole exception is
+> `ghl_get_facebook_campaign_publishing_progress`, which uses `v3`. See `src/client.ts`'s
+> `GHL_VERSION_LEGACY`/`GHL_VERSION_V3` and the in-file code comments in each
+> `src/tools/facebook_*.ts` / `google_*.ts` / `linkedin.ts` module for details.
+
+| Tool                                        | Description                                                                       |
+|-----------------------------------------------|---------------------------------------------------------------------------------------|
+| `ghl_get_facebook_ad_accounts`               | List Facebook ad accounts connected to a location                                    |
+| `ghl_get_facebook_ad_account`                | Get a single Facebook ad account by ID                                               |
+| `ghl_delete_facebook_ad_account`             | Delete a Facebook ad account                                                         |
+| `ghl_create_facebook_integration`            | Create a Facebook ad-publishing integration for a location                           |
+| `ghl_get_facebook_integration`               | Get the Facebook ad-publishing integration for a location                            |
+| `ghl_delete_facebook_integration`            | Delete the Facebook ad-publishing integration for a location                         |
+| `ghl_get_facebook_me`                        | Get the Facebook identity (user/page) tied to the location's integration             |
+| `ghl_get_facebook_entity`                    | List Facebook ad entities (campaigns, ad sets, or ads)                               |
+| `ghl_get_facebook_pages`                     | List Facebook pages available to a location                                          |
+| `ghl_delete_facebook_page`                   | Disconnect a Facebook page from a location                                           |
+| `ghl_set_default_facebook_page`              | Set the default Facebook page for a location                                         |
+| `ghl_get_facebook_page_forms`                | List lead forms for a Facebook page                                                  |
+| `ghl_create_facebook_page_form`              | Create a Facebook lead form on a page                                                |
+| `ghl_get_facebook_page_instagram_accounts`   | List Instagram accounts linked to a Facebook page                                    |
+
+### Facebook Campaigns
+
+| Tool                                            | Description                                                                       |
+|----------------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_facebook_campaign`                        | Get a single Facebook campaign by ID                                                  |
+| `ghl_upsert_facebook_campaign`                     | Create or update a Facebook campaign — pass `id` to update, omit to create            |
+| `ghl_delete_facebook_campaign`                     | Delete a Facebook campaign                                                            |
+| `ghl_duplicate_facebook_campaign`                  | Duplicate a Facebook campaign                                                         |
+| `ghl_pause_facebook_campaign`                      | Pause a Facebook campaign                                                             |
+| `ghl_publish_facebook_campaign`                    | Publish a Facebook campaign                                                           |
+| `ghl_get_facebook_campaign_publishing_progress`    | Get the publishing progress of a Facebook campaign                                    |
+| `ghl_resume_facebook_campaign`                     | Resume a paused Facebook campaign                                                     |
+| `ghl_upsert_facebook_adset`                        | Create or update a Facebook ad set — pass `id` to update, omit to create              |
+| `ghl_delete_facebook_adset`                        | Delete a Facebook ad set                                                              |
+| `ghl_duplicate_facebook_adset`                     | Duplicate a Facebook ad set                                                           |
+| `ghl_pause_facebook_adset`                         | Pause a Facebook ad set                                                               |
+| `ghl_resume_facebook_adset`                        | Resume a paused Facebook ad set                                                       |
+| `ghl_upsert_facebook_ad`                           | Create or update a Facebook ad — pass `id` to update, omit to create                  |
+| `ghl_delete_facebook_ad`                           | Delete a Facebook ad                                                                  |
+| `ghl_duplicate_facebook_ad`                        | Duplicate a Facebook ad                                                               |
+| `ghl_pause_facebook_ad`                            | Pause a Facebook ad                                                                   |
+| `ghl_resume_facebook_ad`                           | Resume a paused Facebook ad                                                           |
+
+### Facebook Audiences
+
+| Tool                                              | Description                                                                       |
+|-------------------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_facebook_custom_audiences`                   | Get Facebook custom audiences for a location                                          |
+| `ghl_delete_facebook_custom_audience`                 | Delete a Facebook custom audience                                                     |
+| `ghl_update_facebook_custom_audience`                 | Update a Facebook custom audience's name and description                              |
+| `ghl_get_facebook_custom_audience`                    | Get a single Facebook custom audience by ID                                           |
+| `ghl_add_facebook_custom_audience_member`             | Add a contact to a Facebook custom audience                                           |
+| `ghl_remove_facebook_custom_audience_member`          | Remove a contact from a Facebook custom audience                                      |
+| `ghl_batch_update_facebook_custom_audience_members`   | Batch add/remove members of a Facebook custom audience via CSV, smartlists, or dynamic audience |
+| `ghl_get_facebook_pixels`                             | Get Facebook conversion pixels for a location                                         |
+| `ghl_upsert_facebook_pixel`                           | Create or update a Facebook conversion pixel                                          |
+| `ghl_get_facebook_conversation_forms`                 | Get Facebook conversation forms for a location                                        |
+| `ghl_create_facebook_conversation_form`               | Create a Facebook conversation form                                                   |
+| `ghl_get_facebook_lead_form`                          | Get a single Facebook lead form by ID                                                 |
+
+### Facebook Reporting
+
+| Tool                                    | Description                                                                       |
+|----------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_facebook_reporting`                 | Get Facebook ad reporting data with aggregation                                       |
+| `ghl_get_facebook_campaign_reporting`        | Get reporting data for a specific Facebook campaign                                   |
+| `ghl_get_facebook_reporting_list`            | Get a list of Facebook reporting data (campaigns, ad sets, or ads)                    |
+| `ghl_search_facebook_targeting`              | Search Facebook targeting options (interests, behaviors, demographics)                |
+
+### Google Accounts
+
+| Tool                             | Description                                                                       |
+|---------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_google_ad_accounts`         | List Google ad accounts connected to a location                                       |
+| `ghl_get_google_ad_account`          | Get a single Google ad account by ID                                                  |
+| `ghl_delete_google_ad_account`       | Delete a Google ad account                                                            |
+| `ghl_create_google_integration`      | Create a Google ad-publishing integration for a location                              |
+| `ghl_get_google_integration`         | Get the Google ad-publishing integration for a location                               |
+| `ghl_get_google_me`                  | Get the Google identity tied to the location's integration                            |
+| `ghl_get_google_entity`              | List Google ad entities (campaigns, ad groups, or ads)                                |
+
+### Google Campaigns
+
+| Tool                             | Description                                                                       |
+|---------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_upsert_google_campaign`         | Create or update a Google Ads campaign — pass `id` to update, omit to create           |
+| `ghl_get_google_campaign`            | Get a single Google Ads campaign by ID                                                |
+| `ghl_publish_google_campaign`        | Publish a Google Ads campaign and push it live                                        |
+| `ghl_get_google_assets`              | List Google Ads creative assets                                                       |
+| `ghl_upsert_google_assets`           | Create or update a Google Ads creative asset (call, sitelink, or lead form)           |
+| `ghl_get_google_keyword_ideas`       | Get Google Ads keyword ideas for a target URL                                         |
+
+### Google Audiences
+
+| Tool                                    | Description                                                                       |
+|----------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_upsert_google_audience`                 | Create or update a Google Ads audience — pass `resourceName` to update, omit to create |
+| `ghl_get_google_audiences`                   | List Google Ads audiences for the location                                            |
+| `ghl_get_google_audience`                    | Get a single Google Ads audience by ID                                                |
+| `ghl_get_google_segments`                    | List Google Ads segments for the location                                             |
+| `ghl_upsert_google_segment`                  | Create or update a Google Ads segment — pass `id` to update, omit to create            |
+| `ghl_create_google_offline_user_list_job`    | Create a Google Ads offline user list upload job                                      |
+| `ghl_delete_google_segment`                  | Delete a Google Ads segment                                                           |
+| `ghl_get_google_segment`                     | Get a single Google Ads segment by ID                                                 |
+| `ghl_get_google_conversions`                 | List Google Ads conversion actions for the location                                   |
+| `ghl_upsert_google_conversion`               | Create or update a Google Ads conversion action — pass `conversionId` to update        |
+| `ghl_get_google_conversion`                  | Get a single Google Ads conversion action by ID                                       |
+| `ghl_delete_google_conversion`               | Delete a Google Ads conversion action                                                 |
+| `ghl_get_google_conversion_goals`            | List Google Ads conversion goals for the location                                     |
+| `ghl_get_google_target_interests`            | Search Google Ads target interest categories                                          |
+
+### Google Reporting
+
+| Tool                                | Description                                                                       |
+|--------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_google_reporting`                 | Get Google Ads reporting data with aggregation                                        |
+| `ghl_get_google_campaign_reporting`        | Get reporting data for a specific Google Ads campaign                                 |
+| `ghl_get_google_reporting_list`            | Get a list of Google Ads reporting data (e.g. campaigns)                              |
+| `ghl_search_google_targeting`              | Search Google Ads targeting options (e.g. geolocation)                                |
+
+### LinkedIn
+
+| Tool                                          | Description                                                                       |
+|-----------------------------------------------------|----------------------------------------------------------------------------------------|
+| `ghl_get_linkedin_ad_account`                       | Get a connected LinkedIn ad account                                                   |
+| `ghl_delete_linkedin_ad_account`                    | Delete a connected LinkedIn ad account                                                |
+| `ghl_get_linkedin_ad_accounts`                      | List connected LinkedIn ad accounts for the location                                  |
+| `ghl_create_linkedin_integration`                   | Create a LinkedIn ad account integration for the location                             |
+| `ghl_get_linkedin_integration`                      | Get the LinkedIn ad account integration for the location                              |
+| `ghl_get_linkedin_me`                               | Get the authenticated LinkedIn member profile for the location's integration          |
+| `ghl_upsert_linkedin_campaign`                      | Create or update a LinkedIn ad campaign group — pass `adCampaignGroupId` to update     |
+| `ghl_get_linkedin_campaign`                         | Get a single LinkedIn ad campaign group by ID                                         |
+| `ghl_publish_linkedin_campaign`                     | Publish a LinkedIn ad campaign group to LinkedIn                                      |
+| `ghl_update_linkedin_ad_status`                     | Update the status (paused, archived, resume) of a LinkedIn ad entity                  |
+| `ghl_create_linkedin_lead_form`                     | Create a LinkedIn lead-gen form for an ad account                                     |
+| `ghl_get_linkedin_lead_forms`                       | List LinkedIn lead-gen forms for an ad account                                        |
+| `ghl_get_linkedin_reporting`                        | Get LinkedIn ad reporting analytics                                                   |
+| `ghl_get_linkedin_campaign_group_reporting`         | Get LinkedIn ad reporting analytics for a specific campaign group                     |
+| `ghl_get_linkedin_reporting_list`                   | Get a LinkedIn reporting list for a campaign within a campaign group                  |
+| `ghl_search_linkedin_targeting`                     | Search LinkedIn targeting facets (e.g. locations, industries, job titles)             |
 
 ---
 

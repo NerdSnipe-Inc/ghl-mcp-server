@@ -1,5 +1,56 @@
 # Changelog
 
+## Unreleased — Phase 2f — Ad Publishing
+
+Adds GHL API v3 Ad Publishing coverage — 95 new tools across 9 new modules, spanning
+three ad platforms:
+
+**Facebook — 48 tools across 4 files**
+- `facebook_accounts.ts` (14 tools) — ad accounts, integration, identity, pages/Instagram, lead forms on pages
+- `facebook_campaigns.ts` (18 tools) — campaign/ad set/ad CRUD, duplicate, pause, resume, publish, publishing progress
+- `facebook_audiences.ts` (12 tools) — custom audiences & members, conversion pixels, conversation forms, lead forms
+- `facebook_reporting.ts` (4 tools) — aggregated reporting, per-campaign reporting, reporting lists, targeting search
+
+**Google — 31 tools across 4 files**
+- `google_accounts.ts` (7 tools) — ad accounts, integration, identity, entity listing
+- `google_campaigns.ts` (6 tools) — campaign upsert/get/publish, creative assets, keyword ideas
+- `google_audiences.ts` (14 tools) — audiences, segments, offline user list jobs, conversion actions, conversion goals, target interests
+- `google_reporting.ts` (4 tools) — aggregated reporting, per-campaign reporting, reporting lists, targeting search
+
+**LinkedIn — 16 tools in 1 file**
+- `linkedin.ts` (16 tools) — ad accounts, integration, identity, campaign groups (upsert/get/publish/status), lead forms, reporting, targeting search
+
+Total tool count: 309 → 404.
+
+All 95 operations in `ad-publishing-v3.json` declare `security: bearer`, so unlike
+several prior phases this sub-phase required no agency-only exclusions — full coverage
+was achievable with this server's location-scoped PIT token.
+
+**Notable implementation detail:** despite living in the `ad-publishing-v3.json` spec
+file (and this repo's "Phase 2f" / `-v3` naming), 94 of these 95 operations declare a
+fixed legacy `Version: 2021-07-28` header, not a v3 header — `GHL_VERSION_LEGACY` is
+used throughout all 9 new modules for that reason. The sole exception is
+`ghl_get_facebook_campaign_publishing_progress` (`GET
+/ad-publishing/facebook/campaigns/{campaignId}/publishing-progress`), whose `Version`
+header enum is `["v3"]` — it's the only `GHL_VERSION_V3` usage across the entire
+resource. Future contributors extending this resource should verify each new
+operation's `Version` header against the live spec rather than assuming `-v3` in the
+filename implies a v3 header.
+
+The `PUT /{platform}/campaigns|adsets|ads|audiences|segments|pixels|conversions` family
+are genuine upserts (no ID in the path; an optional ID/resource-name field in the body
+selects create vs. update) and are named `ghl_upsert_<platform>_<noun>` accordingly,
+consistent with the naming precedent already established for similar upsert-shaped
+endpoints in earlier phases.
+
+This completes v3 coverage for every practically-buildable GHL resource this server's
+location-scoped Private Integration Token can reach. The only remaining gaps are the
+agency-only exclusions documented across earlier phases: `saas` (Phase 2a),
+`marketplace` (Phase 2b), and `companies`/`snapshots`/`oauth` (Phase 2d) — all of which
+require agency-level or Marketplace-app-developer credentials this server's
+location-scoped PIT token does not have. See
+`docs/superpowers/specs/2026-08-04-v3-phase2f-ad-publishing-design.md`.
+
 ## Unreleased — Phase 2e — Social Planner
 
 Adds GHL API v3 Social Planner coverage — 41 new tools across 4 new modules:
