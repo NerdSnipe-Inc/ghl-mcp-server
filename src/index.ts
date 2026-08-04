@@ -81,6 +81,7 @@ import { facebookAudiencesTools } from "./tools/facebook_audiences.js";
 import { facebookReportingTools } from "./tools/facebook_reporting.js";
 import { googleAccountsTools } from "./tools/google_accounts.js";
 import { googleCampaignsTools } from "./tools/google_campaigns.js";
+import { googleAudiencesTools } from "./tools/google_audiences.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -186,6 +187,7 @@ const ALL_TOOLS: ToolDef[] = [
   // Ad publishing — Google ad account, integration, and identity management
   ...googleAccountsTools,
   ...googleCampaignsTools,
+  ...googleAudiencesTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));

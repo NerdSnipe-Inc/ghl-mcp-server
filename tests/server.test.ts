@@ -47,6 +47,7 @@ import { facebookAudiencesTools } from '../src/tools/facebook_audiences.js';
 import { facebookReportingTools } from '../src/tools/facebook_reporting.js';
 import { googleAccountsTools } from '../src/tools/google_accounts.js';
 import { googleCampaignsTools } from '../src/tools/google_campaigns.js';
+import { googleAudiencesTools } from '../src/tools/google_audiences.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -124,11 +125,12 @@ const ALL_TOOLS = [
   ...facebookReportingTools,
   ...googleAccountsTools,
   ...googleCampaignsTools,
+  ...googleAudiencesTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 364 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(370);
+    expect(ALL_TOOLS).toHaveLength(384);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -222,6 +224,7 @@ describe('Tool counts per module', () => {
   it('facebookReporting has 4 tools', () => expect(facebookReportingTools).toHaveLength(4));
   it('googleAccounts has 7 tools', () => expect(googleAccountsTools).toHaveLength(7));
   it('googleCampaigns has 6 tools', () => expect(googleCampaignsTools).toHaveLength(6));
+  it('googleAudiences has 14 tools', () => expect(googleAudiencesTools).toHaveLength(14));
 });
 
 describe('Specific tool existence', () => {
@@ -434,12 +437,19 @@ describe('Specific tool existence', () => {
     // Ad publishing — Google campaign upsert, assets, and keyword research (6)
     'ghl_upsert_google_campaign', 'ghl_get_google_campaign', 'ghl_publish_google_campaign',
     'ghl_get_google_assets', 'ghl_upsert_google_assets', 'ghl_get_google_keyword_ideas',
+    // Ad publishing — Google audience, segment, and conversion management (14)
+    'ghl_upsert_google_audience', 'ghl_get_google_audiences', 'ghl_get_google_audience',
+    'ghl_get_google_segments', 'ghl_upsert_google_segment',
+    'ghl_create_google_offline_user_list_job', 'ghl_delete_google_segment',
+    'ghl_get_google_segment', 'ghl_get_google_conversions', 'ghl_upsert_google_conversion',
+    'ghl_get_google_conversion', 'ghl_delete_google_conversion',
+    'ghl_get_google_conversion_goals', 'ghl_get_google_target_interests',
   ];
 
-  it('all 370 expected tools are present', () => {
+  it('all 384 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(370);
+    expect(expectedTools).toHaveLength(384);
   });
 });
