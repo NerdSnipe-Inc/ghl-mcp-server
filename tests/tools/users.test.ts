@@ -245,6 +245,128 @@ describe('ghl_create_user', () => {
     );
     expectError(result, 422);
   });
+
+  it('accepts scopes, scopesAssignedToOnly, profilePhoto, twilioPhone, platformLanguage', async () => {
+    const fetch = mockTwoCalls(MOCK_DATA);
+    await getTool('ghl_create_user').handler(
+      {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        password: 'Sup3rSecret!Pass',
+        type: 'account',
+        role: 'user',
+        scopes: ['contacts.write', 'campaigns.readonly'],
+        scopesAssignedToOnly: ['contacts.write'],
+        profilePhoto: 'https://img.png',
+        twilioPhone: { 'loc-1': '+18832327657' },
+        platformLanguage: 'en_US',
+      },
+      TEST_CONFIG
+    );
+    const createCall = parseFetchCall(fetch, 1);
+    expect(createCall.body?.scopes).toEqual(['contacts.write', 'campaigns.readonly']);
+    expect(createCall.body?.scopesAssignedToOnly).toEqual(['contacts.write']);
+    expect(createCall.body?.profilePhoto).toBe('https://img.png');
+    expect(createCall.body?.twilioPhone).toEqual({ 'loc-1': '+18832327657' });
+    expect(createCall.body?.platformLanguage).toBe('en_US');
+  });
+
+  describe('permissions field', () => {
+    it('rejects the old misspelled attributionReportEnabled field name', () => {
+      const result = getTool('ghl_create_user').inputSchema.safeParse({
+        firstName: 'A',
+        lastName: 'B',
+        email: 'a@b.com',
+        password: 'Sup3rSecret!Pass',
+        type: 'account',
+        role: 'user',
+        permissions: { attributionReportEnabled: true },
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect((result.data.permissions as Record<string, unknown> | undefined)?.attributionReportEnabled).toBeUndefined();
+      }
+    });
+
+    it('accepts the correct attributionsReportingEnabled field name', async () => {
+      const fetch = mockTwoCalls(MOCK_DATA);
+      await getTool('ghl_create_user').handler(
+        {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          password: 'Sup3rSecret!Pass',
+          type: 'account',
+          role: 'user',
+          permissions: { attributionsReportingEnabled: true },
+        },
+        TEST_CONFIG
+      );
+      const createCall = parseFetchCall(fetch, 1);
+      expect((createCall.body?.permissions as Record<string, unknown>)?.attributionsReportingEnabled).toBe(true);
+    });
+
+    it('rejects the fabricated fields not present in the v3 spec', () => {
+      const result = getTool('ghl_create_user').inputSchema.safeParse({
+        firstName: 'A',
+        lastName: 'B',
+        email: 'a@b.com',
+        password: 'Sup3rSecret!Pass',
+        type: 'account',
+        role: 'user',
+        permissions: {
+          userCommsMgmtEnabled: true,
+          auditLogsEnabled: true,
+          leadSourcesEnabled: true,
+          agentLeaderboardEnabled: true,
+        },
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        const perms = result.data.permissions as Record<string, unknown> | undefined;
+        expect(perms?.userCommsMgmtEnabled).toBeUndefined();
+        expect(perms?.auditLogsEnabled).toBeUndefined();
+        expect(perms?.leadSourcesEnabled).toBeUndefined();
+        expect(perms?.agentLeaderboardEnabled).toBeUndefined();
+      }
+    });
+
+    it('accepts all real permission fields previously missing from the schema', async () => {
+      const fetch = mockTwoCalls(MOCK_DATA);
+      const newPermissions = {
+        campaignsReadOnly: true,
+        workflowsReadOnly: true,
+        bulkRequestsEnabled: true,
+        botService: true,
+        socialPlanner: true,
+        bloggingEnabled: true,
+        invoiceEnabled: true,
+        affiliateManagerEnabled: true,
+        contentAiEnabled: true,
+        refundsEnabled: true,
+        recordPaymentEnabled: true,
+        cancelSubscriptionEnabled: true,
+        paymentsEnabled: true,
+        communitiesEnabled: true,
+        exportPaymentsEnabled: true,
+      };
+      await getTool('ghl_create_user').handler(
+        {
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          password: 'Sup3rSecret!Pass',
+          type: 'account',
+          role: 'user',
+          permissions: newPermissions,
+        },
+        TEST_CONFIG
+      );
+      const createCall = parseFetchCall(fetch, 1);
+      expect(createCall.body?.permissions).toEqual(newPermissions);
+    });
+  });
 });
 
 // ── ghl_update_user ──────────────────────────────────────────────────────────
@@ -272,6 +394,36 @@ describe('ghl_update_user', () => {
       TEST_CONFIG
     );
     expectError(result, 404);
+  });
+
+  it('accepts locationIds, password, companyId, type, scopes, and Minor fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    const result = await getTool('ghl_update_user').handler(
+      {
+        userId: 'user-1',
+        locationIds: ['loc-1', 'loc-2'],
+        password: 'N3wSecret!Pass',
+        companyId: 'company-abc',
+        type: 'account',
+        scopes: ['contacts.write'],
+        scopesAssignedToOnly: ['contacts.write'],
+        profilePhoto: 'https://img.png',
+        twilioPhone: { 'loc-1': '+18832327657' },
+        platformLanguage: 'en_US',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.locationIds).toEqual(['loc-1', 'loc-2']);
+    expect(call.body?.password).toBe('N3wSecret!Pass');
+    expect(call.body?.companyId).toBe('company-abc');
+    expect(call.body?.type).toBe('account');
+    expect(call.body?.scopes).toEqual(['contacts.write']);
+    expect(call.body?.scopesAssignedToOnly).toEqual(['contacts.write']);
+    expect(call.body?.profilePhoto).toBe('https://img.png');
+    expect(call.body?.twilioPhone).toEqual({ 'loc-1': '+18832327657' });
+    expect(call.body?.platformLanguage).toBe('en_US');
+    expectSuccess(result, MOCK_DATA);
   });
 });
 
