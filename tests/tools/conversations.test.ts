@@ -47,6 +47,55 @@ describe('ghl_search_conversations', () => {
       500
     );
   });
+
+  it('accepts the full lastMessageType enum, not just a 5-value subset', async () => {
+    for (const type of ['TYPE_RCS', 'TYPE_TIKTOK', 'TYPE_WEBCHAT', 'TYPE_GMB', 'TYPE_SMS_REACTION']) {
+      const result = getTool('ghl_search_conversations').inputSchema.safeParse({
+        lastMessageType: type,
+      });
+      expect(result.success, `expected ${type} to be valid`).toBe(true);
+    }
+  });
+
+  it('passes through the missing spec query params', async () => {
+    const fetch = mockFetchSuccess({ conversations: [] });
+    await getTool('ghl_search_conversations').handler(
+      {
+        assignedTo: 'user-1,user-2',
+        followers: 'user-3',
+        mentions: 'user-4',
+        sort: 'desc',
+        sortBy: 'last_message_date',
+        startAfterDate: 1600854,
+        id: 'conv-1',
+        lastMessageAction: 'manual',
+        lastMessageDirection: 'inbound',
+        sortScoreProfile: 'sp-1',
+        scoreProfile: 'sp-2',
+        scoreProfileMin: 0,
+        scoreProfileMax: 100,
+        startDate: 1640995200000,
+        endDate: 1672531199000,
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.assignedTo).toBe('user-1,user-2');
+    expect(call.params.followers).toBe('user-3');
+    expect(call.params.mentions).toBe('user-4');
+    expect(call.params.sort).toBe('desc');
+    expect(call.params.sortBy).toBe('last_message_date');
+    expect(call.params.startAfterDate).toBe('1600854');
+    expect(call.params.id).toBe('conv-1');
+    expect(call.params.lastMessageAction).toBe('manual');
+    expect(call.params.lastMessageDirection).toBe('inbound');
+    expect(call.params.sortScoreProfile).toBe('sp-1');
+    expect(call.params.scoreProfile).toBe('sp-2');
+    expect(call.params.scoreProfileMin).toBe('0');
+    expect(call.params.scoreProfileMax).toBe('100');
+    expect(call.params.startDate).toBe('1640995200000');
+    expect(call.params.endDate).toBe('1672531199000');
+  });
 });
 
 // ── ghl_get_conversation ──────────────────────────────────────────────────────
@@ -155,6 +204,61 @@ describe('ghl_send_message', () => {
       422
     );
   });
+
+  it('rejects invalid type values GMB and Call, accepts RCS and TIKTOK', async () => {
+    for (const bad of ['GMB', 'Call']) {
+      const result = getTool('ghl_send_message').inputSchema.safeParse({
+        contactId: 'contact-abc',
+        type: bad,
+        message: 'Hi',
+      });
+      expect(result.success, `expected ${bad} to be invalid`).toBe(false);
+    }
+    for (const good of ['RCS', 'TIKTOK']) {
+      const result = getTool('ghl_send_message').inputSchema.safeParse({
+        contactId: 'contact-abc',
+        type: good,
+        message: 'Hi',
+      });
+      expect(result.success, `expected ${good} to be valid`).toBe(true);
+    }
+  });
+
+  it('passes through missing spec fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_send_message').handler(
+      {
+        contactId: 'contact-abc',
+        type: 'Email',
+        message: 'Hi',
+        appointmentId: 'appt-1',
+        templateId: 'tmpl-1',
+        threadId: 'thread-1',
+        customSubtypeId: 'sub-1',
+        emailReplyMode: 'reply_all',
+        forward: { isForwarded: true, toEmail: 'forward@example.com' },
+        toNumber: '+15551234567',
+        usesNativeSchedulingAi: true,
+        optimizationPeriod: '24h',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.appointmentId).toBe('appt-1');
+    expect(call.body?.templateId).toBe('tmpl-1');
+    expect(call.body?.threadId).toBe('thread-1');
+    expect(call.body?.customSubtypeId).toBe('sub-1');
+    expect(call.body?.emailReplyMode).toBe('reply_all');
+    expect(call.body?.forward).toEqual({ isForwarded: true, toEmail: 'forward@example.com' });
+    expect(call.body?.toNumber).toBe('+15551234567');
+    expect(call.body?.usesNativeSchedulingAi).toBe(true);
+    expect(call.body?.optimizationPeriod).toBe('24h');
+  });
+
+  it('does not accept fromName — it is not a real spec field', () => {
+    const shape = getTool('ghl_send_message').inputSchema.shape as Record<string, unknown>;
+    expect(shape.fromName).toBeUndefined();
+  });
 });
 
 // ── ghl_send_email ────────────────────────────────────────────────────────────
@@ -218,6 +322,14 @@ describe('ghl_update_message_status', () => {
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.status).toBe('read');
   });
+
+  it('rejects "unread" — not a valid spec status', () => {
+    const result = getTool('ghl_update_message_status').inputSchema.safeParse({
+      messageId: 'msg-1',
+      status: 'unread',
+    });
+    expect(result.success).toBe(false);
+  });
 });
 
 // ── ghl_cancel_scheduled_message ─────────────────────────────────────────────
@@ -242,7 +354,13 @@ describe('ghl_add_inbound_message', () => {
   it('calls POST /conversations/messages/inbound with locationId', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_add_inbound_message').handler(
-      { type: 'SMS', message: 'Reply text', contactId: 'contact-abc' },
+      {
+        type: 'SMS',
+        message: 'Reply text',
+        contactId: 'contact-abc',
+        conversationId: 'conv-1',
+        conversationProviderId: 'provider-1',
+      },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -251,6 +369,39 @@ describe('ghl_add_inbound_message', () => {
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.type).toBe('SMS');
     expect(call.body?.message).toBe('Reply text');
+    expect(call.body?.conversationId).toBe('conv-1');
+    expect(call.body?.conversationProviderId).toBe('provider-1');
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
+  });
+
+  it('requires conversationId and conversationProviderId per spec', () => {
+    const missingConversationId = getTool('ghl_add_inbound_message').inputSchema.safeParse({
+      type: 'SMS',
+      message: 'Reply text',
+      contactId: 'contact-abc',
+      conversationProviderId: 'provider-1',
+    });
+    expect(missingConversationId.success).toBe(false);
+
+    const missingProviderId = getTool('ghl_add_inbound_message').inputSchema.safeParse({
+      type: 'SMS',
+      message: 'Reply text',
+      contactId: 'contact-abc',
+      conversationId: 'conv-1',
+    });
+    expect(missingProviderId.success).toBe(false);
+  });
+
+  it('accepts the expanded type enum (GMB, WebChat, Live_Chat, etc.)', () => {
+    for (const type of ['GMB', 'WebChat', 'Live_Chat', 'TIKTOK', 'FORM_SUBMISSION']) {
+      const result = getTool('ghl_add_inbound_message').inputSchema.safeParse({
+        type,
+        message: 'Reply text',
+        contactId: 'contact-abc',
+        conversationId: 'conv-1',
+        conversationProviderId: 'provider-1',
+      });
+      expect(result.success, `expected ${type} to be valid`).toBe(true);
+    }
   });
 });
