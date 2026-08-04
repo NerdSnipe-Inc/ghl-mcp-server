@@ -38,6 +38,7 @@ import { voiceAiTools } from '../src/tools/voice_ai.js';
 import { chatWidgetTools } from '../src/tools/chat_widget.js';
 import { agentStudioTools } from '../src/tools/agent_studio.js';
 import { socialPlannerQueuesTools } from '../src/tools/social_planner_queues.js';
+import { socialPlannerCommentsTools } from '../src/tools/social_planner_comments.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -104,11 +105,14 @@ const ALL_TOOLS = [
 
   // Social planner — content queues
   ...socialPlannerQueuesTools,
+
+  // Social planner — comments
+  ...socialPlannerCommentsTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 286 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(286);
+  it('registers exactly 290 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(290);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -193,6 +197,7 @@ describe('Tool counts per module', () => {
   it('chatWidget has 8 tools', () => expect(chatWidgetTools).toHaveLength(8));
   it('agentStudio has 8 tools', () => expect(agentStudioTools).toHaveLength(8));
   it('socialPlannerQueues has 18 tools', () => expect(socialPlannerQueuesTools).toHaveLength(18));
+  it('socialPlannerComments has 4 tools', () => expect(socialPlannerCommentsTools).toHaveLength(4));
 });
 
 describe('Specific tool existence', () => {
@@ -362,12 +367,15 @@ describe('Specific tool existence', () => {
     'ghl_discard_social_queue_edit', 'ghl_save_social_queue_edit', 'ghl_start_social_queue_edit',
     'ghl_get_social_queue_items', 'ghl_delete_social_queue_item', 'ghl_update_social_queue_item',
     'ghl_clone_social_queue_item', 'ghl_reset_social_queue_item', 'ghl_get_social_queue_slots',
+    // Social planner — comments (4)
+    'ghl_create_social_comment', 'ghl_list_social_comments', 'ghl_like_social_comment',
+    'ghl_unlike_social_comment',
   ];
 
-  it('all 286 expected tools are present', () => {
+  it('all 290 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(286);
+    expect(expectedTools).toHaveLength(290);
   });
 });

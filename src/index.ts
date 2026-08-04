@@ -72,6 +72,7 @@ import { voiceAiTools } from "./tools/voice_ai.js";
 import { chatWidgetTools } from "./tools/chat_widget.js";
 import { agentStudioTools } from "./tools/agent_studio.js";
 import { socialPlannerQueuesTools } from "./tools/social_planner_queues.js";
+import { socialPlannerCommentsTools } from "./tools/social_planner_comments.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,9 @@ const ALL_TOOLS: ToolDef[] = [
 
   // Social planner — content queues
   ...socialPlannerQueuesTools,
+
+  // Social planner — comments
+  ...socialPlannerCommentsTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
