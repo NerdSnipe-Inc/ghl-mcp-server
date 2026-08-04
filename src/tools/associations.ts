@@ -30,15 +30,15 @@ export const associationsTools = [
   {
     name: "ghl_get_association_relations",
     description:
-      "List relations for a record. Required fields: recordId, skip, limit. Optional: associationIds (comma-separated).",
+      "List relations for a record. Required fields: recordId, skip, limit. Optional: associationIds.",
     inputSchema: z.object({
       recordId: z.string().describe("The record ID"),
       skip: z.number().describe("Number of results to skip"),
       limit: z.number().describe("Max results to return"),
-      associationIds: z.string().optional().describe("Comma-separated list of association IDs to filter by"),
+      associationIds: z.array(z.string()).optional().describe("Association IDs to filter by"),
     }),
     handler: async (
-      args: { recordId: string; skip: number; limit: number; associationIds?: string },
+      args: { recordId: string; skip: number; limit: number; associationIds?: string[] },
       config: GHLConfig
     ) => {
       try {
@@ -49,7 +49,7 @@ export const associationsTools = [
             locationId: config.locationId,
             skip: args.skip,
             limit: args.limit,
-            associationIds: args.associationIds,
+            associationIds: args.associationIds?.join(","),
           },
         });
         return JSON.stringify(result, null, 2);

@@ -53,7 +53,7 @@ describe('ghl_get_association_relations', () => {
   it('calls GET /associations/relations/:recordId with locationId, skip, limit, associationIds', async () => {
     const fetch = mockFetchSuccess({ relations: [] });
     const result = await getTool('ghl_get_association_relations').handler(
-      { recordId: 'rec1', skip: 0, limit: 20, associationIds: 'assoc1,assoc2' },
+      { recordId: 'rec1', skip: 0, limit: 20, associationIds: ['assoc1', 'assoc2'] },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
