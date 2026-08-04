@@ -89,17 +89,43 @@ export const socialPlannerAccountsTools = [
     name: "ghl_connect_social_oauth_account",
     description:
       "Step 3 of 3 in the OAuth account-connection flow: connect the account/page selected in " +
-      "Step 2 (ghl_get_social_oauth_accounts) to this location. The request body shape varies by " +
-      "platform. Facebook/Instagram/LinkedIn/TikTok/YouTube/Pinterest use type, originId, name, " +
-      "avatar; Google Business Profile uses nested location and account objects instead. Required: " +
-      "platform, accountId, plus the platform-specific body fields above.",
+      "Step 2 (ghl_get_social_oauth_accounts) to this location. The upstream request body is a " +
+      "`oneOf` of 8 platform-specific DTOs, selected by the `platform` path param — required " +
+      "fields differ per platform:\n" +
+      "  - facebook: type, originId, name, avatar (all required)\n" +
+      "  - instagram: pageId (required only). originId/name/avatar optional.\n" +
+      "  - google: location, account (both required, nested objects)\n" +
+      "  - pinterest: originId (required only). name/avatar/verified/username/websiteUrl/" +
+      "companyId/type/originAccountType optional.\n" +
+      "  - tiktok / youtube: type, originId, name, avatar (all required); verified/username optional.\n" +
+      "  - linkedin: type, originId, name, avatar, urn (all required)\n" +
+      "  - threads: type, originId, name, avatar (all required)\n" +
+      "Only supply the fields relevant to the chosen platform; this tool's schema is a permissive " +
+      "union of all 8 shapes so every platform's fields (including instagram's pageId and " +
+      "linkedin's urn) reach the request body.",
     inputSchema: z.object({
       platform: z.enum(PLATFORM_ENUM).describe("Social platform"),
       accountId: z.string().describe("The accountId returned from Step 1 to attach"),
-      type: z.string().optional().describe("Account type, e.g. 'page' (Facebook/Instagram/LinkedIn)"),
-      originId: z.string().optional().describe("Platform-native ID of the page/channel/account being connected"),
+      // NOTE: the real request body is a `oneOf` across 8 platform-specific DTOs
+      // (AttachFBAccountDTO, AttachIGAccountDTO, AttachGMBLocationDTO,
+      // AttachPinterestAccountDTO, AttachTiktokAccountDTO,
+      // AttachYoutubeAccountResponseDTO, AttachLinkedinAccountDTO,
+      // AttachThreadsAccountDTO) with different required fields each. We model this
+      // as a single permissive object with every field from every DTO optional,
+      // since the `platform` field already selects which DTO applies and Zod has
+      // no clean way to make required-ness conditional on a sibling field without
+      // a discriminated union that would fragment the tool interface per platform.
+      type: z.string().optional().describe("Account type, e.g. 'page' (facebook/linkedin/tiktok/youtube/threads/pinterest)"),
+      originId: z.string().optional().describe("Platform-native ID of the page/channel/account being connected (all platforms except google)"),
       name: z.string().optional().describe("Display name of the account/page being connected"),
       avatar: z.string().optional().describe("Avatar/profile image URL"),
+      pageId: z.string().optional().describe("REQUIRED for instagram: the linked Facebook Page ID"),
+      urn: z.string().optional().describe("REQUIRED for linkedin: the LinkedIn URN, e.g. 'urn:li:organization:12345'"),
+      verified: z.boolean().optional().describe("Verified badge flag (pinterest/tiktok/youtube)"),
+      username: z.string().optional().describe("Platform username/handle (pinterest/tiktok/youtube)"),
+      websiteUrl: z.string().optional().describe("Account website URL (pinterest only)"),
+      companyId: z.string().optional().describe("Pinterest company/business ID (pinterest only)"),
+      originAccountType: z.string().optional().describe("Pinterest origin account type (pinterest only)"),
       location: z
         .object({
           name: z.string().optional(),
@@ -108,7 +134,7 @@ export const socialPlannerAccountsTools = [
           isVerified: z.string().optional(),
         })
         .optional()
-        .describe("Google Business Profile location object (Google platform only)"),
+        .describe("REQUIRED for google: Google Business Profile location object"),
       account: z
         .object({
           name: z.string().optional(),
@@ -118,7 +144,7 @@ export const socialPlannerAccountsTools = [
           vettedState: z.string().optional(),
         })
         .optional()
-        .describe("Google Business Profile account object (Google platform only)"),
+        .describe("REQUIRED for google: Google Business Profile account object"),
     }),
     handler: async (
       args: { platform: string; accountId: string } & Record<string, unknown>,

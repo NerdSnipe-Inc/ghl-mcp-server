@@ -136,6 +136,70 @@ describe('ghl_connect_social_oauth_account', () => {
     });
   });
 
+  it('supports Instagram pageId-only body shape', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_connect_social_oauth_account').handler(
+      {
+        platform: 'instagram',
+        accountId: 'acct1',
+        pageId: 'fbpage123',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.pathname).toBe(
+      `/social-media-posting/oauth/${TEST_CONFIG.locationId}/instagram/accounts/acct1`
+    );
+    expect(call.body.pageId).toBe('fbpage123');
+  });
+
+  it('supports LinkedIn urn-required body shape', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_connect_social_oauth_account').handler(
+      {
+        platform: 'linkedin',
+        accountId: 'acct1',
+        type: 'page',
+        originId: 'urn:li:organization:12345',
+        name: 'My LinkedIn Page',
+        urn: 'urn:li:organization:12345',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.pathname).toBe(
+      `/social-media-posting/oauth/${TEST_CONFIG.locationId}/linkedin/accounts/acct1`
+    );
+    expect(call.body.type).toBe('page');
+    expect(call.body.originId).toBe('urn:li:organization:12345');
+    expect(call.body.name).toBe('My LinkedIn Page');
+    expect(call.body.urn).toBe('urn:li:organization:12345');
+  });
+
+  it('supports Pinterest originId-only body shape with optional fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_connect_social_oauth_account').handler(
+      {
+        platform: 'pinterest',
+        accountId: 'acct1',
+        originId: '123456789',
+        verified: true,
+        username: 'mypinterest',
+        websiteUrl: 'https://example.com',
+        companyId: 'company1',
+        originAccountType: 'business',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body.originId).toBe('123456789');
+    expect(call.body.verified).toBe(true);
+    expect(call.body.username).toBe('mypinterest');
+    expect(call.body.websiteUrl).toBe('https://example.com');
+    expect(call.body.companyId).toBe('company1');
+    expect(call.body.originAccountType).toBe('business');
+  });
+
   it('handles API errors', async () => {
     mockFetchError(400, { message: 'Bad request' });
     const result = await getTool('ghl_connect_social_oauth_account').handler(
