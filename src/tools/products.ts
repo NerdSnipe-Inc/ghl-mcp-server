@@ -12,7 +12,7 @@ export const productTools = [
       search: z.string().optional().describe("Search by product name"),
       collectionIds: z.string().optional().describe("Comma-separated collection IDs to filter by"),
       collectionSlug: z.string().optional().describe("Filter by collection slug"),
-      expand: z.array(z.string()).optional().describe("Related fields to expand, e.g. ['variants','medias']"),
+      expand: z.array(z.string()).optional().describe("Related entities to expand, e.g. ['tax','stripe','paypal']"),
       productIds: z.array(z.string()).optional().describe("Specific product IDs to fetch"),
       storeId: z.string().optional().describe("Filter by store ID"),
       includedInStore: z.boolean().optional().describe("Filter by whether product is included in the store"),
@@ -31,9 +31,8 @@ export const productTools = [
             search: args.search as string | undefined,
             collectionIds: args.collectionIds as string | undefined,
             collectionSlug: args.collectionSlug as string | undefined,
-            // UNVERIFIED: comma-joining these array params assumes GHL wants "a,b" not repeated "?key=a&key=b" — needs a live API call to confirm; src/client.ts's params type can't emit repeated keys either way. See CHANGELOG.
-            expand: (args.expand as string[] | undefined)?.join(","),
-            productIds: (args.productIds as string[] | undefined)?.join(","),
+            expand: args.expand as string[] | undefined,
+            productIds: args.productIds as string[] | undefined,
             storeId: args.storeId as string | undefined,
             includedInStore: args.includedInStore as boolean | undefined,
             availableInStore: args.availableInStore as boolean | undefined,
@@ -74,21 +73,62 @@ export const productTools = [
     description: "Create a new product in the store catalog.",
     inputSchema: z.object({
       name: z.string().describe("Product name"),
-      productType: z.string().describe("Product type, e.g. PHYSICAL, DIGITAL, SERVICE"),
+      productType: z.enum(["DIGITAL", "PHYSICAL", "SERVICE", "PHYSICAL/DIGITAL"]).describe("Product type"),
       description: z.string().optional(),
       image: z.string().optional().describe("Product image URL"),
       statementDescriptor: z.string().optional(),
       availableInStore: z.boolean().optional(),
-      medias: z.array(z.record(z.unknown())).optional().describe("Array of media objects"),
-      variants: z.array(z.record(z.unknown())).optional().describe("Array of variant option objects"),
+      medias: z
+        .array(
+          z.object({
+            id: z.string().optional().describe("Media ID"),
+            title: z.string().optional().describe("Media file title"),
+            url: z.string().describe("URL where the media file is stored"),
+            type: z.enum(["image", "video"]).describe("Media type"),
+            isFeatured: z.boolean().optional().describe("Whether the media is featured"),
+            priceIds: z.array(z.string()).optional().describe("Price IDs the media is assigned to"),
+          })
+        )
+        .optional()
+        .describe("Array of media objects"),
+      variants: z
+        .array(
+          z.object({
+            id: z.string().optional().describe("Variant ID"),
+            name: z.string().describe("Variant name, e.g. Size"),
+            options: z
+              .array(
+                z.object({
+                  id: z.string().optional().describe("Option ID"),
+                  name: z.string().describe("Option name, e.g. XL"),
+                })
+              )
+              .describe("Array of options for the variant"),
+          })
+        )
+        .optional()
+        .describe("Array of variant objects"),
       collectionIds: z.array(z.string()).optional().describe("Category/collection IDs"),
       isTaxesEnabled: z.boolean().optional(),
-      taxes: z.array(z.record(z.unknown())).optional().describe("Array of tax objects"),
+      taxes: z.array(z.string()).optional().describe("List of tax IDs attached to the product"),
       automaticTaxCategoryId: z.string().optional(),
       isLabelEnabled: z.boolean().optional(),
-      label: z.record(z.unknown()).optional().describe("Product label object"),
+      label: z
+        .object({
+          title: z.string().describe("Product label content"),
+          startDate: z.string().optional().describe("Start date, YYYY-MM-DDTHH:mm:ssZ"),
+          endDate: z.string().optional().describe("End date, YYYY-MM-DDTHH:mm:ssZ"),
+        })
+        .optional()
+        .describe("Product label details"),
       slug: z.string().optional(),
-      seo: z.record(z.unknown()).optional().describe("SEO metadata object"),
+      seo: z
+        .object({
+          title: z.string().optional().describe("SEO title"),
+          description: z.string().optional().describe("SEO description"),
+        })
+        .optional()
+        .describe("SEO metadata for the product"),
       taxInclusive: z.boolean().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
@@ -110,23 +150,64 @@ export const productTools = [
     inputSchema: z.object({
       productId: z.string().describe("The product ID to update"),
       name: z.string().describe("Product name"),
-      productType: z.string().describe("Product type, e.g. PHYSICAL, DIGITAL, SERVICE"),
+      productType: z.enum(["DIGITAL", "PHYSICAL", "SERVICE", "PHYSICAL/DIGITAL"]).describe("Product type"),
       description: z.string().optional(),
       image: z.string().optional().describe("Product image URL"),
       statementDescriptor: z.string().optional(),
       availableInStore: z.boolean().optional(),
-      medias: z.array(z.record(z.unknown())).optional().describe("Array of media objects"),
-      variants: z.array(z.record(z.unknown())).optional().describe("Array of variant option objects"),
+      medias: z
+        .array(
+          z.object({
+            id: z.string().optional().describe("Media ID"),
+            title: z.string().optional().describe("Media file title"),
+            url: z.string().describe("URL where the media file is stored"),
+            type: z.enum(["image", "video"]).describe("Media type"),
+            isFeatured: z.boolean().optional().describe("Whether the media is featured"),
+            priceIds: z.array(z.string()).optional().describe("Price IDs the media is assigned to"),
+          })
+        )
+        .optional()
+        .describe("Array of media objects"),
+      variants: z
+        .array(
+          z.object({
+            id: z.string().optional().describe("Variant ID"),
+            name: z.string().describe("Variant name, e.g. Size"),
+            options: z
+              .array(
+                z.object({
+                  id: z.string().optional().describe("Option ID"),
+                  name: z.string().describe("Option name, e.g. XL"),
+                })
+              )
+              .describe("Array of options for the variant"),
+          })
+        )
+        .optional()
+        .describe("Array of variant objects"),
       collectionIds: z.array(z.string()).optional().describe("Category/collection IDs"),
       isTaxesEnabled: z.boolean().optional(),
-      taxes: z.array(z.record(z.unknown())).optional().describe("Array of tax objects"),
+      taxes: z.array(z.string()).optional().describe("List of tax IDs attached to the product"),
       automaticTaxCategoryId: z.string().optional(),
       isLabelEnabled: z.boolean().optional(),
-      label: z.record(z.unknown()).optional().describe("Product label object"),
+      label: z
+        .object({
+          title: z.string().describe("Product label content"),
+          startDate: z.string().optional().describe("Start date, YYYY-MM-DDTHH:mm:ssZ"),
+          endDate: z.string().optional().describe("End date, YYYY-MM-DDTHH:mm:ssZ"),
+        })
+        .optional()
+        .describe("Product label details"),
       slug: z.string().optional(),
-      seo: z.record(z.unknown()).optional().describe("SEO metadata object"),
+      seo: z
+        .object({
+          title: z.string().optional().describe("SEO title"),
+          description: z.string().optional().describe("SEO description"),
+        })
+        .optional()
+        .describe("SEO metadata for the product"),
       taxInclusive: z.boolean().optional(),
-      prices: z.array(z.record(z.unknown())).optional().describe("Array of price objects"),
+      prices: z.array(z.string()).optional().describe("List of price IDs for the product"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { productId, ...fields } = args as { productId: string } & Record<string, unknown>;
@@ -182,8 +263,38 @@ export const productTools = [
         .describe("Type of bulk update operation"),
       productIds: z.array(z.string()).min(1).describe("Array of product IDs to update"),
       filters: z.record(z.unknown()).optional().describe("Filters to apply when selecting all matching products"),
-      price: z.record(z.unknown()).optional().describe("Price update configuration"),
-      compareAtPrice: z.record(z.unknown()).optional().describe("Compare-at price update configuration"),
+      price: z
+        .object({
+          type: z
+            .enum([
+              "INCREASE_BY_AMOUNT",
+              "REDUCE_BY_AMOUNT",
+              "SET_NEW_PRICE",
+              "INCREASE_BY_PERCENTAGE",
+              "REDUCE_BY_PERCENTAGE",
+            ])
+            .describe("Type of price update"),
+          value: z.number().describe("Value to update (amount or percentage based on type)"),
+          roundToWhole: z.boolean().optional().describe("Round to nearest whole number"),
+        })
+        .optional()
+        .describe("Price update configuration"),
+      compareAtPrice: z
+        .object({
+          type: z
+            .enum([
+              "INCREASE_BY_AMOUNT",
+              "REDUCE_BY_AMOUNT",
+              "SET_NEW_PRICE",
+              "INCREASE_BY_PERCENTAGE",
+              "REDUCE_BY_PERCENTAGE",
+            ])
+            .describe("Type of price update"),
+          value: z.number().describe("Value to update (amount or percentage based on type)"),
+          roundToWhole: z.boolean().optional().describe("Round to nearest whole number"),
+        })
+        .optional()
+        .describe("Compare-at price update configuration"),
       availability: z.boolean().optional().describe("New availability status"),
       collectionIds: z.array(z.string()).optional().describe("Array of collection IDs"),
       currency: z.string().optional().describe("Currency code, e.g. USD"),
@@ -279,26 +390,71 @@ export const productTools = [
     inputSchema: z.object({
       productId: z.string().describe("The product ID to create the price under"),
       name: z.string().describe("Price name"),
-      type: z.string().describe("Price type, e.g. one_time, recurring"),
+      type: z.enum(["one_time", "recurring"]).describe("Price type"),
       currency: z.string().describe("Currency code, e.g. USD"),
       amount: z.number().describe("Price amount"),
-      recurring: z.record(z.unknown()).optional().describe("Recurring billing configuration"),
+      recurring: z
+        .object({
+          interval: z.enum(["day", "month", "week", "year"]).describe("Recurrence interval"),
+          intervalCount: z.number().describe("Number of intervals between each occurrence"),
+        })
+        .optional()
+        .describe("Recurring billing configuration (if type is recurring)"),
       description: z.string().optional(),
-      membershipOffers: z.array(z.record(z.unknown())).optional().describe("Array of membership offer objects"),
+      membershipOffers: z
+        .array(
+          z.object({
+            label: z.string().describe("Membership offer label"),
+            value: z.string().describe("Membership offer value"),
+            _id: z.string().describe("Membership offer ID"),
+          })
+        )
+        .optional()
+        .describe("Array of membership offer objects"),
       trialPeriod: z.number().optional().describe("Trial period in days"),
       totalCycles: z.number().optional().describe("Total number of billing cycles"),
       setupFee: z.number().optional().describe("One-time setup fee"),
       variantOptionIds: z.array(z.string()).optional().describe("Variant option IDs this price applies to"),
       compareAtPrice: z.number().optional().describe("Compare-at (original/strikethrough) price"),
       userId: z.string().optional().describe("User ID creating the price"),
-      meta: z.record(z.unknown()).optional().describe("Arbitrary metadata object"),
+      meta: z
+        .object({
+          source: z.enum(["stripe", "woocommerce", "shopify"]).describe("Source of the price"),
+          sourceId: z.string().optional().describe("ID of the source the price was imported from"),
+          stripePriceId: z.string().describe("Stripe price ID associated with the price"),
+          internalSource: z
+            .enum(["agency_plan", "funnel", "membership", "communities", "gokollab", "calendar"])
+            .describe("Internal source of the price"),
+        })
+        .optional()
+        .describe("Additional metadata associated with the price"),
       trackInventory: z.boolean().optional(),
       availableQuantity: z.number().optional().describe("Available inventory quantity"),
       allowOutOfStockPurchases: z.boolean().optional(),
       sku: z.string().optional(),
-      shippingOptions: z.record(z.unknown()).optional().describe("Shipping configuration object"),
+      shippingOptions: z
+        .object({
+          weight: z
+            .object({
+              value: z.number().describe("Actual weight of the product"),
+              unit: z.enum(["kg", "lb", "g", "oz"]).describe("Weight unit"),
+            })
+            .optional()
+            .describe("Weight options of the product"),
+          dimensions: z
+            .object({
+              height: z.number().describe("Height"),
+              width: z.number().describe("Width"),
+              length: z.number().describe("Length"),
+              unit: z.enum(["cm", "in", "m"]).describe("Dimension unit"),
+            })
+            .optional()
+            .describe("Dimensions of the product"),
+        })
+        .optional()
+        .describe("Shipping options of the price"),
       isDigitalProduct: z.boolean().optional(),
-      digitalDelivery: z.record(z.unknown()).optional().describe("Digital delivery configuration object"),
+      digitalDelivery: z.array(z.string()).optional().describe("Digital delivery options"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { productId, ...fields } = args as { productId: string } & Record<string, unknown>;
@@ -321,26 +477,71 @@ export const productTools = [
       productId: z.string().describe("The product ID"),
       priceId: z.string().describe("The price ID to update"),
       name: z.string().describe("Price name"),
-      type: z.string().describe("Price type, e.g. one_time, recurring"),
+      type: z.enum(["one_time", "recurring"]).describe("Price type"),
       currency: z.string().describe("Currency code, e.g. USD"),
       amount: z.number().describe("Price amount"),
-      recurring: z.record(z.unknown()).optional().describe("Recurring billing configuration"),
+      recurring: z
+        .object({
+          interval: z.enum(["day", "month", "week", "year"]).describe("Recurrence interval"),
+          intervalCount: z.number().describe("Number of intervals between each occurrence"),
+        })
+        .optional()
+        .describe("Recurring billing configuration (if type is recurring)"),
       description: z.string().optional(),
-      membershipOffers: z.array(z.record(z.unknown())).optional().describe("Array of membership offer objects"),
+      membershipOffers: z
+        .array(
+          z.object({
+            label: z.string().describe("Membership offer label"),
+            value: z.string().describe("Membership offer value"),
+            _id: z.string().describe("Membership offer ID"),
+          })
+        )
+        .optional()
+        .describe("Array of membership offer objects"),
       trialPeriod: z.number().optional().describe("Trial period in days"),
       totalCycles: z.number().optional().describe("Total number of billing cycles"),
       setupFee: z.number().optional().describe("One-time setup fee"),
       variantOptionIds: z.array(z.string()).optional().describe("Variant option IDs this price applies to"),
       compareAtPrice: z.number().optional().describe("Compare-at (original/strikethrough) price"),
       userId: z.string().optional().describe("User ID updating the price"),
-      meta: z.record(z.unknown()).optional().describe("Arbitrary metadata object"),
+      meta: z
+        .object({
+          source: z.enum(["stripe", "woocommerce", "shopify"]).describe("Source of the price"),
+          sourceId: z.string().optional().describe("ID of the source the price was imported from"),
+          stripePriceId: z.string().describe("Stripe price ID associated with the price"),
+          internalSource: z
+            .enum(["agency_plan", "funnel", "membership", "communities", "gokollab", "calendar"])
+            .describe("Internal source of the price"),
+        })
+        .optional()
+        .describe("Additional metadata associated with the price"),
       trackInventory: z.boolean().optional(),
       availableQuantity: z.number().optional().describe("Available inventory quantity"),
       allowOutOfStockPurchases: z.boolean().optional(),
       sku: z.string().optional(),
-      shippingOptions: z.record(z.unknown()).optional().describe("Shipping configuration object"),
+      shippingOptions: z
+        .object({
+          weight: z
+            .object({
+              value: z.number().describe("Actual weight of the product"),
+              unit: z.enum(["kg", "lb", "g", "oz"]).describe("Weight unit"),
+            })
+            .optional()
+            .describe("Weight options of the product"),
+          dimensions: z
+            .object({
+              height: z.number().describe("Height"),
+              width: z.number().describe("Width"),
+              length: z.number().describe("Length"),
+              unit: z.enum(["cm", "in", "m"]).describe("Dimension unit"),
+            })
+            .optional()
+            .describe("Dimensions of the product"),
+        })
+        .optional()
+        .describe("Shipping options of the price"),
       isDigitalProduct: z.boolean().optional(),
-      digitalDelivery: z.record(z.unknown()).optional().describe("Digital delivery configuration object"),
+      digitalDelivery: z.array(z.string()).optional().describe("Digital delivery options"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { productId, priceId, ...fields } = args as
@@ -410,8 +611,17 @@ export const productTools = [
     description: "Bulk update inventory quantities for a set of product price variants.",
     inputSchema: z.object({
       items: z
-        .array(z.record(z.unknown()))
-        .describe("Array of inventory items to update, e.g. [{ priceId, productId, availableQuantity }]"),
+        .array(
+          z.object({
+            priceId: z.string().describe("Price ID, in MongoDB ID format"),
+            availableQuantity: z.number().optional().describe("Available quantity of the item"),
+            allowOutOfStockPurchases: z
+              .boolean()
+              .optional()
+              .describe("Whether to continue selling the item when out of stock"),
+          })
+        )
+        .describe("Array of inventory items to update"),
     }),
     handler: async (args: { items: Record<string, unknown>[] }, config: GHLConfig) => {
       try {

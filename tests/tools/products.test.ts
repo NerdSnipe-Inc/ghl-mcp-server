@@ -58,8 +58,8 @@ describe('ghl_get_products', () => {
     expect(call.params.includedInStore).toBe('true');
     expect(call.params.availableInStore).toBe('false');
     expect(call.params.sortOrder).toBe('desc');
-    expect(call.params.expand).toBe('variants,medias');
-    expect(call.params.productIds).toBe('p1,p2');
+    expect(call.url.searchParams.getAll('expand')).toEqual(['variants', 'medias']);
+    expect(call.url.searchParams.getAll('productIds')).toEqual(['p1', 'p2']);
   });
 
   it('handles API errors', async () => {
@@ -134,10 +134,10 @@ describe('ghl_create_product', () => {
         statementDescriptor: 'SHIRT',
         availableInStore: true,
         collectionIds: ['col1'],
-        medias: [{ url: 'https://example.com/1.png' }],
-        variants: [{ name: 'Size' }],
+        medias: [{ url: 'https://example.com/1.png', type: 'image' }],
+        variants: [{ name: 'Size', options: [{ name: 'S' }] }],
         isTaxesEnabled: true,
-        taxes: [{ id: 'tax1' }],
+        taxes: ['tax1'],
         automaticTaxCategoryId: 'cat1',
         isLabelEnabled: true,
         label: { title: 'New' },
@@ -150,8 +150,8 @@ describe('ghl_create_product', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.body?.description).toBe('Nice shirt');
     expect(call.body?.collectionIds).toEqual(['col1']);
-    expect(call.body?.variants).toEqual([{ name: 'Size' }]);
-    expect(call.body?.taxes).toEqual([{ id: 'tax1' }]);
+    expect(call.body?.variants).toEqual([{ name: 'Size', options: [{ name: 'S' }] }]);
+    expect(call.body?.taxes).toEqual(['tax1']);
     expect(call.body?.label).toEqual({ title: 'New' });
     expect(call.body?.seo).toEqual({ title: 'T-Shirt' });
   });
@@ -193,12 +193,12 @@ describe('ghl_update_product', () => {
         productId: 'abc',
         name: 'Shirt',
         productType: 'PHYSICAL',
-        prices: [{ id: 'price1', amount: 10 }],
+        prices: ['price1'],
       },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.body?.prices).toEqual([{ id: 'price1', amount: 10 }]);
+    expect(call.body?.prices).toEqual(['price1']);
   });
 
   it('handles errors', async () => {
@@ -262,8 +262,8 @@ describe('ghl_bulk_update_products', () => {
         type: 'bulk-update-price',
         productIds: ['p1'],
         filters: { collectionIds: ['c1'] },
-        price: { type: 'fixed', value: 10 },
-        compareAtPrice: { type: 'fixed', value: 20 },
+        price: { type: 'SET_NEW_PRICE', value: 10 },
+        compareAtPrice: { type: 'SET_NEW_PRICE', value: 20 },
         collectionIds: ['c1'],
         currency: 'USD',
       },
@@ -271,8 +271,8 @@ describe('ghl_bulk_update_products', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.body?.filters).toEqual({ collectionIds: ['c1'] });
-    expect(call.body?.price).toEqual({ type: 'fixed', value: 10 });
-    expect(call.body?.compareAtPrice).toEqual({ type: 'fixed', value: 20 });
+    expect(call.body?.price).toEqual({ type: 'SET_NEW_PRICE', value: 10 });
+    expect(call.body?.compareAtPrice).toEqual({ type: 'SET_NEW_PRICE', value: 20 });
     expect(call.body?.currency).toBe('USD');
   });
 
@@ -421,10 +421,10 @@ describe('ghl_create_product_price', () => {
         availableQuantity: 5,
         allowOutOfStockPurchases: false,
         isDigitalProduct: true,
-        digitalDelivery: { url: 'https://example.com/file.zip' },
-        meta: { note: 'x' },
-        shippingOptions: { weight: 1 },
-        membershipOffers: [{ id: 'offer1' }],
+        digitalDelivery: ['https://example.com/file.zip'],
+        meta: { source: 'stripe', stripePriceId: 'price_123', internalSource: 'funnel' },
+        shippingOptions: { weight: { value: 1, unit: 'kg' } },
+        membershipOffers: [{ label: 'top_50', value: '50', _id: 'offer1' }],
         userId: 'user1',
       },
       TEST_CONFIG
@@ -433,8 +433,8 @@ describe('ghl_create_product_price', () => {
     expect(call.body?.recurring).toEqual({ interval: 'month', intervalCount: 1 });
     expect(call.body?.trialPeriod).toBe(7);
     expect(call.body?.variantOptionIds).toEqual(['opt1']);
-    expect(call.body?.digitalDelivery).toEqual({ url: 'https://example.com/file.zip' });
-    expect(call.body?.membershipOffers).toEqual([{ id: 'offer1' }]);
+    expect(call.body?.digitalDelivery).toEqual(['https://example.com/file.zip']);
+    expect(call.body?.membershipOffers).toEqual([{ label: 'top_50', value: '50', _id: 'offer1' }]);
   });
 
   it('handles errors', async () => {
