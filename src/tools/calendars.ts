@@ -7,13 +7,21 @@ export const calendarTools = [
     description: "List all calendars in the GHL location.",
     inputSchema: z.object({
       groupId: z.string().optional().describe("Filter by calendar group ID"),
+      showDrafted: z
+        .boolean()
+        .optional()
+        .describe("Whether to include drafted (unpublished) calendars. Defaults to true."),
     }),
-    handler: async (args: { groupId?: string }, config: GHLConfig) => {
+    handler: async (args: { groupId?: string; showDrafted?: boolean }, config: GHLConfig) => {
       try {
         const result = await ghlRequest("GET", "/calendars/", {
           token: config.token,
           version: GHL_VERSION_V3,
-          params: { locationId: config.locationId, groupId: args.groupId },
+          params: {
+            locationId: config.locationId,
+            groupId: args.groupId,
+            showDrafted: args.showDrafted,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -55,9 +63,18 @@ export const calendarTools = [
         .string()
         .optional()
         .describe("Timezone for slots, e.g. 'America/New_York'"),
+      userId: z.string().optional().describe("Filter free slots for a single user"),
+      userIds: z.array(z.string()).optional().describe("Filter free slots for multiple users"),
     }),
     handler: async (
-      args: { calendarId: string; startDate: number; endDate: number; timezone?: string },
+      args: {
+        calendarId: string;
+        startDate: number;
+        endDate: number;
+        timezone?: string;
+        userId?: string;
+        userIds?: string[];
+      },
       config: GHLConfig
     ) => {
       try {
@@ -68,6 +85,8 @@ export const calendarTools = [
             startDate: args.startDate,
             endDate: args.endDate,
             timezone: args.timezone,
+            userId: args.userId,
+            userIds: args.userIds ? args.userIds.join(",") : undefined,
           },
         });
         return JSON.stringify(result, null, 2);
@@ -122,19 +141,37 @@ export const calendarTools = [
         .describe("ISO 8601 start time, e.g. '2024-12-15T14:00:00-05:00'"),
       endTime: z
         .string()
-        .describe("ISO 8601 end time"),
+        .optional()
+        .describe("ISO 8601 end time (spec: optional — calendar duration used if omitted)"),
       title: z.string().optional().describe("Appointment title/name"),
       appointmentStatus: z
-        .enum(["new", "confirmed", "cancelled", "showed", "noshow", "invalid"])
+        .enum(["new", "confirmed", "cancelled", "showed", "noshow", "invalid", "completed", "active"])
         .optional()
         .default("new"),
       meetingLocationType: z
-        .enum(["default", "zoom", "google_meet", "phone", "custom"])
+        .enum(["custom", "zoom", "gmeet", "phone", "address", "ms_teams", "google"])
         .optional(),
       address: z.string().optional().describe("Location address if in-person"),
-      notes: z.string().optional(),
+      description: z.string().optional().describe("Appointment description/notes"),
       ignoreDateRange: z.boolean().optional(),
       toNotify: z.boolean().optional().default(true),
+      assignedUserId: z.string().optional().describe("User ID assigned to the appointment"),
+      meetingLocationId: z
+        .string()
+        .optional()
+        .describe("Meeting location ID from calendar.locationConfigurations"),
+      overrideLocationConfig: z
+        .boolean()
+        .optional()
+        .describe("Override location config: true with meetingLocationType, false with meetingLocationId"),
+      ignoreFreeSlotValidation: z
+        .boolean()
+        .optional()
+        .describe("Skip time slot validation for appointment creation"),
+      rrule: z
+        .string()
+        .optional()
+        .describe("RRULE (RFC 5545) for recurring events; only applied if ignoreFreeSlotValidation is true"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -178,10 +215,32 @@ export const calendarTools = [
       endTime: z.string().optional().describe("New ISO 8601 end time"),
       title: z.string().optional(),
       appointmentStatus: z
-        .enum(["new", "confirmed", "cancelled", "showed", "noshow", "invalid"])
+        .enum(["new", "confirmed", "cancelled", "showed", "noshow", "invalid", "completed", "active"])
         .optional(),
-      notes: z.string().optional(),
+      meetingLocationType: z
+        .enum(["custom", "zoom", "gmeet", "phone", "address", "ms_teams", "google"])
+        .optional(),
+      description: z.string().optional().describe("Appointment description/notes"),
+      address: z.string().optional().describe("Location address if in-person"),
       toNotify: z.boolean().optional(),
+      assignedUserId: z.string().optional().describe("User ID assigned to the appointment"),
+      meetingLocationId: z
+        .string()
+        .optional()
+        .describe("Meeting location ID from calendar.locationConfigurations"),
+      overrideLocationConfig: z
+        .boolean()
+        .optional()
+        .describe("Override location config: true with meetingLocationType, false with meetingLocationId"),
+      ignoreFreeSlotValidation: z
+        .boolean()
+        .optional()
+        .describe("Skip time slot validation for appointment updates"),
+      ignoreDateRange: z.boolean().optional(),
+      rrule: z
+        .string()
+        .optional()
+        .describe("RRULE (RFC 5545) for recurring events; only applied if ignoreFreeSlotValidation is true"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { eventId, ...updateData } = args as { eventId: string } & Record<string, unknown>;

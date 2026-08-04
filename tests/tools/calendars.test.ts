@@ -36,6 +36,13 @@ describe('ghl_get_calendars', () => {
     expect(call.params.groupId).toBe('grp-1');
   });
 
+  it('passes showDrafted filter when provided', async () => {
+    const fetch = mockFetchSuccess({ calendars: [] });
+    await getTool('ghl_get_calendars').handler({ showDrafted: false }, TEST_CONFIG);
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.showDrafted).toBe('false');
+  });
+
   it('handles API errors', async () => {
     mockFetchError(401, { message: 'Unauthorized' });
     expectError(await getTool('ghl_get_calendars').handler({}, TEST_CONFIG), 401);
@@ -87,6 +94,23 @@ describe('ghl_get_free_slots', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.params.timezone).toBe('America/New_York');
+  });
+
+  it('passes userId and userIds when provided', async () => {
+    const fetch = mockFetchSuccess({ slots: [] });
+    await getTool('ghl_get_free_slots').handler(
+      {
+        calendarId: 'cal-1',
+        startDate: 1700000000000,
+        endDate: 1700086400000,
+        userId: 'user-1',
+        userIds: ['user-1', 'user-2'],
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.params.userId).toBe('user-1');
+    expect(call.params.userIds).toBe('user-1,user-2');
   });
 });
 
@@ -158,6 +182,71 @@ describe('ghl_create_appointment', () => {
       422
     );
   });
+
+  it('sends description (not notes) and the real meetingLocationType/spec fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_create_appointment').handler(
+      {
+        calendarId: 'cal-1',
+        contactId: 'contact-abc',
+        startTime: '2024-12-15T14:00:00-05:00',
+        endTime: '2024-12-15T15:00:00-05:00',
+        description: 'First consultation',
+        meetingLocationType: 'gmeet',
+        assignedUserId: 'user-1',
+        meetingLocationId: 'custom_0',
+        overrideLocationConfig: true,
+        ignoreFreeSlotValidation: true,
+        rrule: 'RRULE:FREQ=DAILY;INTERVAL=1;COUNT=5',
+        address: '123 Main St',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.description).toBe('First consultation');
+    expect(call.body?.notes).toBeUndefined();
+    expect(call.body?.meetingLocationType).toBe('gmeet');
+    expect(call.body?.assignedUserId).toBe('user-1');
+    expect(call.body?.meetingLocationId).toBe('custom_0');
+    expect(call.body?.overrideLocationConfig).toBe(true);
+    expect(call.body?.ignoreFreeSlotValidation).toBe(true);
+    expect(call.body?.rrule).toBe('RRULE:FREQ=DAILY;INTERVAL=1;COUNT=5');
+    expect(call.body?.address).toBe('123 Main St');
+  });
+
+  it('accepts all real meetingLocationType enum values', async () => {
+    for (const type of ['custom', 'zoom', 'gmeet', 'phone', 'address', 'ms_teams', 'google']) {
+      const result = getTool('ghl_create_appointment').inputSchema.safeParse({
+        calendarId: 'cal-1',
+        contactId: 'contact-abc',
+        startTime: '2024-12-15T14:00:00Z',
+        endTime: '2024-12-15T15:00:00Z',
+        meetingLocationType: type,
+      });
+      expect(result.success, `expected ${type} to be valid`).toBe(true);
+    }
+    const invalid = getTool('ghl_create_appointment').inputSchema.safeParse({
+      calendarId: 'cal-1',
+      contactId: 'contact-abc',
+      startTime: '2024-12-15T14:00:00Z',
+      endTime: '2024-12-15T15:00:00Z',
+      meetingLocationType: 'google_meet',
+    });
+    expect(invalid.success).toBe(false);
+  });
+
+  it('accepts completed and active appointmentStatus values', async () => {
+    for (const status of ['completed', 'active']) {
+      const result = getTool('ghl_create_appointment').inputSchema.safeParse({
+        calendarId: 'cal-1',
+        contactId: 'contact-abc',
+        startTime: '2024-12-15T14:00:00Z',
+        endTime: '2024-12-15T15:00:00Z',
+        appointmentStatus: status,
+      });
+      expect(result.success, `expected ${status} to be valid`).toBe(true);
+    }
+  });
 });
 
 // ── ghl_get_appointment ───────────────────────────────────────────────────────
@@ -193,6 +282,44 @@ describe('ghl_update_appointment', () => {
     expect(call.body?.appointmentStatus).toBe('confirmed');
     expect(call.body?.startTime).toBe('2024-12-16T14:00:00Z');
     expect(call.body?.eventId).toBeUndefined();
+  });
+
+  it('sends description (not notes) and missing spec fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_appointment').handler(
+      {
+        eventId: 'evt-1',
+        description: 'Rescheduled',
+        meetingLocationType: 'phone',
+        assignedUserId: 'user-2',
+        meetingLocationId: 'custom_1',
+        overrideLocationConfig: false,
+        ignoreFreeSlotValidation: true,
+        rrule: 'RRULE:FREQ=DAILY;INTERVAL=1;COUNT=3',
+        address: '456 Oak Ave',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.description).toBe('Rescheduled');
+    expect(call.body?.notes).toBeUndefined();
+    expect(call.body?.meetingLocationType).toBe('phone');
+    expect(call.body?.assignedUserId).toBe('user-2');
+    expect(call.body?.meetingLocationId).toBe('custom_1');
+    expect(call.body?.overrideLocationConfig).toBe(false);
+    expect(call.body?.ignoreFreeSlotValidation).toBe(true);
+    expect(call.body?.rrule).toBe('RRULE:FREQ=DAILY;INTERVAL=1;COUNT=3');
+    expect(call.body?.address).toBe('456 Oak Ave');
+  });
+
+  it('accepts completed and active appointmentStatus values', async () => {
+    for (const status of ['completed', 'active']) {
+      const result = getTool('ghl_update_appointment').inputSchema.safeParse({
+        eventId: 'evt-1',
+        appointmentStatus: status,
+      });
+      expect(result.success, `expected ${status} to be valid`).toBe(true);
+    }
   });
 });
 
