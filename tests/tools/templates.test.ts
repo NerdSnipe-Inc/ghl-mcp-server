@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { templateTools } from '../../src/tools/templates.js';
-import { GHL_VERSION_V3, GHL_VERSION_LEGACY } from '../../src/client.js';
+import { GHL_VERSION_V3 } from '../../src/client.js';
 import {
   TEST_CONFIG,
   MOCK_DATA,
@@ -54,61 +54,10 @@ describe('ghl_get_templates', () => {
   });
 });
 
-// ── ghl_create_template ────────────────────────────────────────────────────────
-
-describe('ghl_create_template', () => {
-  it('calls POST /locations/:locationId/templates with body', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
-    await getTool('ghl_create_template').handler(
-      { name: 'Welcome SMS', type: 'sms', body: 'Hello there' },
-      TEST_CONFIG
-    );
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('POST');
-    expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/templates`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
-    expect(call.body?.name).toBe('Welcome SMS');
-    expect(call.body?.type).toBe('sms');
-    expect(call.body?.body).toBe('Hello there');
-  });
-
-  it('handles 422 validation error', async () => {
-    mockFetchError(422, { message: 'Invalid template' });
-    expectError(
-      await getTool('ghl_create_template').handler(
-        { name: '', type: 'sms', body: '' },
-        TEST_CONFIG
-      ),
-      422
-    );
-  });
-});
-
-// ── ghl_update_template ────────────────────────────────────────────────────────
-
-describe('ghl_update_template', () => {
-  it('calls PUT /locations/:locationId/templates/:templateId with body', async () => {
-    const fetch = mockFetchSuccess(MOCK_DATA);
-    await getTool('ghl_update_template').handler(
-      { templateId: 'tmpl-1', name: 'Updated Name' },
-      TEST_CONFIG
-    );
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('PUT');
-    expect(call.pathname).toBe(`/locations/${TEST_CONFIG.locationId}/templates/tmpl-1`);
-    expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
-    expect(call.body?.name).toBe('Updated Name');
-    expect(call.body?.templateId).toBeUndefined();
-  });
-
-  it('handles 404', async () => {
-    mockFetchError(404, { message: 'Not found' });
-    expectError(
-      await getTool('ghl_update_template').handler({ templateId: 'bad' }, TEST_CONFIG),
-      404
-    );
-  });
-});
+// ghl_create_template / ghl_update_template were removed during the
+// 2026-08-04 remediation: /locations/{locationId}/templates has no POST/PUT
+// anywhere in the v3 or legacy spec (only GET/DELETE) — there is no real
+// endpoint to build them against. See templates.ts's header comment.
 
 // ── ghl_delete_template ────────────────────────────────────────────────────────
 

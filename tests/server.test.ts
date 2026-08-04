@@ -134,7 +134,7 @@ const ALL_TOOLS = [
 
 describe('Tool registry', () => {
   it('registers exactly 364 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(403);
+    expect(ALL_TOOLS).toHaveLength(401);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -184,7 +184,7 @@ describe('Tool counts per module', () => {
   it('customFields has 4 tools', () => expect(customFieldTools).toHaveLength(4));
   it('customValues has 4 tools', () => expect(customValueTools).toHaveLength(4));
   it('users has 6 tools', () => expect(userTools).toHaveLength(6));
-  it('templates has 4 tools', () => expect(templateTools).toHaveLength(4));
+  it('templates has 2 tools', () => expect(templateTools).toHaveLength(2));
   it('forms has 2 tools', () => expect(formTools).toHaveLength(2));
   it('surveys has 2 tools', () => expect(surveyTools).toHaveLength(2));
   it('emailBuilder has 5 tools', () => expect(emailBuilderTools).toHaveLength(5));
@@ -274,7 +274,7 @@ describe('Specific tool existence', () => {
     'ghl_get_users', 'ghl_search_users', 'ghl_get_user',
     'ghl_create_user', 'ghl_update_user', 'ghl_delete_user',
     // Templates (4)
-    'ghl_get_templates', 'ghl_create_template', 'ghl_update_template', 'ghl_delete_template',
+    'ghl_get_templates', 'ghl_delete_template',
     // Forms (2)
     'ghl_get_forms', 'ghl_get_form_submissions',
     // Surveys (2)
@@ -468,6 +468,6 @@ describe('Specific tool existence', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(403);
+    expect(expectedTools).toHaveLength(401);
   });
 });

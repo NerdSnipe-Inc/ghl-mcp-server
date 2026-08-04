@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY } from "../client.js";
+import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
 /**
  * Location Templates — quick-reply style SMS/email/WhatsApp templates.
@@ -10,15 +10,21 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3, GHL_VERSION_LEGACY 
  * For full visual/HTML email marketing templates used in campaigns,
  * see emails.ts (ghl_create_email_builder_template).
  *
- * v3 status (confirmed via a full sweep of every file in apps/v3/, not just
- * locations-v3.json): GET and DELETE map cleanly to v3
- * (/locations/{locationId}/templates[/{id}]). GET requires an `originId`
- * query param — defaulted here to config.locationId, matching how "origin"
- * is used elsewhere in GHL's API for location-native (non-integration)
- * resources. There is no v3 POST/PUT for this path anywhere in the spec
- * tree — ghl_create_template/ghl_update_template stay on GHL_VERSION_LEGACY
- * permanently until GHL ships one. See apps/locations.json for the v2 shape
- * those two calls still use.
+ * v3 status (confirmed via a full sweep of every file in apps/v3/ AND the
+ * legacy apps/*.json tree, re-verified during the 2026-08-04 remediation):
+ * GET and DELETE map cleanly to v3 (/locations/{locationId}/templates[/{id}]).
+ * GET requires an `originId` query param — defaulted here to
+ * config.locationId, matching how "origin" is used elsewhere in GHL's API
+ * for location-native (non-integration) resources. There is NO POST/PUT for
+ * this exact path (/locations/{locationId}/templates) anywhere in the spec
+ * tree — v3 or legacy. (There IS a POST on the differently-shaped
+ * /emails/locations/{locationId}/templates path, but that's the email
+ * marketing/builder-template resource, already covered by emails.ts's
+ * ghl_create_email_builder_template — not this simple quick-reply resource.)
+ * ghl_create_template/ghl_update_template have therefore been removed: there
+ * is no real endpoint to point them at, matching the "cannot be built" cases
+ * documented for saas.ts/marketplace.ts/oauth.ts in earlier remediation
+ * phases.
  */
 export const templateTools = [
   {
@@ -46,54 +52,6 @@ export const templateTools = [
             originId: (args.originId as string | undefined) ?? config.locationId,
           },
         });
-        return JSON.stringify(result, null, 2);
-      } catch (e) {
-        return formatError(e);
-      }
-    },
-  },
-  {
-    name: "ghl_create_template",
-    description:
-      "Create a new SMS, email, or WhatsApp template. For email, provide a subject and HTML body. Returns the created template including its ID.",
-    inputSchema: z.object({
-      name: z.string().describe("Template display name"),
-      type: z.enum(["email", "sms", "whatsapp"]).describe("Template channel type"),
-      subject: z.string().optional().describe("Subject line — required for email templates"),
-      body: z.string().describe("Template body — plain text for SMS/WhatsApp, HTML for email"),
-      attachments: z.array(z.string()).optional().describe("Array of attachment URLs"),
-    }),
-    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      try {
-        const result = await ghlRequest("POST", `/locations/${config.locationId}/templates`, {
-          token: config.token,
-          version: GHL_VERSION_LEGACY,
-          body: args,
-        });
-        return JSON.stringify(result, null, 2);
-      } catch (e) {
-        return formatError(e);
-      }
-    },
-  },
-  {
-    name: "ghl_update_template",
-    description: "Update an existing SMS/email/WhatsApp template.",
-    inputSchema: z.object({
-      templateId: z.string().describe("Template ID to update"),
-      name: z.string().optional(),
-      subject: z.string().optional(),
-      body: z.string().optional(),
-      attachments: z.array(z.string()).optional(),
-    }),
-    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      const { templateId, ...updateData } = args as { templateId: string } & Record<string, unknown>;
-      try {
-        const result = await ghlRequest(
-          "PUT",
-          `/locations/${config.locationId}/templates/${templateId}`,
-          { token: config.token, version: GHL_VERSION_LEGACY, body: updateData }
-        );
         return JSON.stringify(result, null, 2);
       } catch (e) {
         return formatError(e);
