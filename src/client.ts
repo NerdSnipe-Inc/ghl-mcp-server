@@ -63,7 +63,7 @@ export async function ghlRequest<T = unknown>(
     token: string;
     version: string;
     body?: unknown;
-    params?: Record<string, string | number | boolean | undefined>;
+    params?: Record<string, string | number | boolean | string[] | undefined>;
   }
 ): Promise<T> {
   const { token, version, body, params } = options;
@@ -73,7 +73,12 @@ export async function ghlRequest<T = unknown>(
   if (params) {
     const searchParams = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== null) {
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          searchParams.append(key, String(item));
+        }
+      } else {
         searchParams.set(key, String(value));
       }
     }

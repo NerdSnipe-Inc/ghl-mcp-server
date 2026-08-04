@@ -104,6 +104,20 @@ describe('ghlRequest', () => {
     expect(parsed.searchParams.has('query')).toBe(false);
   });
 
+  it('serializes array param values as repeated query keys', async () => {
+    const fetch = mockFetchSuccess({});
+    await ghlRequest('GET', '/products/', {
+      token: 'tok',
+      version: GHL_VERSION_V3,
+      params: { productIds: ['a', 'b'] },
+    });
+    const [url] = fetch.mock.calls[0] as [string, RequestInit];
+    const parsed = new URL(url);
+    expect(parsed.searchParams.getAll('productIds')).toEqual(['a', 'b']);
+    expect(url).not.toContain('productIds=a%2Cb');
+    expect(url).not.toContain('productIds=a,b');
+  });
+
   it('sends body as JSON for POST requests', async () => {
     const fetch = mockFetchSuccess({ id: '1' });
     await ghlRequest('POST', '/contacts/', {
