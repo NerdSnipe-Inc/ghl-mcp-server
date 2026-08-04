@@ -25,10 +25,36 @@ export const socialTools = [
     inputSchema: z.object({
       skip: z.number().optional().default(0),
       limit: z.number().optional().default(20),
-      status: z
-        .enum(["scheduled", "published", "failed", "all"])
+      // Spec: SearchPostDTO's filter field is `type`, not `status` — enum values
+      // are recent, all, scheduled, draft, failed, in_review, published,
+      // in_progress, pending, deleted (not the old "scheduled/published/failed/all").
+      type: z
+        .enum([
+          "recent",
+          "all",
+          "scheduled",
+          "draft",
+          "failed",
+          "in_review",
+          "published",
+          "in_progress",
+          "pending",
+          "deleted",
+        ])
         .optional()
         .default("all"),
+      // Spec: fromDate, toDate, includeUsers are required by SearchPostDTO.
+      fromDate: z.string().describe("Range start (ISO 8601)"),
+      toDate: z.string().describe("Range end (ISO 8601)"),
+      includeUsers: z.boolean().describe("Whether to include user data in the response"),
+      accounts: z
+        .array(z.string())
+        .optional()
+        .describe("Social account IDs to filter by"),
+      postType: z
+        .enum(["post", "story", "reel"])
+        .optional()
+        .describe("Filter by post type (post, story, or reel)"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -41,7 +67,14 @@ export const socialTools = [
             body: {
               skip: args.skip,
               limit: args.limit,
-              status: args.status,
+              type: args.type,
+              fromDate: args.fromDate,
+              toDate: args.toDate,
+              includeUsers: args.includeUsers,
+              accounts: Array.isArray(args.accounts)
+                ? (args.accounts as string[]).join(",")
+                : undefined,
+              postType: args.postType,
             },
           }
         );
@@ -55,18 +88,48 @@ export const socialTools = [
     name: "ghl_create_social_post",
     description: "Schedule or publish a social media post.",
     inputSchema: z.object({
-      content: z.string().describe("Post caption/body text"),
+      // Spec: CreatePostDTO requires type, accountIds, userId.
+      type: z.enum(["post", "story", "reel"]).describe("Post type: post, story, or reel"),
       accountIds: z
         .array(z.string())
         .describe("Social account IDs to post to"),
-      scheduledAt: z
+      userId: z.string().describe("User ID creating/managing the post"),
+      // Spec: caption field is `summary`, not `content`.
+      summary: z.string().optional().describe("Post caption/body text"),
+      // Spec: scheduling field is `scheduleDate`, not `scheduledAt`.
+      scheduleDate: z
         .string()
         .optional()
-        .describe("ISO 8601 scheduled publish time (omit to post immediately)"),
-      mediaUrls: z
-        .array(z.string())
+        .describe(
+          "ISO 8601 scheduled publish time (omit to post immediately; required if status is scheduled or in_review)"
+        ),
+      // Spec: media is an array of {url, type, caption, altText} objects, not
+      // a bare array of URL strings.
+      media: z
+        .array(
+          z.object({
+            url: z.string().describe("Media URL"),
+            type: z.string().optional().describe("Media MIME type, e.g. image/jpeg"),
+            caption: z.string().optional(),
+            altText: z.string().optional(),
+          })
+        )
         .optional()
-        .describe("Image/video URLs to attach"),
+        .describe("Media attachments for the post"),
+      status: z
+        .enum([
+          "draft",
+          "scheduled",
+          "in_review",
+          "published",
+          "in_progress",
+          "pending",
+          "failed",
+          "notification_sent",
+          "deleted",
+        ])
+        .optional()
+        .describe("Post status"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {

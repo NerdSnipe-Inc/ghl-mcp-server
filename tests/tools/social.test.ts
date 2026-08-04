@@ -41,9 +41,15 @@ describe('ghl_get_social_accounts', () => {
 // ── ghl_get_social_posts ──────────────────────────────────────────────────────
 
 describe('ghl_get_social_posts', () => {
+  const REQUIRED_ARGS = {
+    fromDate: '2024-01-01T00:00:00Z',
+    toDate: '2024-02-01T00:00:00Z',
+    includeUsers: true,
+  };
+
   it('calls POST /social-media-posting/:locationId/posts/list', async () => {
     const fetch = mockFetchSuccess({ posts: [] });
-    await getTool('ghl_get_social_posts').handler({}, TEST_CONFIG);
+    await getTool('ghl_get_social_posts').handler(REQUIRED_ARGS, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe(
@@ -52,28 +58,60 @@ describe('ghl_get_social_posts', () => {
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
-  it('passes skip, limit, and status in the request body', async () => {
+  it('passes skip, limit, type, fromDate, toDate, and includeUsers in the request body', async () => {
     const fetch = mockFetchSuccess({ posts: [] });
     await getTool('ghl_get_social_posts').handler(
-      { skip: 10, limit: 5, status: 'scheduled' },
+      { skip: 10, limit: 5, type: 'scheduled', ...REQUIRED_ARGS },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.body?.skip).toBe(10);
     expect(call.body?.limit).toBe(5);
-    expect(call.body?.status).toBe('scheduled');
+    expect(call.body?.type).toBe('scheduled');
+    expect(call.body?.fromDate).toBe(REQUIRED_ARGS.fromDate);
+    expect(call.body?.toDate).toBe(REQUIRED_ARGS.toDate);
+    expect(call.body?.includeUsers).toBe(true);
+  });
+
+  it('joins accounts array into a comma-separated string and passes postType', async () => {
+    const fetch = mockFetchSuccess({ posts: [] });
+    await getTool('ghl_get_social_posts').handler(
+      { accounts: ['acc-1', 'acc-2'], postType: 'reel', ...REQUIRED_ARGS },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.accounts).toBe('acc-1,acc-2');
+    expect(call.body?.postType).toBe('reel');
+  });
+
+  it('rejects missing required fromDate/toDate/includeUsers', () => {
+    const schema = getTool('ghl_get_social_posts').inputSchema;
+    expect(schema.safeParse({}).success).toBe(false);
+    expect(schema.safeParse(REQUIRED_ARGS).success).toBe(true);
+  });
+
+  it('rejects an old-style status value that is not a real `type` enum member', () => {
+    const schema = getTool('ghl_get_social_posts').inputSchema;
+    const result = schema.safeParse({ ...REQUIRED_ARGS, type: 'published_only' });
+    expect(result.success).toBe(false);
   });
 });
 
 // ── ghl_create_social_post ────────────────────────────────────────────────────
 
 describe('ghl_create_social_post', () => {
-  it('calls POST /social-media-posting/:locationId/posts with content', async () => {
+  const REQUIRED_ARGS = {
+    type: 'post' as const,
+    accountIds: ['acc-1', 'acc-2'],
+    userId: 'user-1',
+  };
+
+  it('calls POST /social-media-posting/:locationId/posts with summary', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_create_social_post').handler(
       {
-        content: 'Check out our new offer!',
-        accountIds: ['acc-1', 'acc-2'],
+        summary: 'Check out our new offer!',
+        ...REQUIRED_ARGS,
       },
       TEST_CONFIG
     );
@@ -82,23 +120,42 @@ describe('ghl_create_social_post', () => {
     expect(call.pathname).toBe(
       `/social-media-posting/${TEST_CONFIG.locationId}/posts`
     );
-    expect(call.body?.content).toBe('Check out our new offer!');
+    expect(call.body?.summary).toBe('Check out our new offer!');
     expect(call.body?.accountIds).toEqual(['acc-1', 'acc-2']);
+    expect(call.body?.type).toBe('post');
+    expect(call.body?.userId).toBe('user-1');
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
-  it('includes scheduledAt when provided', async () => {
+  it('includes scheduleDate and media objects when provided', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_create_social_post').handler(
       {
-        content: 'Scheduled post',
-        accountIds: ['acc-1'],
-        scheduledAt: '2024-12-20T09:00:00Z',
+        ...REQUIRED_ARGS,
+        summary: 'Scheduled post',
+        scheduleDate: '2024-12-20T09:00:00Z',
+        media: [{ url: 'https://example.com/a.jpg', type: 'image/jpeg' }],
       },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.body?.scheduledAt).toBe('2024-12-20T09:00:00Z');
+    expect(call.body?.scheduleDate).toBe('2024-12-20T09:00:00Z');
+    expect(call.body?.media).toEqual([{ url: 'https://example.com/a.jpg', type: 'image/jpeg' }]);
+  });
+
+  it('rejects missing required type/accountIds/userId', () => {
+    const schema = getTool('ghl_create_social_post').inputSchema;
+    expect(schema.safeParse({ summary: 'no required fields' }).success).toBe(false);
+    expect(schema.safeParse(REQUIRED_ARGS).success).toBe(true);
+  });
+
+  it('rejects a bare media URL string array (old shape)', () => {
+    const schema = getTool('ghl_create_social_post').inputSchema;
+    const result = schema.safeParse({
+      ...REQUIRED_ARGS,
+      media: ['https://example.com/a.jpg'],
+    });
+    expect(result.success).toBe(false);
   });
 });
 
