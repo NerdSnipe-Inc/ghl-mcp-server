@@ -83,6 +83,7 @@ import { googleAccountsTools } from "./tools/google_accounts.js";
 import { googleCampaignsTools } from "./tools/google_campaigns.js";
 import { googleAudiencesTools } from "./tools/google_audiences.js";
 import { googleReportingTools } from "./tools/google_reporting.js";
+import { linkedinTools } from "./tools/linkedin.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -190,6 +191,7 @@ const ALL_TOOLS: ToolDef[] = [
   ...googleCampaignsTools,
   ...googleAudiencesTools,
   ...googleReportingTools,
+  ...linkedinTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));

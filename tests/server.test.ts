@@ -49,6 +49,7 @@ import { googleAccountsTools } from '../src/tools/google_accounts.js';
 import { googleCampaignsTools } from '../src/tools/google_campaigns.js';
 import { googleAudiencesTools } from '../src/tools/google_audiences.js';
 import { googleReportingTools } from '../src/tools/google_reporting.js';
+import { linkedinTools } from '../src/tools/linkedin.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -128,11 +129,12 @@ const ALL_TOOLS = [
   ...googleCampaignsTools,
   ...googleAudiencesTools,
   ...googleReportingTools,
+  ...linkedinTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 364 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(388);
+    expect(ALL_TOOLS).toHaveLength(404);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -228,6 +230,7 @@ describe('Tool counts per module', () => {
   it('googleCampaigns has 6 tools', () => expect(googleCampaignsTools).toHaveLength(6));
   it('googleAudiences has 14 tools', () => expect(googleAudiencesTools).toHaveLength(14));
   it('googleReporting has 4 tools', () => expect(googleReportingTools).toHaveLength(4));
+  it('linkedin has 16 tools', () => expect(linkedinTools).toHaveLength(16));
 });
 
 describe('Specific tool existence', () => {
@@ -450,12 +453,21 @@ describe('Specific tool existence', () => {
     // Ad publishing — Google reporting and targeting search (4)
     'ghl_get_google_reporting', 'ghl_get_google_campaign_reporting',
     'ghl_get_google_reporting_list', 'ghl_search_google_targeting',
+    // Ad publishing — LinkedIn ad account, campaign, form, and reporting management (16)
+    'ghl_get_linkedin_ad_account', 'ghl_delete_linkedin_ad_account',
+    'ghl_get_linkedin_ad_accounts', 'ghl_create_linkedin_integration',
+    'ghl_get_linkedin_integration', 'ghl_get_linkedin_me',
+    'ghl_upsert_linkedin_campaign', 'ghl_get_linkedin_campaign',
+    'ghl_publish_linkedin_campaign', 'ghl_update_linkedin_ad_status',
+    'ghl_create_linkedin_lead_form', 'ghl_get_linkedin_lead_forms',
+    'ghl_get_linkedin_reporting', 'ghl_get_linkedin_campaign_group_reporting',
+    'ghl_get_linkedin_reporting_list', 'ghl_search_linkedin_targeting',
   ];
 
-  it('all 388 expected tools are present', () => {
+  it('all 404 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(388);
+    expect(expectedTools).toHaveLength(404);
   });
 });
