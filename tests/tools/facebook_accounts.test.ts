@@ -473,6 +473,47 @@ describe('ghl_create_facebook_page_form', () => {
     };
     expect(schema.safeParse(invalidOption).success).toBe(false);
   });
+
+  it('validates thankYouPage/greetingCard/customDisclaimer as typed objects, not free-form records', () => {
+    const schema = getTool('ghl_create_facebook_page_form').inputSchema;
+
+    // thankYouPage missing required buttonType/buttonText
+    expect(
+      schema.safeParse({
+        ...CREATE_FORM_ARGS,
+        thankYouPage: { title: 'Thanks', body: 'body' },
+      }).success
+    ).toBe(false);
+
+    // greetingCard missing required style/content
+    expect(
+      schema.safeParse({
+        ...CREATE_FORM_ARGS,
+        greetingCard: { title: 'Welcome!' },
+      }).success
+    ).toBe(false);
+
+    // customDisclaimer checkbox missing required fields
+    expect(
+      schema.safeParse({
+        ...CREATE_FORM_ARGS,
+        customDisclaimer: { title: 'Terms', body: 'x', checkboxes: [{ text: 'I agree' }] },
+      }).success
+    ).toBe(false);
+
+    // fully valid optional shapes
+    expect(
+      schema.safeParse({
+        ...CREATE_FORM_ARGS,
+        greetingCard: { title: 'Welcome!', style: 'LIST_STYLE', content: ['Learn more'] },
+        customDisclaimer: {
+          title: 'Terms',
+          body: 'By submitting...',
+          checkboxes: [{ isRequired: true, text: 'I agree', key: 'agree' }],
+        },
+      }).success
+    ).toBe(true);
+  });
 });
 
 // ── ghl_get_facebook_page_instagram_accounts ────────────────────────────────

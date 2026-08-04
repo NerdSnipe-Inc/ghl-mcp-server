@@ -357,11 +357,43 @@ export const facebookAccountsTools = [
         )
         .describe("List of questions displayed on the lead form"),
       privacyPolicyLink: z.string().describe("Privacy policy URL"),
-      thankYouPage: z.record(z.string(), z.unknown()).describe("Thank you page configuration"),
+      thankYouPage: z
+        .object({
+          title: z.string(),
+          body: z.string(),
+          buttonText: z.string(),
+          buttonType: z.string(),
+          buttonLink: z.string().optional(),
+          businessPhone: z.string().optional(),
+          countryCode: z.string().optional(),
+        })
+        .describe("Thank you page configuration"),
       questionPageHeadline: z.string().optional().describe("Question page headline"),
       privacyPolicyText: z.string().optional().describe("Privacy policy text"),
-      greetingCard: z.record(z.string(), z.unknown()).optional().describe("Greeting card configuration"),
-      customDisclaimer: z.record(z.string(), z.unknown()).optional().describe("Custom disclaimer configuration"),
+      greetingCard: z
+        .object({
+          title: z.string(),
+          style: z.string(),
+          content: z.array(z.string()),
+        })
+        .optional()
+        .describe("Greeting card configuration"),
+      customDisclaimer: z
+        .object({
+          title: z.string(),
+          body: z.string(),
+          checkboxes: z
+            .array(
+              z.object({
+                isRequired: z.boolean(),
+                text: z.string(),
+                key: z.string(),
+              })
+            )
+            .optional(),
+        })
+        .optional()
+        .describe("Custom disclaimer configuration"),
       isDraft: z.boolean().optional().describe("If the form is a draft, set to true"),
       draftFormId: z.string().optional().describe("Draft form ID"),
       locale: z.string().optional().describe("Locale, e.g. EN_US"),
@@ -400,11 +432,23 @@ export const facebookAccountsTools = [
           options?: { key: string; value: string }[];
         }[];
         privacyPolicyLink: string;
-        thankYouPage: Record<string, unknown>;
+        thankYouPage: {
+          title: string;
+          body: string;
+          buttonText: string;
+          buttonType: string;
+          buttonLink?: string;
+          businessPhone?: string;
+          countryCode?: string;
+        };
         questionPageHeadline?: string;
         privacyPolicyText?: string;
-        greetingCard?: Record<string, unknown>;
-        customDisclaimer?: Record<string, unknown>;
+        greetingCard?: { title: string; style: string; content: string[] };
+        customDisclaimer?: {
+          title: string;
+          body: string;
+          checkboxes?: { isRequired: boolean; text: string; key: string }[];
+        };
         isDraft?: boolean;
         draftFormId?: string;
         locale?: string;
