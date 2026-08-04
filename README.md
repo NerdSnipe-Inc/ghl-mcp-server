@@ -7,14 +7,14 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple)](https://modelcontextprotocol.io)
-[![GoHighLevel](https://img.shields.io/badge/API-GHL%20v2-orange)](https://marketplace.gohighlevel.com/docs/)
+[![GoHighLevel](https://img.shields.io/badge/API-GHL%20v3-orange)](https://marketplace.gohighlevel.com/docs/)
 [![MCP Badge](https://lobehub.com/badge/mcp/nerdsnipe-inc-ghl-mcp-server)](https://lobehub.com/mcp/nerdsnipe-inc-ghl-mcp-server)
 
 ---
 
 ## What is this?
 
-This is a **[Model Context Protocol (MCP)](https://modelcontextprotocol.io) server** that connects your AI tools directly to your GoHighLevel (GHL) sub-account via the GHL API v2.
+This is a **[Model Context Protocol (MCP)](https://modelcontextprotocol.io) server** that connects your AI tools directly to your GoHighLevel (GHL) sub-account via the GHL API v3.
 
 Once installed, you can talk to your CRM naturally:
 
@@ -1117,6 +1117,6 @@ MIT © [Business AI Specialist](https://nerdsnipe.cc)
 
 ## Related
 
-- [GoHighLevel API v2 Documentation](https://marketplace.gohighlevel.com/docs/)
+- [GoHighLevel API Documentation](https://marketplace.gohighlevel.com/docs/)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
