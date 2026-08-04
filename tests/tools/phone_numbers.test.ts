@@ -53,11 +53,22 @@ describe('ghl_get_phone_numbers', () => {
 
 // ── ghl_search_available_phone_numbers ────────────────────────────────────────
 
+const VALID_SEARCH_ARGS = {
+  countryCode: 'US',
+  numberTypes: 'local',
+  firstPart: '613',
+  lastPart: '555',
+  anywhere: false,
+  smsEnabled: true,
+  mmsEnabled: true,
+  voiceEnabled: true,
+};
+
 describe('ghl_search_available_phone_numbers', () => {
-  it('calls GET /phone-system/numbers/location/:locationId/available with countryCode', async () => {
+  it('calls GET /phone-system/numbers/location/:locationId/available with all required params', async () => {
     const fetch = mockFetchSuccess({ numbers: [] });
     await getTool('ghl_search_available_phone_numbers').handler(
-      { countryCode: 'US' },
+      VALID_SEARCH_ARGS,
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -66,27 +77,38 @@ describe('ghl_search_available_phone_numbers', () => {
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/available`
     );
     expect(call.params.countryCode).toBe('US');
+    expect(call.params.numberTypes).toBe('local');
+    expect(call.params.firstPart).toBe('613');
+    expect(call.params.lastPart).toBe('555');
+    expect(call.params.anywhere).toBe('false');
+    expect(call.params.smsEnabled).toBe('true');
+    expect(call.params.mmsEnabled).toBe('true');
+    expect(call.params.voiceEnabled).toBe('true');
     expect(call.headers.Version).toBe('v3');
   });
 
-  it('passes optional params: numberTypes, firstPart, smsEnabled', async () => {
-    const fetch = mockFetchSuccess({ numbers: [] });
-    await getTool('ghl_search_available_phone_numbers').handler(
-      { countryCode: 'CA', numberTypes: 'local', firstPart: '613', smsEnabled: true },
-      TEST_CONFIG
-    );
-    const call = parseLastFetchCall(fetch);
-    expect(call.params.countryCode).toBe('CA');
-    expect(call.params.numberTypes).toBe('local');
-    expect(call.params.firstPart).toBe('613');
-    expect(call.params.smsEnabled).toBe('true');
+  it.each([
+    'firstPart',
+    'lastPart',
+    'anywhere',
+    'numberTypes',
+    'smsEnabled',
+    'mmsEnabled',
+    'voiceEnabled',
+    'countryCode',
+  ])('rejects missing required field %s', (field) => {
+    const schema = getTool('ghl_search_available_phone_numbers').inputSchema;
+    const args = { ...VALID_SEARCH_ARGS } as Record<string, unknown>;
+    delete args[field];
+    const result = schema.safeParse(args);
+    expect(result.success).toBe(false);
   });
 
   it('handles API errors', async () => {
     mockFetchError(500, { message: 'Server error' });
     expectError(
       await getTool('ghl_search_available_phone_numbers').handler(
-        { countryCode: 'US' },
+        VALID_SEARCH_ARGS,
         TEST_CONFIG
       ),
       500
@@ -96,29 +118,69 @@ describe('ghl_search_available_phone_numbers', () => {
 
 // ── ghl_purchase_phone_number ─────────────────────────────────────────────────
 
+const VALID_PURCHASE_ARGS = {
+  phoneNumber: '+16135550100',
+  addressSid: 'ADXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  bundleSid: 'BUXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  countryCode: 'US',
+  numberType: 'local',
+  paymentIntentId: 'pi_3Oxxxxxxxxxxxxxxxxxxxx',
+  stripeAccountId: 'acct_1Oxxxxxxxxxxxxxxxx',
+  paymentMethodId: 'pm_1Oxxxxxxxxxxxxxxxx',
+  locality: 'Austin',
+  region: 'TX',
+  fingerprintId: 'purchase-req-abc-123',
+  skipLocationKYC: false,
+};
+
 describe('ghl_purchase_phone_number', () => {
-  it('calls POST /phone-system/numbers/location/:locationId/purchase with phoneNumber', async () => {
+  it('calls POST /phone-system/numbers/location/:locationId/purchase with all required fields', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
-    await getTool('ghl_purchase_phone_number').handler(
-      { phoneNumber: '+16135550100' },
-      TEST_CONFIG
-    );
+    await getTool('ghl_purchase_phone_number').handler(VALID_PURCHASE_ARGS, TEST_CONFIG);
     const call = parseLastFetchCall(fetch);
     expect(call.method).toBe('POST');
     expect(call.pathname).toBe(
       `/phone-system/numbers/location/${TEST_CONFIG.locationId}/purchase`
     );
     expect(call.body?.phoneNumber).toBe('+16135550100');
+    expect(call.body?.addressSid).toBe(VALID_PURCHASE_ARGS.addressSid);
+    expect(call.body?.bundleSid).toBe(VALID_PURCHASE_ARGS.bundleSid);
+    expect(call.body?.countryCode).toBe('US');
+    expect(call.body?.numberType).toBe('local');
+    expect(call.body?.paymentIntentId).toBe(VALID_PURCHASE_ARGS.paymentIntentId);
+    expect(call.body?.stripeAccountId).toBe(VALID_PURCHASE_ARGS.stripeAccountId);
+    expect(call.body?.paymentMethodId).toBe(VALID_PURCHASE_ARGS.paymentMethodId);
+    expect(call.body?.locality).toBe('Austin');
+    expect(call.body?.region).toBe('TX');
+    expect(call.body?.fingerprintId).toBe(VALID_PURCHASE_ARGS.fingerprintId);
+    expect(call.body?.skipLocationKYC).toBe(false);
     expect(call.headers.Version).toBe('v3');
+  });
+
+  it.each([
+    'addressSid',
+    'bundleSid',
+    'countryCode',
+    'numberType',
+    'paymentIntentId',
+    'stripeAccountId',
+    'paymentMethodId',
+    'locality',
+    'region',
+    'fingerprintId',
+    'skipLocationKYC',
+  ])('rejects missing required field %s', (field) => {
+    const schema = getTool('ghl_purchase_phone_number').inputSchema;
+    const args = { ...VALID_PURCHASE_ARGS } as Record<string, unknown>;
+    delete args[field];
+    const result = schema.safeParse(args);
+    expect(result.success).toBe(false);
   });
 
   it('handles errors', async () => {
     mockFetchError(422, { message: 'Number unavailable' });
     expectError(
-      await getTool('ghl_purchase_phone_number').handler(
-        { phoneNumber: '+16135550100' },
-        TEST_CONFIG
-      ),
+      await getTool('ghl_purchase_phone_number').handler(VALID_PURCHASE_ARGS, TEST_CONFIG),
       422
     );
   });

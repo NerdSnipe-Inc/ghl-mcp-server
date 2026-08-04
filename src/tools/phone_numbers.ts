@@ -36,16 +36,26 @@ export const phoneNumberTools = [
   {
     name: "ghl_search_available_phone_numbers",
     description:
-      "Search for available phone numbers to purchase. Filter by country, number type, or capabilities.",
+      "Search for available phone numbers to purchase. All filters below are required by the spec.",
+    // Spec (GET .../available): firstPart, lastPart, anywhere, numberTypes,
+    // smsEnabled, mmsEnabled, voiceEnabled, and countryCode are ALL required
+    // query params — none are optional despite intuitively reading like filters.
     inputSchema: z.object({
       countryCode: z.string().describe("ISO 2-letter country code (e.g. CA, US)"),
-      numberTypes: z.string().optional().describe("Phone number type (e.g. local, tollFree)"),
-      firstPart: z.string().optional().describe("First part of the number to match"),
-      lastPart: z.string().optional().describe("Last part of the number to match"),
-      anywhere: z.boolean().optional().describe("Match digits anywhere in number"),
-      smsEnabled: z.boolean().optional().describe("Filter for SMS-capable numbers"),
-      mmsEnabled: z.boolean().optional().describe("Filter for MMS-capable numbers"),
-      voiceEnabled: z.boolean().optional().describe("Filter for voice-capable numbers"),
+      numberTypes: z
+        .string()
+        .describe("Comma-separated phone number type(s), e.g. \"local\" or \"tollFree,mobile,local\""),
+      firstPart: z.string().describe("Beginning of the phone number to match"),
+      lastPart: z.string().describe("Ending of the phone number to match"),
+      // Spec's OpenAPI schema declares `anywhere` as type "string" with an example
+      // of "825" — that example looks like a copy/paste leftover from the
+      // adjacent `lastPart` param, and the description ("are the numbers required
+      // anywhere in phone number") clearly describes a yes/no flag. We keep this
+      // as a boolean, matching the pre-existing tool design and `smsEnabled`/etc.
+      anywhere: z.boolean().describe("Match digits anywhere in number"),
+      smsEnabled: z.boolean().describe("Requested numbers must have SMS capability"),
+      mmsEnabled: z.boolean().describe("Requested numbers must have MMS capability"),
+      voiceEnabled: z.boolean().describe("Requested numbers must have voice capability"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -57,13 +67,13 @@ export const phoneNumberTools = [
             version: GHL_VERSION_V3,
             params: {
               countryCode: args.countryCode as string,
-              numberTypes: args.numberTypes as string | undefined,
-              firstPart: args.firstPart as string | undefined,
-              lastPart: args.lastPart as string | undefined,
-              anywhere: args.anywhere as boolean | undefined,
-              smsEnabled: args.smsEnabled as boolean | undefined,
-              mmsEnabled: args.mmsEnabled as boolean | undefined,
-              voiceEnabled: args.voiceEnabled as boolean | undefined,
+              numberTypes: args.numberTypes as string,
+              firstPart: args.firstPart as string,
+              lastPart: args.lastPart as string,
+              anywhere: args.anywhere as boolean,
+              smsEnabled: args.smsEnabled as boolean,
+              mmsEnabled: args.mmsEnabled as boolean,
+              voiceEnabled: args.voiceEnabled as boolean,
             },
           }
         );
@@ -76,11 +86,28 @@ export const phoneNumberTools = [
   {
     name: "ghl_purchase_phone_number",
     description:
-      "Purchase a phone number for the location.",
+      "Purchase a phone number for the location. All fields below are required by the spec " +
+      "(Twilio address/bundle SIDs, Stripe payment details, and locality info).",
     inputSchema: z.object({
       phoneNumber: z
         .string()
         .describe("Phone number to purchase in E.164 format (e.g. +16135550100)"),
+      addressSid: z.string().describe("Twilio address SID"),
+      bundleSid: z.string().describe("Twilio bundle SID"),
+      countryCode: z.string().describe("Country for which the phone number is being requested"),
+      // Spec's OpenAPI schema declares `numberType` as type "object" but its
+      // example is a plain string ("local") consistent with numberTypes above —
+      // we treat it as a string.
+      numberType: z.string().describe("Type of phone number to purchase, e.g. local, tollFree"),
+      paymentIntentId: z.string().describe("Stripe payment intent ID"),
+      stripeAccountId: z.string().describe("Stripe account ID"),
+      paymentMethodId: z.string().describe("Stripe registered payment method ID"),
+      locality: z.string().describe("Locality of the user in which the number is being purchased"),
+      region: z.string().describe("Region of the user in which the number is being purchased"),
+      fingerprintId: z.string().describe("Unique request ID for this purchase request"),
+      skipLocationKYC: z
+        .boolean()
+        .describe("Skip location-level KYC verification if agency-level compliance is already verified"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -90,7 +117,7 @@ export const phoneNumberTools = [
           {
             token: config.token,
             version: GHL_VERSION_V3,
-            body: { phoneNumber: args.phoneNumber },
+            body: args,
           }
         );
         return JSON.stringify(result, null, 2);
