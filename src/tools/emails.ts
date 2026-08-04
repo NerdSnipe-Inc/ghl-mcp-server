@@ -23,6 +23,80 @@ const templatesPath = (locationId: string) =>
 const campaignsPath = (locationId: string) =>
   `/emails/locations/${locationId}/campaigns/emails`;
 
+// Spec: ScheduleCampaignScheduleConfigPublicV2Dto — sendAt plus 3 optional
+// nested sub-objects (batch, tracking, resend) and emailPreferenceId.
+const scheduleConfigSchema = z.object({
+  sendAt: z
+    .string()
+    .optional()
+    .describe(
+      "Date/time to send, e.g. '2026-04-01 09:00 AM'. Required when scheduleType is 'scheduled', 'batch', or 'smart_send'. Ignored for 'immediate' and 'rss'."
+    ),
+  batch: z
+    .object({
+      batchSize: z.number().describe("Number of contacts to process per batch"),
+      interval: z.number().describe("Delay between batches"),
+      intervalUnit: z.enum(["minutes", "hours", "days"]).describe("Unit for the interval"),
+      skipDays: z
+        .array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
+        .optional()
+        .describe("Days to skip sending"),
+      windowStart: z.string().optional().describe("Earliest time to send batches, e.g. '09:00 AM'"),
+      windowEnd: z.string().optional().describe("Latest time to send batches, e.g. '05:00 PM'"),
+    })
+    .optional()
+    .describe("Batch/drip configuration. Required when scheduleType is 'batch'."),
+  tracking: z
+    .object({
+      clickTracking: z.boolean().optional(),
+      utmTracking: z.boolean().optional(),
+    })
+    .optional()
+    .describe("Click and UTM tracking options"),
+  resend: z
+    .object({
+      enabled: z.boolean().optional(),
+      waitHours: z.number().optional().describe("Hours to wait before resending. Required when enabled is true."),
+      subject: z.string().optional().describe("Override subject line for the resend email"),
+    })
+    .optional()
+    .describe("Auto-resend to contacts who did not open"),
+  emailPreferenceId: z.string().optional().describe("Email preference type ID for categorizing this campaign"),
+});
+
+// Spec: ScheduleCampaignRssConfigPublicV2Dto — required when scheduleType is 'rss'.
+const rssConfigSchema = z.object({
+  name: z.string().describe("RSS schedule name"),
+  rssFeedURL: z.string().describe("RSS feed URL"),
+  repeatAfter: z.enum(["every_day", "every_week", "every_month"]).describe("How often to check the feed"),
+  repeatAfterTime: z.string().describe("Time of day to execute, e.g. '09:00 AM'"),
+  rssFeedLimit: z.number().optional().describe("Max number of RSS items per email"),
+  startAtDay: z
+    .enum(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+    .optional()
+    .describe("Day of week for weekly RSS"),
+  startAtMonthDay: z.string().optional().describe("Day of month for monthly RSS, e.g. '15'"),
+  firstExecutionDate: z.string().optional().describe("Override first execution date/time"),
+});
+
+// Spec: ScheduleCampaignABTestConfigPublicV2Dto — can be combined with any
+// scheduleType except 'rss'.
+const abTestConfigSchema = z.object({
+  testType: z.enum(["emailContent", "subjectLine"]).describe("What is being tested"),
+  testDuration: z.number().describe("Seconds to run the test before picking a winner"),
+  variationCount: z.number().describe("Number of variations"),
+  testSize: z.number().describe("Percentage of contacts in the test group (0-100)"),
+  winningCriteria: z.enum(["openRate", "clickRate"]).describe("How to pick the winner"),
+  variations: z
+    .array(
+      z.object({
+        subject: z.string().optional().describe("Subject line for this variation"),
+        documentId: z.string().optional().describe("Template/document ID for this variation"),
+      })
+    )
+    .describe("A/B test variations"),
+});
+
 export const emailBuilderTools = [
   {
     name: "ghl_get_email_builder_templates",
@@ -45,6 +119,11 @@ export const emailBuilderTools = [
         .string()
         .optional()
         .describe("Only return items inside this folder ('root' for top level)"),
+      include: z
+        .enum(["all", "templates", "folders"])
+        .optional()
+        .default("all")
+        .describe("Restrict results to templates only, folders only, or both (default)"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -58,6 +137,7 @@ export const emailBuilderTools = [
             sortOrder: args.sortOrder as string | undefined,
             archived: args.archived as boolean | undefined,
             folderId: args.folderId as string | undefined,
+            include: args.include as string | undefined,
           },
         });
         return JSON.stringify(result, null, 2);
@@ -263,6 +343,7 @@ export const emailCampaignTools = [
       userId: z
         .string()
         .describe("GHL user ID performing this action (required by the API)"),
+      userName: z.string().optional().describe("Name of the user performing this action"),
       timeZone: z
         .string()
         .optional()
@@ -289,6 +370,7 @@ export const emailCampaignTools = [
             name: args.name,
             editorType: "html",
             userId: args.userId,
+            ...(args.userName ? { userName: args.userName } : {}),
             timeZone: (args.timeZone as string | undefined) ?? "UTC",
             ...(args.templateId ? { templateId: args.templateId } : {}),
             ...(args.html ? { editorContent: args.html } : {}),
@@ -350,38 +432,24 @@ export const emailCampaignTools = [
         .boolean()
         .optional()
         .describe("Freeze the contact list at schedule time — new matching contacts won't be added later"),
-      sendAt: z
-        .string()
-        .optional()
-        .describe(
-          "Date/time to send, e.g. '2026-04-01 09:00 AM'. Required when scheduleType is 'scheduled', 'batch', or 'smart_send'. Ignored for 'immediate' and 'rss'."
-        ),
       sendDays: z
         .array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]))
         .optional()
         .describe("Days of the week to allow sending. Used for 'batch' and 'rss' scheduleTypes."),
-      rssName: z.string().optional().describe("RSS schedule name. Required when scheduleType is 'rss'."),
-      rssFeedURL: z.string().optional().describe("RSS feed URL. Required when scheduleType is 'rss'."),
-      rssRepeatAfter: z
-        .enum(["every_day", "every_week", "every_month"])
+      // Spec: ScheduleCampaignScheduleConfigPublicV2Dto. Required when scheduleType
+      // is not 'rss'.
+      scheduleConfig: scheduleConfigSchema
         .optional()
-        .describe("How often to check the feed. Required when scheduleType is 'rss'."),
-      rssRepeatAfterTime: z
-        .string()
+        .describe("Schedule configuration. Required when scheduleType is not 'rss'."),
+      // Spec: ScheduleCampaignRssConfigPublicV2Dto. Required when scheduleType is 'rss'.
+      rssConfig: rssConfigSchema
         .optional()
-        .describe("Time of day to execute, e.g. '09:00 AM'. Required when scheduleType is 'rss'."),
-      scheduleConfigExtra: z
-        .string()
+        .describe("RSS feed configuration. Required when scheduleType is 'rss'."),
+      // Spec: ScheduleCampaignABTestConfigPublicV2Dto. Can be combined with any
+      // scheduleType except 'rss'.
+      abTestConfig: abTestConfigSchema
         .optional()
-        .describe(
-          "JSON-encoded advanced scheduleConfig fields (batch, tracking, resend, emailPreferenceId) — merged in when scheduleType is not 'rss'."
-        ),
-      rssConfigExtra: z
-        .string()
-        .optional()
-        .describe(
-          "JSON-encoded advanced rssConfig fields (rssFeedLimit, startAtDay, startAtMonthDay, firstExecutionDate) — merged in when scheduleType is 'rss'."
-        ),
+        .describe("A/B test configuration. Can be combined with any scheduleType except 'rss'."),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -405,13 +473,6 @@ export const emailCampaignTools = [
           ...(args.freezeList !== undefined ? { freezeList: args.freezeList } : {}),
         };
 
-        const scheduleConfigExtra = args.scheduleConfigExtra
-          ? JSON.parse(args.scheduleConfigExtra as string)
-          : {};
-        const rssConfigExtra = args.rssConfigExtra
-          ? JSON.parse(args.rssConfigExtra as string)
-          : {};
-
         const result = await ghlRequest(
           "POST",
           `${campaignsPath(config.locationId)}/${args.campaignId}/schedule`,
@@ -426,22 +487,9 @@ export const emailCampaignTools = [
               emailMeta,
               recipients,
               ...(args.sendDays ? { sendDays: args.sendDays } : {}),
-              ...(scheduleType === "rss"
-                ? {
-                    rssConfig: {
-                      name: args.rssName,
-                      rssFeedURL: args.rssFeedURL,
-                      repeatAfter: args.rssRepeatAfter,
-                      repeatAfterTime: args.rssRepeatAfterTime,
-                      ...rssConfigExtra,
-                    },
-                  }
-                : {
-                    scheduleConfig: {
-                      ...(args.sendAt ? { sendAt: args.sendAt } : {}),
-                      ...scheduleConfigExtra,
-                    },
-                  }),
+              ...(args.scheduleConfig ? { scheduleConfig: args.scheduleConfig } : {}),
+              ...(args.rssConfig ? { rssConfig: args.rssConfig } : {}),
+              ...(args.abTestConfig ? { abTestConfig: args.abTestConfig } : {}),
             },
           }
         );

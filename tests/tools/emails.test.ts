@@ -34,10 +34,17 @@ describe('ghl_get_email_builder_templates', () => {
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
   });
 
-  it('passes limit, offset, sortOrder, search and archived params', async () => {
+  it('passes limit, offset, sortOrder, search, archived and include params', async () => {
     const fetch = mockFetchSuccess({ templates: [] });
     await getTool('ghl_get_email_builder_templates').handler(
-      { limit: 10, offset: 20, sortOrder: 'asc', search: 'newsletter', archived: true },
+      {
+        limit: 10,
+        offset: 20,
+        sortOrder: 'asc',
+        search: 'newsletter',
+        archived: true,
+        include: 'templates',
+      },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -46,6 +53,12 @@ describe('ghl_get_email_builder_templates', () => {
     expect(call.params.sortOrder).toBe('asc');
     expect(call.params.search).toBe('newsletter');
     expect(call.params.archived).toBe('true');
+    expect(call.params.include).toBe('templates');
+  });
+
+  it('rejects an invalid include value', () => {
+    const schema = getTool('ghl_get_email_builder_templates').inputSchema;
+    expect(schema.safeParse({ include: 'not-a-real-option' }).success).toBe(false);
   });
 
   it('handles API errors', async () => {
@@ -275,6 +288,7 @@ describe('ghl_create_email_campaign', () => {
         name: 'My Campaign',
         templateId: 'tmpl-1',
         userId: 'user-1',
+        userName: 'John Doe',
         timeZone: 'America/New_York',
       },
       TEST_CONFIG
@@ -286,6 +300,7 @@ describe('ghl_create_email_campaign', () => {
     expect(call.body?.name).toBe('My Campaign');
     expect(call.body?.templateId).toBe('tmpl-1');
     expect(call.body?.userId).toBe('user-1');
+    expect(call.body?.userName).toBe('John Doe');
     expect(call.body?.timeZone).toBe('America/New_York');
     expect(call.body?.editorType).toBe('html');
     // locationId is a path segment in v3, not a body field
@@ -346,7 +361,40 @@ describe('ghl_schedule_email_campaign', () => {
     expect(call.body?.recipients?.contactIds).toEqual(['contact-1', 'contact-2']);
   });
 
-  it('builds an rssConfig instead of scheduleConfig when scheduleType is rss', async () => {
+  it('passes a typed scheduleConfig object through, including nested batch/tracking/resend', async () => {
+    const fetch = mockFetchSuccess({ success: true });
+    await getTool('ghl_schedule_email_campaign').handler(
+      {
+        campaignId: 'camp-1',
+        scheduleType: 'batch',
+        timeZone: 'UTC',
+        userId: 'user-1',
+        subject: 'Batch send',
+        fromName: 'John Doe',
+        fromEmail: 'john@example.com',
+        contactIds: ['contact-1'],
+        scheduleConfig: {
+          sendAt: '2026-04-01 09:00 AM',
+          batch: { batchSize: 100, interval: 2, intervalUnit: 'hours' },
+          tracking: { clickTracking: true, utmTracking: false },
+          resend: { enabled: false },
+          emailPreferenceId: 'pref-1',
+        },
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.scheduleConfig).toEqual({
+      sendAt: '2026-04-01 09:00 AM',
+      batch: { batchSize: 100, interval: 2, intervalUnit: 'hours' },
+      tracking: { clickTracking: true, utmTracking: false },
+      resend: { enabled: false },
+      emailPreferenceId: 'pref-1',
+    });
+    expect(call.body).not.toHaveProperty('rssConfig');
+  });
+
+  it('passes a typed rssConfig object through instead of scheduleConfig when scheduleType is rss', async () => {
     const fetch = mockFetchSuccess({ success: true });
     await getTool('ghl_schedule_email_campaign').handler(
       {
@@ -358,10 +406,12 @@ describe('ghl_schedule_email_campaign', () => {
         fromName: 'John Doe',
         fromEmail: 'john@example.com',
         contactIds: ['contact-1'],
-        rssName: 'Weekly Digest',
-        rssFeedURL: 'https://example.com/rss',
-        rssRepeatAfter: 'every_day',
-        rssRepeatAfterTime: '09:00 AM',
+        rssConfig: {
+          name: 'Weekly Digest',
+          rssFeedURL: 'https://example.com/rss',
+          repeatAfter: 'every_day',
+          repeatAfterTime: '09:00 AM',
+        },
       },
       TEST_CONFIG
     );
@@ -373,6 +423,66 @@ describe('ghl_schedule_email_campaign', () => {
       repeatAfterTime: '09:00 AM',
     });
     expect(call.body).not.toHaveProperty('scheduleConfig');
+  });
+
+  it('passes an abTestConfig object through', async () => {
+    const fetch = mockFetchSuccess({ success: true });
+    await getTool('ghl_schedule_email_campaign').handler(
+      {
+        campaignId: 'camp-1',
+        scheduleType: 'immediate',
+        timeZone: 'UTC',
+        userId: 'user-1',
+        subject: 'A/B test',
+        fromName: 'John Doe',
+        fromEmail: 'john@example.com',
+        contactIds: ['contact-1'],
+        abTestConfig: {
+          testType: 'subjectLine',
+          testDuration: 3600,
+          variationCount: 2,
+          testSize: 30,
+          winningCriteria: 'openRate',
+          variations: [{ subject: 'Subject A' }, { subject: 'Subject B' }],
+        },
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.abTestConfig).toEqual({
+      testType: 'subjectLine',
+      testDuration: 3600,
+      variationCount: 2,
+      testSize: 30,
+      winningCriteria: 'openRate',
+      variations: [{ subject: 'Subject A' }, { subject: 'Subject B' }],
+    });
+  });
+
+  it('rejects an rssConfig missing required fields', () => {
+    const schema = getTool('ghl_schedule_email_campaign').inputSchema;
+    const result = schema.safeParse({
+      campaignId: 'camp-1',
+      userId: 'user-1',
+      subject: 'Bad',
+      fromName: 'John Doe',
+      fromEmail: 'john@example.com',
+      rssConfig: { name: 'Weekly Digest' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a scheduleConfig.batch missing required fields', () => {
+    const schema = getTool('ghl_schedule_email_campaign').inputSchema;
+    const result = schema.safeParse({
+      campaignId: 'camp-1',
+      userId: 'user-1',
+      subject: 'Bad',
+      fromName: 'John Doe',
+      fromEmail: 'john@example.com',
+      scheduleConfig: { batch: { batchSize: 100 } },
+    });
+    expect(result.success).toBe(false);
   });
 
   it('handles API errors', async () => {
