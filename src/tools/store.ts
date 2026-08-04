@@ -328,8 +328,47 @@ export const storeTools = [
         .describe("Estimated weight of the order in kg(s)"),
       source: z
         .object({
-          type: z.string().describe("Source of order, e.g. website, funnel, manual"),
-          subType: z.string().optional().describe("Source subtype of order, e.g. store"),
+          type: z
+            .enum([
+              "funnel",
+              "website",
+              "invoice",
+              "calendar",
+              "text2Pay",
+              "document_contracts",
+              "membership",
+              "mobile_app",
+              "communities",
+              "point_of_sale",
+              "manual",
+              "form",
+              "survey",
+              "payment_link",
+              "external",
+            ])
+            .describe("Source of order"),
+          subType: z
+            .enum([
+              "one_step_order_form",
+              "two_step_order_form",
+              "upsell",
+              "tap_to_pay",
+              "card_payment",
+              "store",
+              "contact_view",
+              "email_campaign",
+              "payments_dashboard",
+              "shopify",
+              "subscription_view",
+              "store_upsell",
+              "woocommerce",
+              "service",
+              "meeting",
+              "imported_csv",
+              "qr_code",
+            ])
+            .optional()
+            .describe("Source subtype of order"),
         })
         .describe("Source of the order"),
       products: z
