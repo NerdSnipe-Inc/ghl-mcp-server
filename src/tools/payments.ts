@@ -8,11 +8,11 @@ export const paymentTools = [
     description: "Get payment orders in the location.",
     inputSchema: z.object({
       contactId: z.string().optional().describe("Filter by contact"),
-      status: z
-        .enum(["pending", "confirmed", "cancelled", "failed", "refunded"])
-        .optional(),
+      // Spec: the only enum-constrained order filter is paymentStatus, not a
+      // generic "status" field.
+      paymentStatus: z.enum(["paid", "unpaid", "refunded", "partially_paid"]).optional(),
       limit: z.number().optional().default(20),
-      page: z.number().optional().default(1),
+      offset: z.number().optional().default(0),
       startAt: z.string().optional().describe("Start date filter ISO 8601"),
       endAt: z.string().optional().describe("End date filter ISO 8601"),
     }),
@@ -55,7 +55,7 @@ export const paymentTools = [
     inputSchema: z.object({
       contactId: z.string().optional(),
       limit: z.number().optional().default(20),
-      page: z.number().optional().default(1),
+      offset: z.number().optional().default(0),
       startAt: z.string().optional(),
       endAt: z.string().optional(),
     }),
@@ -79,7 +79,7 @@ export const paymentTools = [
     inputSchema: z.object({
       contactId: z.string().optional(),
       limit: z.number().optional().default(20),
-      page: z.number().optional().default(1),
+      offset: z.number().optional().default(0),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -130,9 +130,10 @@ export const paymentTools = [
     inputSchema: z.object({
       name: z.string(),
       code: z.string().describe("Coupon code (e.g. SAVE20)"),
-      discountType: z.enum(["percentage", "fixed"]),
-      discount: z.number().describe("Discount value (% or $ amount)"),
-      startDate: z.string().optional().describe("Coupon validity start date ISO 8601"),
+      // Spec (CreateCouponParams): "amount", not "fixed".
+      discountType: z.enum(["percentage", "amount"]),
+      discountValue: z.number().describe("Discount value (% or $ amount)"),
+      startDate: z.string().describe("Coupon validity start date, YYYY-MM-DDTHH:mm:ssZ (required by spec)"),
       endDate: z.string().optional().describe("Coupon expiry date ISO 8601"),
       usageLimit: z.number().optional().describe("Max number of times coupon can be used"),
       productIds: z.array(z.string()).optional().describe("Restrict to specific product IDs"),
@@ -211,28 +212,60 @@ export const invoiceTools = [
   },
   {
     name: "ghl_create_invoice",
-    description: "Create a new invoice for a contact.",
+    description: "Create a new invoice. Sends contactDetails (not a bare contactId) per the spec.",
     inputSchema: z.object({
-      contactId: z.string(),
       name: z.string().describe("Invoice name/title"),
-      currency: z.string().optional().default("USD"),
-      dueDate: z.string().optional().describe("ISO 8601 due date"),
+      currency: z.string().describe("Currency code, e.g. USD"),
+      businessDetails: z
+        .object({
+          logoUrl: z.string().optional(),
+          name: z.string().optional(),
+          phoneNo: z.string().optional(),
+          address: z.record(z.unknown()).optional(),
+          website: z.string().optional(),
+          customValues: z.array(z.string()).optional(),
+        })
+        .describe("Business details shown on the invoice (required by spec)"),
+      contactDetails: z
+        .object({
+          id: z.string().describe("Contact ID"),
+          name: z.string(),
+          phoneNo: z.string(),
+          email: z.string().email(),
+          companyName: z.string().optional(),
+          address: z.record(z.unknown()).optional(),
+        })
+        .describe(
+          "Contact to send the invoice to — spec uses a structured contactDetails object, not a bare contactId"
+        ),
+      dueDate: z.string().optional().describe("Due date, YYYY-MM-DD"),
+      issueDate: z.string().describe("Issue date, YYYY-MM-DD (required by spec)"),
       items: z
         .array(
           z.object({
             name: z.string(),
             description: z.string().optional(),
-            quantity: z.number().default(1),
-            unitAmount: z.number().describe("Price per unit in cents"),
+            currency: z.string(),
+            qty: z.number().describe("Quantity"),
+            amount: z.number().describe("Line item amount"),
           })
         )
         .describe("Invoice line items"),
       discount: z
         .object({
           type: z.enum(["percentage", "fixed"]),
-          value: z.number(),
+          value: z.number().optional().default(0),
         })
-        .optional(),
+        .describe("Discount for the invoice (required by spec)"),
+      sentTo: z
+        .object({
+          email: z.array(z.string()).describe("Recipient email addresses (required)"),
+          emailCc: z.array(z.string()).optional(),
+          emailBcc: z.array(z.string()).optional(),
+          phoneNo: z.array(z.string()).optional(),
+        })
+        .describe("Recipients for the invoice (required by spec)"),
+      liveMode: z.boolean().describe("Use live payment mode (false = test mode; required by spec)"),
       title: z.string().optional(),
       invoiceNumber: z.string().optional(),
     }),
@@ -251,12 +284,12 @@ export const invoiceTools = [
   },
   {
     name: "ghl_send_invoice",
-    description: "Send an invoice to the contact via email.",
+    description: "Send an invoice to the contact.",
     inputSchema: z.object({
       invoiceId: z.string(),
       userId: z.string().describe("User ID of the sender"),
-      action: z.enum(["send", "resend"]).optional().default("send"),
-      liveMode: z.boolean().optional().default(true).describe("Use live payment mode (false = test mode)"),
+      action: z.enum(["sms_and_email", "send_manually", "email", "sms"]),
+      liveMode: z.boolean().describe("Use live payment mode (false = test mode; required by spec)"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { invoiceId, ...sendData } = args as { invoiceId: string } & Record<string, unknown>;
@@ -297,10 +330,22 @@ export const invoiceTools = [
     inputSchema: z.object({
       invoiceId: z.string(),
       amount: z.number().describe("Payment amount in cents"),
-      paymentMethod: z
-        .enum(["cash", "check", "credit_card", "bank_transfer", "other"])
-        .optional(),
-      notes: z.string().optional(),
+      // Spec (RecordPaymentDto): field is `mode`, not `paymentMethod`; enum is
+      // cash/card/cheque/bank_transfer/other (no "check" or "credit_card").
+      mode: z.enum(["cash", "card", "cheque", "bank_transfer", "other"]),
+      notes: z.string().describe("Note recorded with the transaction (required by spec)"),
+      // Spec marks `card` and `cheque` as required alongside every mode, which
+      // doesn't make business sense (e.g. mode=cash shouldn't need card details).
+      // We treat them as optional and expect callers to supply the one matching
+      // `mode`.
+      card: z
+        .object({ brand: z.string(), last4: z.string() })
+        .optional()
+        .describe("Card details — relevant when mode is 'card'"),
+      cheque: z
+        .object({ number: z.string() })
+        .optional()
+        .describe("Cheque number — relevant when mode is 'cheque'"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { invoiceId, ...paymentData } = args as { invoiceId: string } & Record<string, unknown>;
@@ -308,7 +353,7 @@ export const invoiceTools = [
         const result = await ghlRequest("POST", `/invoices/${invoiceId}/record-payment`, {
           token: config.token,
           version: GHL_VERSION_V3,
-          body: paymentData,
+          body: { ...paymentData, altId: config.locationId, altType: "location" },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
