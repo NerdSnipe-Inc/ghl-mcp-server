@@ -44,6 +44,7 @@ import { socialPlannerPostsTools } from '../src/tools/social_planner_posts.js';
 import { facebookAccountsTools } from '../src/tools/facebook_accounts.js';
 import { facebookCampaignsTools } from '../src/tools/facebook_campaigns.js';
 import { facebookAudiencesTools } from '../src/tools/facebook_audiences.js';
+import { facebookReportingTools } from '../src/tools/facebook_reporting.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -118,11 +119,12 @@ const ALL_TOOLS = [
   ...facebookAccountsTools,
   ...facebookCampaignsTools,
   ...facebookAudiencesTools,
+  ...facebookReportingTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 353 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(353);
+  it('registers exactly 357 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(357);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -213,6 +215,7 @@ describe('Tool counts per module', () => {
   it('facebookAccounts has 14 tools', () => expect(facebookAccountsTools).toHaveLength(14));
   it('facebookCampaigns has 18 tools', () => expect(facebookCampaignsTools).toHaveLength(18));
   it('facebookAudiences has 12 tools', () => expect(facebookAudiencesTools).toHaveLength(12));
+  it('facebookReporting has 4 tools', () => expect(facebookReportingTools).toHaveLength(4));
 });
 
 describe('Specific tool existence', () => {
@@ -415,12 +418,15 @@ describe('Specific tool existence', () => {
     'ghl_batch_update_facebook_custom_audience_members', 'ghl_get_facebook_pixels',
     'ghl_upsert_facebook_pixel', 'ghl_get_facebook_conversation_forms',
     'ghl_create_facebook_conversation_form', 'ghl_get_facebook_lead_form',
+    // Ad publishing — Facebook reporting and targeting search (4)
+    'ghl_get_facebook_reporting', 'ghl_get_facebook_campaign_reporting',
+    'ghl_get_facebook_reporting_list', 'ghl_search_facebook_targeting',
   ];
 
-  it('all 353 expected tools are present', () => {
+  it('all 357 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(353);
+    expect(expectedTools).toHaveLength(357);
   });
 });
