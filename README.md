@@ -292,7 +292,6 @@ node dist/index.js
 
 | Tool                               | Description                                           |
 |------------------------------------|-------------------------------------------------------|
-| `ghl_get_contacts`                 | List/search contacts by name, email, phone, or tags   |
 | `ghl_get_contact`                  | Get a single contact by ID                            |
 | `ghl_create_contact`               | Create a new contact                                  |
 | `ghl_update_contact`               | Update contact fields                                 |

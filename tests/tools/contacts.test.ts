@@ -17,35 +17,14 @@ const getTool = (name: string) => {
   return tool;
 };
 
-// ── ghl_get_contacts ──────────────────────────────────────────────────────────
+// ── ghl_get_contacts removed ────────────────────────────────────────────────────
+// GET /contacts/ does not exist in the real v3 spec — the tool was removed rather
+// than repointed, since ghl_search_contacts (POST /contacts/search) already covers
+// list/search. This test locks in the removal.
 
-describe('ghl_get_contacts', () => {
-  it('calls GET /contacts/ with locationId', async () => {
-    const fetch = mockFetchSuccess({ contacts: [] });
-    await getTool('ghl_get_contacts').handler({}, TEST_CONFIG);
-    const call = parseLastFetchCall(fetch);
-    expect(call.method).toBe('GET');
-    expect(call.pathname).toBe('/contacts/');
-    expect(call.headers.Version).toBe(GHL_VERSION_V3);
-    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
-  });
-
-  it('passes optional query params', async () => {
-    const fetch = mockFetchSuccess({ contacts: [] });
-    await getTool('ghl_get_contacts').handler(
-      { query: 'John', limit: 10, skip: 5 },
-      TEST_CONFIG
-    );
-    const call = parseLastFetchCall(fetch);
-    expect(call.params.query).toBe('John');
-    expect(call.params.limit).toBe('10');
-    expect(call.params.skip).toBe('5');
-  });
-
-  it('handles API errors', async () => {
-    mockFetchError(401, { message: 'Unauthorized' });
-    const result = await getTool('ghl_get_contacts').handler({}, TEST_CONFIG);
-    expectError(result, 401);
+describe('ghl_get_contacts (removed)', () => {
+  it('is not registered as a tool', () => {
+    expect(contactTools.find((t) => t.name === 'ghl_get_contacts')).toBeUndefined();
   });
 });
 
@@ -99,6 +78,38 @@ describe('ghl_create_contact', () => {
       422
     );
   });
+
+  it('sends customFields as {id, fieldValue} per spec, not {id, value}', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_create_contact').handler(
+      { customFields: [{ id: 'cf1', fieldValue: 'My Text' }] },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.customFields).toEqual([{ id: 'cf1', fieldValue: 'My Text' }]);
+  });
+
+  it('passes through spec fields name, gender, dateOfBirth, assignedTo, dndSettings, inboundDndSettings', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_create_contact').handler(
+      {
+        name: 'Jane Doe',
+        gender: 'female',
+        dateOfBirth: '1990-01-01',
+        assignedTo: 'user-1',
+        dndSettings: { call: { status: 'active', message: 'Do not call' } },
+        inboundDndSettings: { all: { status: 'active', message: 'Do not contact' } },
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.name).toBe('Jane Doe');
+    expect(call.body?.gender).toBe('female');
+    expect(call.body?.dateOfBirth).toBe('1990-01-01');
+    expect(call.body?.assignedTo).toBe('user-1');
+    expect(call.body?.dndSettings).toEqual({ call: { status: 'active', message: 'Do not call' } });
+    expect(call.body?.inboundDndSettings).toEqual({ all: { status: 'active', message: 'Do not contact' } });
+  });
 });
 
 // ── ghl_update_contact ────────────────────────────────────────────────────────
@@ -117,6 +128,37 @@ describe('ghl_update_contact', () => {
     expect(call.body?.firstName).toBe('Updated');
     expect(call.body?.contactId).toBeUndefined();
   });
+
+  it('sends customFields as {id, fieldValue} per spec', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_contact').handler(
+      { contactId: 'abc', customFields: [{ id: 'cf1', fieldValue: 'Updated Text' }] },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.customFields).toEqual([{ id: 'cf1', fieldValue: 'Updated Text' }]);
+  });
+
+  it('passes through spec fields name, dateOfBirth, assignedTo, dndSettings, inboundDndSettings', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_contact').handler(
+      {
+        contactId: 'abc',
+        name: 'Jane Doe',
+        dateOfBirth: '1990-01-01',
+        assignedTo: 'user-1',
+        dndSettings: { email: { status: 'inactive' } },
+        inboundDndSettings: { all: { status: 'active' } },
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.name).toBe('Jane Doe');
+    expect(call.body?.dateOfBirth).toBe('1990-01-01');
+    expect(call.body?.assignedTo).toBe('user-1');
+    expect(call.body?.dndSettings).toEqual({ email: { status: 'inactive' } });
+    expect(call.body?.inboundDndSettings).toEqual({ all: { status: 'active' } });
+  });
 });
 
 // ── ghl_upsert_contact ────────────────────────────────────────────────────────
@@ -134,6 +176,49 @@ describe('ghl_upsert_contact', () => {
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.locationId).toBe(TEST_CONFIG.locationId);
     expect(call.body?.email).toBe('jane@example.com');
+  });
+
+  it('sends customFields as {id, fieldValue} and passes through missing spec fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_upsert_contact').handler(
+      {
+        email: 'jane@example.com',
+        name: 'Jane Doe',
+        gender: 'female',
+        address1: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        postalCode: '78701',
+        website: 'https://example.com',
+        timezone: 'America/Chicago',
+        dnd: true,
+        inboundDndSettings: { all: { status: 'active' } },
+        dateOfBirth: '1990-01-01',
+        country: 'US',
+        assignedTo: 'user-1',
+        createNewIfDuplicateAllowed: true,
+        dndSettings: { sms: { status: 'active' } },
+        customFields: [{ id: 'cf1', fieldValue: 'x' }],
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.name).toBe('Jane Doe');
+    expect(call.body?.gender).toBe('female');
+    expect(call.body?.address1).toBe('123 Main St');
+    expect(call.body?.city).toBe('Austin');
+    expect(call.body?.state).toBe('TX');
+    expect(call.body?.postalCode).toBe('78701');
+    expect(call.body?.website).toBe('https://example.com');
+    expect(call.body?.timezone).toBe('America/Chicago');
+    expect(call.body?.dnd).toBe(true);
+    expect(call.body?.inboundDndSettings).toEqual({ all: { status: 'active' } });
+    expect(call.body?.dateOfBirth).toBe('1990-01-01');
+    expect(call.body?.country).toBe('US');
+    expect(call.body?.assignedTo).toBe('user-1');
+    expect(call.body?.createNewIfDuplicateAllowed).toBe(true);
+    expect(call.body?.dndSettings).toEqual({ sms: { status: 'active' } });
+    expect(call.body?.customFields).toEqual([{ id: 'cf1', fieldValue: 'x' }]);
   });
 });
 
@@ -248,6 +333,18 @@ describe('ghl_create_contact_note', () => {
     const call = parseLastFetchCall(fetch);
     expect(call.body?.userId).toBe('user-1');
   });
+
+  it('includes title, color, pinned when provided', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_create_contact_note').handler(
+      { contactId: 'abc', body: 'Note text', title: 'Follow-up', color: '#FFAA00', pinned: true },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.title).toBe('Follow-up');
+    expect(call.body?.color).toBe('#FFAA00');
+    expect(call.body?.pinned).toBe(true);
+  });
 });
 
 // ── ghl_update_contact_note ───────────────────────────────────────────────────
@@ -264,6 +361,28 @@ describe('ghl_update_contact_note', () => {
     expect(call.pathname).toBe('/contacts/abc/notes/note-1');
     expect(call.headers.Version).toBe(GHL_VERSION_V3);
     expect(call.body?.body).toBe('Updated note');
+  });
+
+  it('does not require body — spec has no required fields on update', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_contact_note').handler(
+      { contactId: 'abc', noteId: 'note-1', pinned: true },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.body).toBeUndefined();
+    expect(call.body?.pinned).toBe(true);
+  });
+
+  it('includes title and color when provided', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_update_contact_note').handler(
+      { contactId: 'abc', noteId: 'note-1', title: 'New title', color: '#FF0000' },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.title).toBe('New title');
+    expect(call.body?.color).toBe('#FF0000');
   });
 });
 

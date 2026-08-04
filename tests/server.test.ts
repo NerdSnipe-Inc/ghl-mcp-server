@@ -134,7 +134,7 @@ const ALL_TOOLS = [
 
 describe('Tool registry', () => {
   it('registers exactly 364 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(404);
+    expect(ALL_TOOLS).toHaveLength(403);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -174,7 +174,7 @@ describe('Tool registry', () => {
 });
 
 describe('Tool counts per module', () => {
-  it('contacts has 20 tools', () => expect(contactTools).toHaveLength(20));
+  it('contacts has 19 tools', () => expect(contactTools).toHaveLength(19));
   it('conversations has 9 tools', () => expect(conversationTools).toHaveLength(9));
   it('calendars has 10 tools', () => expect(calendarTools).toHaveLength(10));
   it('opportunities has 8 tools', () => expect(opportunityTools).toHaveLength(8));
@@ -237,8 +237,8 @@ describe('Specific tool existence', () => {
   const toolNames = new Set(ALL_TOOLS.map((t) => t.name));
 
   const expectedTools = [
-    // Contacts (20)
-    'ghl_get_contacts', 'ghl_get_contact', 'ghl_create_contact',
+    // Contacts (19)
+    'ghl_get_contact', 'ghl_create_contact',
     'ghl_update_contact', 'ghl_upsert_contact', 'ghl_delete_contact',
     'ghl_search_contacts', 'ghl_add_contact_tags', 'ghl_remove_contact_tags',
     'ghl_get_contact_notes', 'ghl_create_contact_note', 'ghl_update_contact_note',
@@ -468,6 +468,6 @@ describe('Specific tool existence', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(404);
+    expect(expectedTools).toHaveLength(403);
   });
 });

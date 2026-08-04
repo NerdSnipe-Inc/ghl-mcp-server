@@ -1,38 +1,60 @@
 import { z } from "zod";
 import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
+// Spec: CreateContactDtoV3/UpdateContactDtoV3 customFields items are one of several
+// typed field variants (TextField, NumericField, CheckboxField, FileField, ...) that
+// all share {id?, key?, fieldValue?, field_value? (deprecated)}. `id` is required
+// per the spec's TextField schema; fieldValue's shape varies by field type (string,
+// number, string[], or a map for file uploads).
+const customFieldSchema = z.object({
+  id: z.string().optional().describe("Custom field ID (pass id or key)"),
+  key: z.string().optional().describe("Custom field key (pass id or key)"),
+  fieldValue: z
+    .union([z.string(), z.number(), z.array(z.string()), z.record(z.unknown())])
+    .optional()
+    .describe("Value for the custom field (preferred)"),
+  field_value: z
+    .union([z.string(), z.number(), z.array(z.string()), z.record(z.unknown())])
+    .optional()
+    .describe("Deprecated alias for fieldValue"),
+});
+
+// Spec: DndSettingSchema — per-channel DND setting.
+const dndSettingSchema = z.object({
+  status: z.enum(["active", "inactive", "permanent"]),
+  message: z.string().optional(),
+  code: z.string().optional(),
+});
+
+// Spec: DndSettingsSchemaV3 — DND settings keyed by channel.
+const dndSettingsSchema = z.object({
+  call: dndSettingSchema.optional(),
+  email: dndSettingSchema.optional(),
+  sms: dndSettingSchema.optional(),
+  whatsApp: dndSettingSchema.optional(),
+  gmb: dndSettingSchema.optional(),
+  fb: dndSettingSchema.optional(),
+});
+
+// Spec: InboundDndSettingSchema.
+const inboundDndSettingSchema = z.object({
+  status: z.enum(["active", "inactive"]),
+  message: z.string().optional(),
+});
+
+// Spec: InboundDndSettingsSchema.
+const inboundDndSettingsSchema = z.object({
+  all: inboundDndSettingSchema.optional(),
+});
+
+// NOTE: `ghl_get_contacts` (GET /contacts/) was removed — that endpoint does not
+// exist in the real v3 spec (contacts-v3.json only defines POST /contacts/ for
+// create, POST /contacts/search for search, and GET/PUT/DELETE /contacts/{id}).
+// `ghl_search_contacts` (POST /contacts/search) already covers the list/search
+// purpose this tool was meant to serve, so it was removed rather than repointed
+// to avoid a confusing duplicate tool with incompatible pagination params.
+
 export const contactTools = [
-  {
-    name: "ghl_get_contacts",
-    description:
-      "List/search contacts in the GHL location. Supports filtering by query and cursor-based pagination.",
-    inputSchema: z.object({
-      query: z.string().optional().describe("Search query (name, email, phone)"),
-      limit: z.number().optional().default(20).describe("Max results (1-100)"),
-      skip: z.number().optional().describe("Number of results to skip"),
-      startAfterId: z.string().optional().describe("Contact ID to start after (cursor pagination)"),
-      startAfter: z.number().optional().describe("Timestamp cursor for pagination"),
-    }),
-    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
-      try {
-        const result = await ghlRequest("GET", "/contacts/", {
-          token: config.token,
-          version: GHL_VERSION_V3,
-          params: {
-            locationId: config.locationId,
-            query: args.query as string | undefined,
-            limit: args.limit as number | undefined,
-            skip: args.skip as number | undefined,
-            startAfterId: args.startAfterId as string | undefined,
-            startAfter: args.startAfter as number | undefined,
-          },
-        });
-        return JSON.stringify(result, null, 2);
-      } catch (e) {
-        return formatError(e);
-      }
-    },
-  },
   {
     name: "ghl_get_contact",
     description: "Get a single contact by ID with all fields, tags, and custom data.",
@@ -57,6 +79,7 @@ export const contactTools = [
     inputSchema: z.object({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      name: z.string().optional().describe("Full name of the contact"),
       email: z.string().email().optional(),
       phone: z.string().optional().describe("E.164 format preferred, e.g. +15551234567"),
       address1: z.string().optional(),
@@ -69,11 +92,18 @@ export const contactTools = [
       source: z.string().optional().describe("Lead source"),
       tags: z.array(z.string()).optional(),
       customFields: z
-        .array(z.object({ id: z.string(), value: z.string() }))
+        .array(customFieldSchema)
         .optional()
-        .describe("Custom field values [{id, value}]"),
+        .describe("Custom field values [{id, fieldValue}]"),
       dnd: z.boolean().optional().describe("Do Not Disturb flag"),
+      dndSettings: dndSettingsSchema.optional().describe("Per-channel DND settings"),
+      inboundDndSettings: inboundDndSettingsSchema
+        .optional()
+        .describe("Inbound DND settings per channel"),
       timezone: z.string().optional(),
+      gender: z.string().optional().describe("Gender of the contact"),
+      dateOfBirth: z.string().optional().describe("Birth date, e.g. YYYY-MM-DD"),
+      assignedTo: z.string().optional().describe("User ID the contact is assigned to"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -95,6 +125,7 @@ export const contactTools = [
       contactId: z.string().describe("The contact ID to update"),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      name: z.string().optional().describe("Full name of the contact"),
       email: z.string().email().optional(),
       phone: z.string().optional(),
       address1: z.string().optional(),
@@ -102,14 +133,17 @@ export const contactTools = [
       state: z.string().optional(),
       postalCode: z.string().optional(),
       country: z.string().optional(),
-      companyName: z.string().optional(),
       website: z.string().optional(),
       source: z.string().optional(),
       tags: z.array(z.string()).optional(),
-      customFields: z
-        .array(z.object({ id: z.string(), value: z.string() }))
-        .optional(),
+      customFields: z.array(customFieldSchema).optional(),
       dnd: z.boolean().optional(),
+      dndSettings: dndSettingsSchema.optional().describe("Per-channel DND settings"),
+      inboundDndSettings: inboundDndSettingsSchema
+        .optional()
+        .describe("Inbound DND settings per channel"),
+      dateOfBirth: z.string().optional().describe("Birth date, e.g. YYYY-MM-DD"),
+      assignedTo: z.string().optional().describe("User ID the contact is assigned to"),
       timezone: z.string().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
@@ -133,14 +167,32 @@ export const contactTools = [
     inputSchema: z.object({
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      name: z.string().optional().describe("Full name of the contact"),
       email: z.string().email().optional(),
       phone: z.string().optional(),
       companyName: z.string().optional(),
+      address1: z.string().optional(),
+      city: z.string().optional(),
+      state: z.string().optional(),
+      postalCode: z.string().optional(),
+      website: z.string().optional(),
+      timezone: z.string().optional(),
+      country: z.string().optional(),
+      gender: z.string().optional().describe("Gender of the contact"),
       tags: z.array(z.string()).optional(),
       source: z.string().optional(),
-      customFields: z
-        .array(z.object({ id: z.string(), value: z.string() }))
-        .optional(),
+      customFields: z.array(customFieldSchema).optional(),
+      dnd: z.boolean().optional().describe("Do Not Disturb flag"),
+      dndSettings: dndSettingsSchema.optional().describe("Per-channel DND settings"),
+      inboundDndSettings: inboundDndSettingsSchema
+        .optional()
+        .describe("Inbound DND settings per channel"),
+      dateOfBirth: z.string().optional().describe("Birth date, e.g. YYYY-MM-DD"),
+      assignedTo: z.string().optional().describe("User ID the contact is assigned to"),
+      createNewIfDuplicateAllowed: z
+        .boolean()
+        .optional()
+        .describe("Allow creating a new contact even if a duplicate is found"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -273,13 +325,32 @@ export const contactTools = [
       contactId: z.string(),
       body: z.string().describe("Note content"),
       userId: z.string().optional().describe("User ID to attribute note to"),
+      title: z.string().optional().describe("Title of the note"),
+      color: z.string().optional().describe("Hex color code for the note"),
+      pinned: z.boolean().optional().describe("Whether the note is pinned"),
     }),
-    handler: async (args: { contactId: string; body: string; userId?: string }, config: GHLConfig) => {
+    handler: async (
+      args: {
+        contactId: string;
+        body: string;
+        userId?: string;
+        title?: string;
+        color?: string;
+        pinned?: boolean;
+      },
+      config: GHLConfig
+    ) => {
       try {
         const result = await ghlRequest("POST", `/contacts/${args.contactId}/notes`, {
           token: config.token,
           version: GHL_VERSION_V3,
-          body: { body: args.body, userId: args.userId },
+          body: {
+            body: args.body,
+            userId: args.userId,
+            title: args.title,
+            color: args.color,
+            pinned: args.pinned,
+          },
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
@@ -289,18 +360,34 @@ export const contactTools = [
   },
   {
     name: "ghl_update_contact_note",
-    description: "Update an existing contact note.",
+    description: "Update an existing contact note. Spec has no required fields on update.",
     inputSchema: z.object({
       contactId: z.string(),
       noteId: z.string(),
-      body: z.string().describe("Updated note content"),
+      body: z.string().optional().describe("Updated note content"),
+      userId: z.string().optional().describe("User ID to attribute note to"),
+      title: z.string().optional().describe("Title of the note"),
+      color: z.string().optional().describe("Hex color code for the note"),
+      pinned: z.boolean().optional().describe("Whether the note is pinned"),
     }),
-    handler: async (args: { contactId: string; noteId: string; body: string }, config: GHLConfig) => {
+    handler: async (
+      args: {
+        contactId: string;
+        noteId: string;
+        body?: string;
+        userId?: string;
+        title?: string;
+        color?: string;
+        pinned?: boolean;
+      },
+      config: GHLConfig
+    ) => {
+      const { contactId, noteId, ...noteData } = args;
       try {
-        const result = await ghlRequest("PUT", `/contacts/${args.contactId}/notes/${args.noteId}`, {
+        const result = await ghlRequest("PUT", `/contacts/${contactId}/notes/${noteId}`, {
           token: config.token,
           version: GHL_VERSION_V3,
-          body: { body: args.body },
+          body: noteData,
         });
         return JSON.stringify(result, null, 2);
       } catch (e) {
