@@ -23,7 +23,7 @@ describe('ghl_get_facebook_custom_audiences', () => {
   it('calls GET /ad-publishing/facebook/custom-audience with locationId, type, adAccountId, source', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     const result = await getTool('ghl_get_facebook_custom_audiences').handler(
-      { type: 'CUSTOM', adAccountId: 'act_123', source: 'facebook' },
+      { type: 'custom', adAccountId: 'act_123', source: 'ad_manager' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -31,16 +31,16 @@ describe('ghl_get_facebook_custom_audiences', () => {
     expect(call.pathname).toBe('/ad-publishing/facebook/custom-audience');
     expect(call.headers.Version).toBe(GHL_VERSION_LEGACY);
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
-    expect(call.params.type).toBe('CUSTOM');
+    expect(call.params.type).toBe('custom');
     expect(call.params.adAccountId).toBe('act_123');
-    expect(call.params.source).toBe('facebook');
+    expect(call.params.source).toBe('ad_manager');
     expectSuccess(result, MOCK_DATA);
   });
 
   it('omits optional source when not provided', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_get_facebook_custom_audiences').handler(
-      { type: 'CUSTOM', adAccountId: 'act_123' },
+      { type: 'custom', adAccountId: 'act_123' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
@@ -50,10 +50,24 @@ describe('ghl_get_facebook_custom_audiences', () => {
   it('handles API errors', async () => {
     mockFetchError(404, { message: 'Not found' });
     const result = await getTool('ghl_get_facebook_custom_audiences').handler(
-      { type: 'CUSTOM', adAccountId: 'act_123' },
+      { type: 'custom', adAccountId: 'act_123' },
       TEST_CONFIG
     );
     expectError(result, 404);
+  });
+
+  it('validates type and source as closed enums', () => {
+    const schema = getTool('ghl_get_facebook_custom_audiences').inputSchema;
+    expect(
+      schema.safeParse({ type: 'lookalike', adAccountId: 'act_123', source: 'integration' }).success
+    ).toBe(true);
+    expect(schema.safeParse({ type: 'all', adAccountId: 'act_123' }).success).toBe(true);
+    expect(schema.safeParse({ type: 'not_a_real_type', adAccountId: 'act_123' }).success).toBe(
+      false
+    );
+    expect(
+      schema.safeParse({ type: 'custom', adAccountId: 'act_123', source: 'facebook' }).success
+    ).toBe(false);
   });
 });
 

@@ -374,7 +374,15 @@ const CREATE_FORM_ARGS = {
   pageId: 'page1',
   type: 'MORE_VOLUME',
   name: 'Contact Form',
-  questions: [{ key: 'full_name', type: 'FULL_NAME', options: [] }],
+  questions: [
+    { key: 'full_name', type: 'FULL_NAME', options: [] },
+    {
+      key: 'are_you_interested',
+      label: 'Are you interested?',
+      type: 'CUSTOM',
+      options: [{ key: 'opt_yes', value: 'Yes' }],
+    },
+  ],
   privacyPolicyLink: 'https://example.com/privacy',
   thankYouPage: {
     title: 'Thank You!',
@@ -438,6 +446,32 @@ describe('ghl_create_facebook_page_form', () => {
       TEST_CONFIG
     );
     expectError(result, 422);
+  });
+
+  it('validates questions as a typed object shape, not a free-form record', () => {
+    const schema = getTool('ghl_create_facebook_page_form').inputSchema;
+    expect(schema.safeParse(CREATE_FORM_ARGS).success).toBe(true);
+
+    // key is required
+    const missingKey = {
+      ...CREATE_FORM_ARGS,
+      questions: [{ type: 'EMAIL' }],
+    };
+    expect(schema.safeParse(missingKey).success).toBe(false);
+
+    // type must be one of the enum values
+    const invalidType = {
+      ...CREATE_FORM_ARGS,
+      questions: [{ key: 'email', type: 'NOT_A_REAL_TYPE' }],
+    };
+    expect(schema.safeParse(invalidType).success).toBe(false);
+
+    // option entries require both key and value
+    const invalidOption = {
+      ...CREATE_FORM_ARGS,
+      questions: [{ key: 'q1', type: 'CUSTOM', options: [{ value: 'Yes' }] }],
+    };
+    expect(schema.safeParse(invalidOption).success).toBe(false);
   });
 });
 

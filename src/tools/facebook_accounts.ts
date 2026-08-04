@@ -314,7 +314,47 @@ export const facebookAccountsTools = [
       type: z.enum(["MORE_VOLUME", "HIGHER_INTENT"]).describe("The lead form type"),
       name: z.string().describe("The lead form name"),
       questions: z
-        .array(z.record(z.string(), z.unknown()))
+        .array(
+          z.object({
+            label: z.string().optional().describe("Question label text shown to the user"),
+            key: z.string().describe("Question key"),
+            type: z
+              .enum([
+                "CUSTOM",
+                "CITY",
+                "COMPANY_NAME",
+                "COUNTRY",
+                "DATE_OF_BIRTH",
+                "EMAIL",
+                "FIRST_NAME",
+                "FULL_NAME",
+                "GENDER",
+                "JOB_TITLE",
+                "LAST_NAME",
+                "MARITIAL_STATUS",
+                "MILITARY_STATUS",
+                "PHONE",
+                "POST_CODE",
+                "RELATIONSHIP_STATUS",
+                "STATE",
+                "STREET_ADDRESS",
+                "WORK_EMAIL",
+                "WORK_PHONE_NUMBER",
+                "ZIP",
+                "SHORT_ANSWER",
+              ])
+              .describe("Question input type"),
+            options: z
+              .array(
+                z.object({
+                  key: z.string().describe("Option key"),
+                  value: z.string().describe("Option value"),
+                })
+              )
+              .optional()
+              .describe("Answer options for multiple-choice questions (only applies to CUSTOM type)"),
+          })
+        )
         .describe("List of questions displayed on the lead form"),
       privacyPolicyLink: z.string().describe("Privacy policy URL"),
       thankYouPage: z.record(z.string(), z.unknown()).describe("Thank you page configuration"),
@@ -331,7 +371,34 @@ export const facebookAccountsTools = [
         pageId: string;
         type: "MORE_VOLUME" | "HIGHER_INTENT";
         name: string;
-        questions: Record<string, unknown>[];
+        questions: {
+          label?: string;
+          key: string;
+          type:
+            | "CUSTOM"
+            | "CITY"
+            | "COMPANY_NAME"
+            | "COUNTRY"
+            | "DATE_OF_BIRTH"
+            | "EMAIL"
+            | "FIRST_NAME"
+            | "FULL_NAME"
+            | "GENDER"
+            | "JOB_TITLE"
+            | "LAST_NAME"
+            | "MARITIAL_STATUS"
+            | "MILITARY_STATUS"
+            | "PHONE"
+            | "POST_CODE"
+            | "RELATIONSHIP_STATUS"
+            | "STATE"
+            | "STREET_ADDRESS"
+            | "WORK_EMAIL"
+            | "WORK_PHONE_NUMBER"
+            | "ZIP"
+            | "SHORT_ANSWER";
+          options?: { key: string; value: string }[];
+        }[];
         privacyPolicyLink: string;
         thankYouPage: Record<string, unknown>;
         questionPageHeadline?: string;

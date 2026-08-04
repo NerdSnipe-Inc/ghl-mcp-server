@@ -28,12 +28,16 @@ export const facebookAudiencesTools = [
     description:
       "Get Facebook custom audiences for a location. Required fields: type, adAccountId. Optional: source.",
     inputSchema: z.object({
-      type: z.string().describe("Custom audience type filter"),
+      type: z.enum(["lookalike", "custom", "all"]).describe("Custom audience type filter"),
       adAccountId: z.string().describe("Facebook ad account ID"),
-      source: z.string().optional().describe("Audience data source"),
+      source: z.enum(["ad_manager", "integration"]).optional().describe("Audience data source"),
     }),
     handler: async (
-      args: { type: string; adAccountId: string; source?: string },
+      args: {
+        type: "lookalike" | "custom" | "all";
+        adAccountId: string;
+        source?: "ad_manager" | "integration";
+      },
       config: GHLConfig
     ) => {
       try {
