@@ -88,7 +88,34 @@ export const googleCampaignsTools = [
         })
         .optional()
         .describe("Bidding strategy configuration"),
-      assets: z.record(z.string(), z.unknown()).optional().describe("Campaign-level assets configuration"),
+      assets: z
+        .object({
+          calls: z.array(z.string()).optional().describe("Call extension asset resource names"),
+          sitelinks: z.array(z.string()).optional().describe("Sitelink asset resource names"),
+          leadForm: z.string().optional().describe("Lead form asset resource name"),
+          images: z
+            .array(
+              z.object({
+                url: z.string(),
+                resourceName: z.string().optional(),
+                name: z.string().optional(),
+                error: z.string().optional(),
+              })
+            )
+            .optional()
+            .describe("Image assets"),
+          businessLogo: z
+            .object({
+              url: z.string(),
+              resourceName: z.string().optional(),
+              name: z.string().optional(),
+              error: z.string().optional(),
+            })
+            .optional()
+            .describe("Business logo asset"),
+        })
+        .optional()
+        .describe("Campaign-level assets configuration"),
       isEuPoliticalAds: z.boolean().optional().describe("Whether this is an EU political ad"),
       adGroups: z
         .array(z.record(z.string(), z.unknown()))
@@ -173,7 +200,13 @@ export const googleCampaignsTools = [
         audience?: Record<string, unknown>;
         networkSettings?: { targetSearchNetwork: boolean; targetContentNetwork: boolean };
         biddingStrategy?: { type?: string; value?: number };
-        assets?: Record<string, unknown>;
+        assets?: {
+          calls?: string[];
+          sitelinks?: string[];
+          leadForm?: string;
+          images?: { url: string; resourceName?: string; name?: string; error?: string }[];
+          businessLogo?: { url: string; resourceName?: string; name?: string; error?: string };
+        };
         isEuPoliticalAds?: boolean;
         adGroups?: Record<string, unknown>[];
         campaignGoal?: {

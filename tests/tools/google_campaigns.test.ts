@@ -75,6 +75,34 @@ describe('ghl_upsert_google_campaign', () => {
     expect(call.body?.adSchedule).toEqual([{ dayOfWeek: 'MONDAY', from: '09:00', to: '17:00' }]);
   });
 
+  it('passes a typed assets object through', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    const assets = {
+      calls: ['customers/123/assets/456'],
+      sitelinks: ['customers/123/assets/789'],
+      leadForm: 'customers/123/assets/321',
+      images: [{ url: 'https://example.com/logo.png', name: 'Logo' }],
+      businessLogo: { url: 'https://example.com/biz-logo.png', name: 'Business Logo' },
+    };
+    await getTool('ghl_upsert_google_campaign').handler(
+      { name: 'Campaign A', advertisingChannelType: 'SEARCH', assets },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body?.assets).toEqual(assets);
+  });
+
+  it('rejects an assets.images entry missing the required url', () => {
+    const schema = getTool('ghl_upsert_google_campaign').inputSchema;
+    expect(
+      schema.safeParse({
+        name: 'Campaign A',
+        advertisingChannelType: 'SEARCH',
+        assets: { images: [{ name: 'Logo' }] },
+      }).success
+    ).toBe(false);
+  });
+
   it('handles API errors', async () => {
     mockFetchError(422, { message: 'Invalid' });
     const result = await getTool('ghl_upsert_google_campaign').handler(
