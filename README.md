@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**268 tools** covering the full GHL API:
+**309 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -38,6 +38,7 @@ Once installed, you can talk to your CRM naturally:
 | Phone Numbers                  | List, search, purchase, update, release phone numbers                       |
 | Payments & Invoices            | Orders, transactions, subscriptions, coupons, invoices, payments            |
 | Social & Media                 | Social posts, media library, trigger links                                  |
+| Social Planner                 | Content queues & scheduling, comment moderation, OAuth account connection, CSV bulk-import posting, post/statistics (see note below) |
 | Knowledge Base, FAQs & Crawler | Create/manage knowledge bases, FAQ pairs, and AI-train websites via crawler |
 | Products, Collections & Reviews | Products, prices, inventory, collections, reviews, store visibility & priority |
 | Store & Shipping               | Shipping carriers, zones, rates, and store settings                        |
@@ -282,7 +283,7 @@ node dist/index.js
 
 ---
 
-## All 268 Tools — Full Reference
+## All 309 Tools — Full Reference
 
 ### Contacts
 
@@ -448,6 +449,14 @@ node dist/index.js
 
 ### Social & Media
 
+> These 4 `ghl_*_social_*`/media/trigger-link tools were built in Phase 1 against a
+> small slice of the `/social-media-posting/` resource. The **Social Planner**
+> sections below (Phase 2e) cover the other 41 operations on that same resource —
+> content queues, comment moderation, OAuth account connection, CSV bulk-import, and
+> the remaining post/statistics endpoints. The two use different naming conventions
+> (`social.ts` vs. `social_planner_*.ts`) because they were designed in separate
+> phases; together they cover all 45 `social-planner-v3.json` operations.
+
 | Tool                      | Description                             |
 |---------------------------|-----------------------------------------|
 | `ghl_get_social_accounts` | List connected social media accounts    |
@@ -459,6 +468,75 @@ node dist/index.js
 | `ghl_get_trigger_links`   | List trigger links                      |
 | `ghl_create_trigger_link` | Create a trigger link                   |
 | `ghl_delete_trigger_link` | Delete a trigger link                   |
+
+### Social Planner Queues
+
+Content queue creation/configuration, queue items, edit sessions, calendar views, and slots (Phase 2e — see note above).
+
+| Tool                              | Description                                                                        |
+|------------------------------------|-------------------------------------------------------------------------------------|
+| `ghl_create_social_queue`          | Create a content queue for a social media category                                 |
+| `ghl_get_social_queue_categories`  | List social media categories available for creating queues                         |
+| `ghl_list_social_queues`           | List content queues for the location                                               |
+| `ghl_get_social_queue_calendar`    | Fetch a calendar view of queued posts                                              |
+| `ghl_delete_social_queue_active_post` | Delete the currently active queue post and schedule the next one                |
+| `ghl_get_social_queue`             | Get a content queue by ID                                                          |
+| `ghl_update_social_queue`          | Update a content queue                                                             |
+| `ghl_create_social_queue_item`     | Create a new item in a content queue                                               |
+| `ghl_get_social_queue_edit_calendar` | Fetch a calendar view of an active edit session                                  |
+| `ghl_discard_social_queue_edit`    | Discard an active queue edit session                                               |
+| `ghl_save_social_queue_edit`       | Save an active queue edit session                                                  |
+| `ghl_start_social_queue_edit`      | Start a new edit session for a content queue                                       |
+| `ghl_get_social_queue_items`       | List items in a content queue                                                      |
+| `ghl_delete_social_queue_item`     | Delete an item from a content queue                                                |
+| `ghl_update_social_queue_item`     | Update an item in a content queue                                                  |
+| `ghl_clone_social_queue_item`      | Clone an item in a content queue                                                   |
+| `ghl_reset_social_queue_item`      | Reset an item in a content queue back to its original state                        |
+| `ghl_get_social_queue_slots`       | List available posting slots for a content queue                                   |
+
+### Social Planner Comments
+
+Comment moderation on social media posts (Phase 2e — see note above).
+
+| Tool                        | Description                                          |
+|------------------------------|--------------------------------------------------------|
+| `ghl_create_social_comment`  | Create a new comment on a social media post           |
+| `ghl_list_social_comments`   | List comments for one or more social media posts      |
+| `ghl_like_social_comment`    | Like a social media comment                            |
+| `ghl_unlike_social_comment`  | Unlike a social media comment                          |
+
+### Social Planner Accounts
+
+OAuth account connection flow, plus account/category/tag management (Phase 2e — see note above).
+
+| Tool                              | Description                                                                       |
+|------------------------------------|--------------------------------------------------------------------------------------|
+| `ghl_start_social_oauth`           | Step 1 of 3: start OAuth for a social platform                                      |
+| `ghl_get_social_oauth_accounts`    | Step 2 of 3: list the pages/channels/locations available to connect                 |
+| `ghl_connect_social_oauth_account` | Step 3 of 3: connect the account/page selected in step 2 to this location           |
+| `ghl_delete_social_account`        | Delete a connected social media account (and remove it from its group)              |
+| `ghl_set_social_accounts`          | Associate connected social accounts with an already-uploaded CSV bulk-import job    |
+| `ghl_get_social_categories`        | List social media categories for this location                                     |
+| `ghl_get_social_category`          | Get a single social media category by ID                                            |
+| `ghl_get_social_tags`              | List social media tags for this location                                            |
+| `ghl_get_social_tags_by_ids`       | Get multiple social media tags by their IDs                                         |
+
+### Social Planner Posts
+
+CSV bulk-import posting, remaining post operations, and statistics (Phase 2e — see note above).
+
+| Tool                             | Description                                                                          |
+|-----------------------------------|------------------------------------------------------------------------------------------|
+| `ghl_upload_social_csv`           | Step 1 of the CSV bulk-import flow: upload a CSV file of social media posts             |
+| `ghl_get_social_csv_upload_status`| List CSV bulk-import jobs (uploads) for this location                                   |
+| `ghl_get_social_csv_post`         | Get the parsed rows/posts of a single CSV bulk-import job by ID                         |
+| `ghl_finalize_social_csv`         | Finalize (commit) a CSV bulk-import job, scheduling/publishing its parsed posts          |
+| `ghl_delete_social_csv`           | Delete a CSV bulk-import job entirely (all its parsed posts)                            |
+| `ghl_delete_social_csv_post`      | Delete a single post row from a CSV bulk-import job                                     |
+| `ghl_bulk_delete_social_posts`    | Delete multiple social media posts by ID in a single request                            |
+| `ghl_get_social_post`             | Get a single social media post by ID                                                    |
+| `ghl_update_social_post`          | Update an existing social media post (content, schedule, status, media, etc.)           |
+| `ghl_get_social_statistics`       | Get engagement/analytics statistics for connected social accounts                       |
 
 ### Knowledge Bases
 

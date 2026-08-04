@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased — Phase 2e — Social Planner
+
+Adds GHL API v3 Social Planner coverage — 41 new tools across 4 new modules:
+
+- `social_planner_queues.ts` (18 tools) — content queue creation/configuration, queue items, edit sessions, calendar views, and slots
+- `social_planner_comments.ts` (4 tools) — comment moderation on social media posts (create, list, like, unlike)
+- `social_planner_accounts.ts` (9 tools) — OAuth account connection flow (3-step), plus account/category/tag management
+- `social_planner_posts.ts` (10 tools) — CSV bulk-import posting, remaining post get/update/bulk-delete operations, and statistics
+
+Total tool count: 268 → 309.
+
+`social-planner-v3.json` has 45 operations total; 4 were already covered by Phase 1's
+`social.ts` (`ghl_get_social_accounts`, `ghl_get_social_posts`, `ghl_create_social_post`,
+`ghl_delete_social_post`). This phase covers the remaining 41, giving full coverage of
+the resource across the two modules (`social.ts` from Phase 1, `social_planner_*.ts`
+from Phase 2e — see the README's Social & Media / Social Planner sections for the split
+rationale).
+
+Adds a new `ghlRequestMultipart` client capability to `src/client.ts` to support
+`ghl_upload_social_csv`'s `multipart/form-data` CSV file upload — the only
+non-JSON-body operation in the codebase. It mirrors `ghlRequest`'s error handling but
+omits the `Content-Type: application/json` header so `fetch`/`FormData` can set the
+correct multipart boundary automatically.
+
+This phase was discovered mid-way through Phase 2's original ad-publishing research and
+was not part of the original 5-way domain split; it was inserted as Phase 2e, and the
+originally-planned "ad-publishing" sub-phase is now renumbered to Phase 2f. See
+`docs/superpowers/specs/2026-08-04-v3-phase2e-social-planner-design.md`.
+
 ## Unreleased — Phase 2d — Platform/Org
 
 Adds GHL API v3 Platform/Org coverage — 23 new tools across 3 new modules:
