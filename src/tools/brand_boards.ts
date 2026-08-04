@@ -8,6 +8,27 @@ import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js
 //   - Brand voices : /brand-boards/locations/{locationId}/brand-voices/...
 // Both are exported together as `brandBoardTools` per the task brief.
 
+const logoSchema = z.object({
+  id: z.string().optional(),
+  url: z.string(),
+  label: z.string(),
+  path: z.string(),
+});
+const colorSchema = z.object({
+  id: z.string().optional(),
+  hexa: z.string(),
+  rgba: z.string(),
+  hex: z.string(),
+  rgb: z.string(),
+  label: z.string(),
+});
+const fontSchema = z.object({
+  id: z.string().optional(),
+  font: z.string(),
+  fallback: z.string(),
+  label: z.string(),
+});
+
 export const brandBoardTools = [
   // ── Brand boards ────────────────────────────────────────────────────────────
   {
@@ -16,18 +37,9 @@ export const brandBoardTools = [
       "Create a brand board for a location. A brand board holds logos, colors, and fonts, and can be created blank, from a template, from a snapshot, or extracted from a website URL.",
     inputSchema: z.object({
       name: z.string().describe("Name of the brand board"),
-      logos: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of logos: { url, label, path, id? }"),
-      colors: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of colors: { hexa, rgba, hex, rgb, label, id? }"),
-      fonts: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of fonts: { font, fallback, label, id? }"),
+      logos: z.array(logoSchema).optional().describe("Array of logos"),
+      colors: z.array(colorSchema).optional().describe("Array of colors"),
+      fonts: z.array(fontSchema).optional().describe("Array of fonts"),
       default: z.boolean().optional().describe("Set as the default brand board for this location"),
       brandBoardId: z
         .string()
@@ -107,18 +119,9 @@ export const brandBoardTools = [
     inputSchema: z.object({
       id: z.string().describe("Brand board ID to update"),
       name: z.string().optional().describe("Name of the brand board"),
-      logos: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of logos: { url, label, path, id? }"),
-      colors: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of colors: { hexa, rgba, hex, rgb, label, id? }"),
-      fonts: z
-        .array(z.record(z.unknown()))
-        .optional()
-        .describe("Array of fonts: { font, fallback, label, id? }"),
+      logos: z.array(logoSchema).optional().describe("Array of logos"),
+      colors: z.array(colorSchema).optional().describe("Array of colors"),
+      fonts: z.array(fontSchema).optional().describe("Array of fonts"),
       default: z.boolean().optional().describe("Set as the default brand board for this location"),
       parentId: z.string().optional().describe("Parent folder ID in media library (reserved for future use)"),
     }),

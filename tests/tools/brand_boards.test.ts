@@ -65,6 +65,27 @@ describe('ghl_create_brand_board', () => {
     expect(call.body?.url).toBe('https://example.com');
   });
 
+  it('rejects incomplete logo/color/font shapes', () => {
+    const schema = getTool('ghl_create_brand_board').inputSchema;
+    expect(
+      schema.safeParse({ name: 'x', logos: [{ url: 'https://x.com/logo.png' }] }).success
+    ).toBe(false); // missing label/path
+    expect(
+      schema.safeParse({ name: 'x', colors: [{ hexa: '#FFF' }] }).success
+    ).toBe(false); // missing rgba/hex/rgb/label
+    expect(
+      schema.safeParse({ name: 'x', fonts: [{ font: 'Arial' }] }).success
+    ).toBe(false); // missing fallback/label
+    expect(
+      schema.safeParse({
+        name: 'x',
+        logos: [{ url: 'https://x.com/logo.png', label: 'Primary', path: '/logo.png' }],
+        colors: [{ hexa: '#FFF', rgba: 'rgba(1,1,1,1)', hex: '#FFF', rgb: 'rgb(1,1,1)', label: 'White' }],
+        fonts: [{ font: 'Arial', fallback: 'sans-serif', label: 'Body' }],
+      }).success
+    ).toBe(true);
+  });
+
   it('handles API errors', async () => {
     mockFetchError(400, { message: 'Bad request' });
     const result = await getTool('ghl_create_brand_board').handler(
@@ -159,6 +180,19 @@ describe('ghl_update_brand_board', () => {
     expect(call.body?.fonts).toEqual([]);
     expect(call.body?.default).toBe(false);
     expect(call.body?.parentId).toBe('folder-2');
+  });
+
+  it('rejects incomplete logo/color/font shapes', () => {
+    const schema = getTool('ghl_update_brand_board').inputSchema;
+    expect(
+      schema.safeParse({ id: 'board1', logos: [{ url: 'https://x.com/logo.png' }] }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        id: 'board1',
+        colors: [{ hexa: '#FFF', rgba: 'rgba(1,1,1,1)', hex: '#FFF', rgb: 'rgb(1,1,1)', label: 'White' }],
+      }).success
+    ).toBe(true);
   });
 
   it('handles API errors', async () => {
