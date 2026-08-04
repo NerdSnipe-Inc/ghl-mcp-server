@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased — Phase 2d — Platform/Org
+
+Adds GHL API v3 Platform/Org coverage — 23 new tools across 3 new modules:
+
+- `businesses.ts` (5 tools) — business CRUD within a location
+- `associations.ts` (10 tools) — association CRUD and association relation CRUD between records
+- `objects.ts` (8 tools) — custom/standard object schema get/update, object listing, and object record CRUD & search
+
+Total tool count: 245 → 268.
+
+`companies.ts`, `snapshots.ts`, and `oauth.ts` were intentionally not built: this server
+authenticates via a location-scoped Private Integration Token with no agency-level
+identity, so agency-only `companies`/`snapshots` endpoints and Marketplace-app-developer-only
+`oauth` endpoints are unreachable. See
+`docs/superpowers/specs/2026-08-04-v3-phase2d-platform-org-design.md`.
+
+`objects.ts`'s `POST /objects/` operation (create a custom object schema) was also
+excluded: its `security` scheme is `Agency-Access`, not `bearer`, so it's unreachable
+with this server's location-scoped PIT token for the same reason.
+
 ## Unreleased — Phase 2c — AI/Communication
 
 Adds GHL API v3 AI/Communication coverage — 39 new tools across 4 new modules:

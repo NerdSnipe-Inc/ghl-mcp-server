@@ -23,7 +23,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**245 tools** covering the full GHL API:
+**268 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -51,6 +51,9 @@ Once installed, you can talk to your CRM naturally:
 | Voice AI                        | CRUD voice AI agents & actions, call logs                                  |
 | Chat Widget                     | CRUD chat widgets, clone, config, list                                     |
 | Agent Studio                    | CRUD Agent Studio agents, versioning, publish, execute                     |
+| Businesses                      | CRUD businesses within a location                                          |
+| Associations                    | CRUD associations and association relations between records                |
+| Objects                         | Get/update custom object schemas, list objects, CRUD & search object records |
 
 > **Not yet covered:** the following GHL API v3 resources require credentials this
 > server doesn't have (agency-level or Marketplace-app-developer identity, not a
@@ -59,8 +62,15 @@ Once installed, you can talk to your CRM naturally:
 >   `docs/superpowers/specs/2026-08-04-v3-phase2a-commerce-design.md`.
 > - `marketplace` — app installs/uninstalls, billing-wallet charges, rebilling config.
 >   See `docs/superpowers/specs/2026-08-04-v3-phase2b-marketing-design.md`.
+> - `companies` — agency/company-level account details. Requires agency-level
+>   credentials; this server authenticates via a location-scoped PIT token and has
+>   no agency-level identity.
+> - `snapshots` — agency-level snapshot push/share/status operations. Same
+>   agency-only credential requirement.
+> - `oauth` — Marketplace app installation/token endpoints. Requires a
+>   Marketplace-app-developer identity, not a location-scoped PIT token.
 >
-> If you need either of these and have the right credential type, please
+> If you need any of these and have the right credential type, please
 > [open an issue](https://github.com/NerdSnipe-Inc/ghl-mcp-server/issues) requesting it.
 
 ---
@@ -272,7 +282,7 @@ node dist/index.js
 
 ---
 
-## All 245 Tools — Full Reference
+## All 268 Tools — Full Reference
 
 ### Contacts
 
@@ -657,6 +667,44 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_update_agent_studio_agent_version`       | Update a version's workflow definition (nodes, edges, variables)             |
 | `ghl_publish_agent_studio_agent`              | Promote a draft version to production, publishing it                         |
 | `ghl_execute_agent_studio_agent`              | Execute an Agent Studio agent and get a non-streaming JSON response          |
+
+### Businesses
+
+| Tool                     | Description                                                             |
+|--------------------------|--------------------------------------------------------------------------|
+| `ghl_get_businesses`     | List businesses for a location                                           |
+| `ghl_get_business`       | Get a specific business by ID                                            |
+| `ghl_create_business`    | Create a new business                                                    |
+| `ghl_update_business`    | Update an existing business                                              |
+| `ghl_delete_business`    | Delete a business                                                        |
+
+### Associations
+
+| Tool                                  | Description                                                        |
+|-----------------------------------------|-----------------------------------------------------------------------|
+| `ghl_create_association_relation`      | Create a relation between two records for an association             |
+| `ghl_get_association_relations`        | List relations for a record                                           |
+| `ghl_delete_association_relation`      | Delete a relation between two records                                 |
+| `ghl_get_association_by_key`           | Get an association by its key name                                    |
+| `ghl_get_association_by_object_key`    | Get an association by its object key                                  |
+| `ghl_create_association`               | Create a new association                                              |
+| `ghl_get_association`                  | Get a specific association by ID                                      |
+| `ghl_update_association`               | Update an association's object labels                                 |
+| `ghl_delete_association`               | Delete an association                                                 |
+| `ghl_list_associations`                | List associations for a location                                      |
+
+### Objects
+
+| Tool                            | Description                                                                |
+|-----------------------------------|-------------------------------------------------------------------------------|
+| `ghl_get_object_schema`          | Get a custom or standard object schema by key                                |
+| `ghl_update_object_schema`       | Update a custom object schema                                                |
+| `ghl_get_objects`                | List all objects (standard and custom) for the location                      |
+| `ghl_get_object_record`          | Get a single custom object record by ID                                      |
+| `ghl_update_object_record`       | Update a custom object record                                                |
+| `ghl_delete_object_record`       | Delete a custom object record                                                |
+| `ghl_create_object_record`       | Create a new custom object record                                            |
+| `ghl_search_object_records`      | Search custom object records                                                 |
 
 ---
 
