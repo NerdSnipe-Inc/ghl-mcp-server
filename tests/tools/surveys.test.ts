@@ -59,15 +59,24 @@ describe('ghl_get_survey_submissions', () => {
     expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
   });
 
-  it('passes surveyId and contactId filters', async () => {
+  it('passes surveyId and q filters', async () => {
     const fetch = mockFetchSuccess({ submissions: [] });
     await getTool('ghl_get_survey_submissions').handler(
-      { surveyId: 'survey-1', contactId: 'contact-abc' },
+      { surveyId: 'survey-1', q: 'contact-abc' },
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
     expect(call.params.surveyId).toBe('survey-1');
-    expect(call.params.contactId).toBe('contact-abc');
+    expect(call.params.q).toBe('contact-abc');
+  });
+
+  it('does not accept contactId (not a real SearchSubmissionsDTO field)', () => {
+    const schema = getTool('ghl_get_survey_submissions').inputSchema;
+    const result = schema.safeParse({ contactId: 'contact-abc' });
+    // Extra unknown keys are stripped by default zod object parsing, not rejected —
+    // assert the parsed output no longer carries contactId through to the request.
+    expect(result.success).toBe(true);
+    expect((result.data as Record<string, unknown>).contactId).toBeUndefined();
   });
 
   it('passes date range filters', async () => {
