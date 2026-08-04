@@ -39,6 +39,7 @@ import { chatWidgetTools } from '../src/tools/chat_widget.js';
 import { agentStudioTools } from '../src/tools/agent_studio.js';
 import { socialPlannerQueuesTools } from '../src/tools/social_planner_queues.js';
 import { socialPlannerCommentsTools } from '../src/tools/social_planner_comments.js';
+import { socialPlannerAccountsTools } from '../src/tools/social_planner_accounts.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -108,11 +109,12 @@ const ALL_TOOLS = [
 
   // Social planner — comments
   ...socialPlannerCommentsTools,
+  ...socialPlannerAccountsTools,
 ];
 
 describe('Tool registry', () => {
   it('registers exactly 290 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(290);
+    expect(ALL_TOOLS).toHaveLength(299);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -198,6 +200,7 @@ describe('Tool counts per module', () => {
   it('agentStudio has 8 tools', () => expect(agentStudioTools).toHaveLength(8));
   it('socialPlannerQueues has 18 tools', () => expect(socialPlannerQueuesTools).toHaveLength(18));
   it('socialPlannerComments has 4 tools', () => expect(socialPlannerCommentsTools).toHaveLength(4));
+  it('socialPlannerAccounts has 9 tools', () => expect(socialPlannerAccountsTools).toHaveLength(9));
 });
 
 describe('Specific tool existence', () => {
@@ -370,12 +373,16 @@ describe('Specific tool existence', () => {
     // Social planner — comments (4)
     'ghl_create_social_comment', 'ghl_list_social_comments', 'ghl_like_social_comment',
     'ghl_unlike_social_comment',
+    // Social planner — accounts (9)
+    'ghl_start_social_oauth', 'ghl_get_social_oauth_accounts', 'ghl_connect_social_oauth_account',
+    'ghl_delete_social_account', 'ghl_set_social_accounts', 'ghl_get_social_categories',
+    'ghl_get_social_category', 'ghl_get_social_tags', 'ghl_get_social_tags_by_ids',
   ];
 
-  it('all 290 expected tools are present', () => {
+  it('all 299 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(290);
+    expect(expectedTools).toHaveLength(299);
   });
 });
