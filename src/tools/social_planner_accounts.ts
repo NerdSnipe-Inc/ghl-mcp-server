@@ -131,7 +131,11 @@ export const socialPlannerAccountsTools = [
           name: z.string().optional(),
           title: z.string().optional(),
           storeCode: z.string().optional(),
-          isVerified: z.string().optional(),
+          isVerified: z.boolean().optional(),
+          isConnected: z.boolean().optional(),
+          maxLocation: z.boolean().optional(),
+          metadata: z.record(z.string(), z.unknown()).optional(),
+          storefrontAddress: z.record(z.string(), z.unknown()).optional(),
         })
         .optional()
         .describe("REQUIRED for google: Google Business Profile location object"),

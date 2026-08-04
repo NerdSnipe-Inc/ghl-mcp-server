@@ -103,9 +103,11 @@ export const socialPlannerCommentsTools = [
   {
     name: "ghl_like_social_comment",
     description:
-      "Like a social media comment. Required fields: platform, id.",
+      "Like a social media comment. Required fields: platform, id. Supported platforms for " +
+      "like/unlike: facebook, linkedin, community, tiktok, bluesky (instagram is NOT supported " +
+      "for liking/unliking, though it is supported for creating/listing comments).",
     inputSchema: z.object({
-      platform: z.string().describe("Social media platform (e.g., 'facebook', 'instagram')"),
+      platform: z.string().describe("Social media platform that supports liking comments (e.g., 'facebook', 'linkedin', 'community', 'tiktok', 'bluesky' — instagram is not supported)"),
       id: z.string().describe("The comment ID to like"),
     }),
     handler: async (
@@ -131,9 +133,11 @@ export const socialPlannerCommentsTools = [
   {
     name: "ghl_unlike_social_comment",
     description:
-      "Unlike a social media comment. Required fields: platform, id.",
+      "Unlike a social media comment. Required fields: platform, id. Supported platforms for " +
+      "like/unlike: facebook, linkedin, community, tiktok, bluesky (instagram is NOT supported " +
+      "for liking/unliking, though it is supported for creating/listing comments).",
     inputSchema: z.object({
-      platform: z.string().describe("Social media platform (e.g., 'facebook', 'instagram')"),
+      platform: z.string().describe("Social media platform that supports unliking comments (e.g., 'facebook', 'linkedin', 'community', 'tiktok', 'bluesky' — instagram is not supported)"),
       id: z.string().describe("The comment ID to unlike"),
     }),
     handler: async (

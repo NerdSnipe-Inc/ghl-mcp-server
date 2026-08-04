@@ -238,11 +238,18 @@ export const socialPlannerPostsTools = [
   {
     name: "ghl_update_social_post",
     description:
-      "Update an existing social media post (content, schedule, status, media, etc). " +
-      "Required: id, type, accountIds, userId. Optional: summary, media, status, scheduleDate, " +
-      "tags, categoryId, and other platform-specific fields — this tool models the common " +
-      "cross-platform fields of CreatePostDTO; platform-specific detail objects (e.g. " +
-      "facebookPostDetails, instagramPostDetails) are not individually modeled and can be omitted.",
+      "Update an existing social media post (content, schedule, status, media, platform-specific " +
+      "details, etc). This PUT endpoint is a full-document replace (CreatePostDTO), so omitted " +
+      "optional fields may clear existing values upstream — pass through previously-set fields " +
+      "you want to preserve. Required: id, type, accountIds, userId. Optional: summary, media, " +
+      "status, scheduleDate, selectedBestTime, createdBy, followUpComment, ogTagsDetails, " +
+      "postApprovalDetails, scheduleTimeUpdated, tags, categoryId, applyWatermark, " +
+      "tiktokPostDetails, gmbPostDetails, linkedinPostDetails, pinterestPostDetails, " +
+      "facebookPostDetails, instagramPostDetails, youtubePostDetails. The platform-specific " +
+      "detail objects (facebookPostDetails, instagramPostDetails, linkedinPostDetails, " +
+      "gmbPostDetails, pinterestPostDetails, tiktokPostDetails, youtubePostDetails, " +
+      "ogTagsDetails, postApprovalDetails) are modeled permissively (pass-through objects), not " +
+      "individually validated — supply whatever shape the platform's DTO expects.",
     inputSchema: z.object({
       id: z.string().describe("The post ID to update"),
       type: z.enum(POST_TYPE_ENUM).describe("Post type: post, story, or reel"),
@@ -262,8 +269,22 @@ export const socialPlannerPostsTools = [
         .describe("Media attachments for the post"),
       status: z.enum(POST_STATUS_ENUM).optional().describe("Post status"),
       scheduleDate: z.string().optional().describe("ISO 8601 scheduled publish time (required if status is scheduled or in_review)"),
+      selectedBestTime: z.string().optional().describe("Selected best-time slot for scheduling (ISO 8601)"),
+      createdBy: z.string().optional().describe("User ID of the post's original creator (MongoDB ObjectId)"),
+      followUpComment: z.string().optional().describe("Follow-up comment to post immediately after the main post (Facebook, Instagram, LinkedIn, YouTube only)"),
+      ogTagsDetails: z.record(z.string(), z.unknown()).optional().describe("Open Graph tags metadata (OgTagsSchema) — e.g. metaImage, metaLink, ogTitle, ogDescription"),
+      postApprovalDetails: z.record(z.string(), z.unknown()).optional().describe("Post approval workflow details (PostApprovalSchema) — e.g. approver, approvalStatus"),
+      scheduleTimeUpdated: z.boolean().optional().describe("Flag indicating the schedule datetime was manually updated (for tracking rescheduled posts)"),
       tags: z.array(z.string()).optional().describe("Tag IDs to attach to the post"),
       categoryId: z.string().optional().describe("Category ID to attach to the post"),
+      applyWatermark: z.boolean().optional().describe("Apply watermark to media in this post (images only)"),
+      tiktokPostDetails: z.record(z.string(), z.unknown()).optional().describe("TikTok-specific post configuration (TiktokPostSchema)"),
+      gmbPostDetails: z.record(z.string(), z.unknown()).optional().describe("Google Business Profile-specific post configuration (GMBPostSchema)"),
+      linkedinPostDetails: z.record(z.string(), z.unknown()).optional().describe("LinkedIn-specific post configuration (LinkedinPostSchema)"),
+      pinterestPostDetails: z.record(z.string(), z.unknown()).optional().describe("Pinterest-specific post configuration (PinterestPostSchema)"),
+      facebookPostDetails: z.record(z.string(), z.unknown()).optional().describe("Facebook-specific post configuration (FacebookPostSchema)"),
+      instagramPostDetails: z.record(z.string(), z.unknown()).optional().describe("Instagram-specific post configuration (InstagramPostSchema)"),
+      youtubePostDetails: z.record(z.string(), z.unknown()).optional().describe("YouTube-specific post configuration (YoutubePostSchema)"),
     }),
     handler: async (
       args: { id: string } & Record<string, unknown>,

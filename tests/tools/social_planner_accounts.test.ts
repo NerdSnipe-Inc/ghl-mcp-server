@@ -136,6 +136,39 @@ describe('ghl_connect_social_oauth_account', () => {
     });
   });
 
+  it('supports the full Google Business Profile location object, including isVerified as a boolean', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    await getTool('ghl_connect_social_oauth_account').handler(
+      {
+        platform: 'google',
+        accountId: 'acct1',
+        location: {
+          name: 'locations/12345',
+          title: 'My Business Location',
+          storeCode: 'store-001',
+          isVerified: true,
+          isConnected: true,
+          maxLocation: false,
+          metadata: { category: 'Restaurant' },
+          storefrontAddress: { addressLines: ['123 Main St'], locality: 'Springfield' },
+        },
+        account: { name: 'accounts/12345', accountName: 'My Business Account' },
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.body.location).toEqual({
+      name: 'locations/12345',
+      title: 'My Business Location',
+      storeCode: 'store-001',
+      isVerified: true,
+      isConnected: true,
+      maxLocation: false,
+      metadata: { category: 'Restaurant' },
+      storefrontAddress: { addressLines: ['123 Main St'], locality: 'Springfield' },
+    });
+  });
+
   it('supports Instagram pageId-only body shape', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_connect_social_oauth_account').handler(

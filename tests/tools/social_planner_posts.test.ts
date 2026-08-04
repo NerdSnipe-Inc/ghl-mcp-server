@@ -299,6 +299,52 @@ describe('ghl_update_social_post', () => {
     expectSuccess(result, MOCK_DATA);
   });
 
+  it('passes through platform-specific detail objects and other previously-unmodeled fields', async () => {
+    const fetch = mockFetchSuccess(MOCK_DATA);
+    const result = await getTool('ghl_update_social_post').handler(
+      {
+        id: 'post-1',
+        type: 'post',
+        accountIds: ['acc-1'],
+        userId: 'user1',
+        facebookPostDetails: { type: 'post' },
+        instagramPostDetails: { showOnFeed: true },
+        linkedinPostDetails: { postAsPdf: true, pdfTitle: 'My PDF' },
+        gmbPostDetails: { gmbEventType: 'STANDARD', actionType: 'BOOK', url: 'https://example.com' },
+        pinterestPostDetails: { title: 'Pin title', boardIds: { 'acc-1': 'board-1' } },
+        tiktokPostDetails: { privacyLevel: 'PUBLIC_TO_EVERYONE', enableComment: true },
+        youtubePostDetails: { title: 'Video title', type: 'video', privacyLevel: 'public' },
+        ogTagsDetails: { metaImage: 'https://example.com/image.jpg', ogTitle: 'Page Title' },
+        postApprovalDetails: { approver: 'user-2', approvalStatus: 'pending' },
+        followUpComment: 'Great post!',
+        applyWatermark: true,
+        createdBy: '65f151c99bc2bf3aaf970d72',
+        scheduleTimeUpdated: true,
+        selectedBestTime: '2026-09-01T10:00:00.000Z',
+      },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.method).toBe('PUT');
+    expect(call.body).toMatchObject({
+      facebookPostDetails: { type: 'post' },
+      instagramPostDetails: { showOnFeed: true },
+      linkedinPostDetails: { postAsPdf: true, pdfTitle: 'My PDF' },
+      gmbPostDetails: { gmbEventType: 'STANDARD', actionType: 'BOOK', url: 'https://example.com' },
+      pinterestPostDetails: { title: 'Pin title', boardIds: { 'acc-1': 'board-1' } },
+      tiktokPostDetails: { privacyLevel: 'PUBLIC_TO_EVERYONE', enableComment: true },
+      youtubePostDetails: { title: 'Video title', type: 'video', privacyLevel: 'public' },
+      ogTagsDetails: { metaImage: 'https://example.com/image.jpg', ogTitle: 'Page Title' },
+      postApprovalDetails: { approver: 'user-2', approvalStatus: 'pending' },
+      followUpComment: 'Great post!',
+      applyWatermark: true,
+      createdBy: '65f151c99bc2bf3aaf970d72',
+      scheduleTimeUpdated: true,
+      selectedBestTime: '2026-09-01T10:00:00.000Z',
+    });
+    expectSuccess(result, MOCK_DATA);
+  });
+
   it('handles API errors', async () => {
     mockFetchError(400, { message: 'Bad request' });
     const result = await getTool('ghl_update_social_post').handler(
