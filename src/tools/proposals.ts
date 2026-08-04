@@ -7,16 +7,16 @@ export const proposalTools = [
     description:
       "List proposal/estimate documents for the location. Supports filtering by status, payment status, date range, and search query.",
     inputSchema: z.object({
+      // Spec declares these as single-value enums (not comma-separated) — the
+      // prior "comma separated" description was unverified/incorrect.
       status: z
-        .string()
+        .enum(["draft", "sent", "viewed", "completed", "accepted"])
         .optional()
-        .describe(
-          "Document status, comma separated: draft, sent, viewed, completed, accepted"
-        ),
+        .describe("Document status"),
       paymentStatus: z
-        .string()
+        .enum(["waiting_for_payment", "paid", "no_payment"])
         .optional()
-        .describe("Payment status, comma separated: waiting_for_payment, paid, no_payment"),
+        .describe("Payment status"),
       limit: z.number().optional().describe("Max results"),
       skip: z.number().optional().describe("Results to skip"),
       query: z.string().optional().describe("Search string"),
@@ -31,8 +31,8 @@ export const proposalTools = [
     }),
     handler: async (
       args: {
-        status?: string;
-        paymentStatus?: string;
+        status?: "draft" | "sent" | "viewed" | "completed" | "accepted";
+        paymentStatus?: "waiting_for_payment" | "paid" | "no_payment";
         limit?: number;
         skip?: number;
         query?: string;
@@ -74,11 +74,23 @@ export const proposalTools = [
       documentName: z.string().optional().describe("Document Name"),
       medium: z.enum(["link", "email"]).optional().describe("Medium to be used for sending the document"),
       ccRecipients: z
-        .array(z.record(z.unknown()))
+        .array(
+          z.object({
+            email: z.string(),
+            id: z.string(),
+            imageUrl: z.string(),
+            contactName: z.string(),
+            firstName: z.string(),
+            lastName: z.string(),
+          })
+        )
         .optional()
         .describe("CC recipients for the document"),
       notificationSettings: z
-        .record(z.unknown())
+        .object({
+          sender: z.object({ fromEmail: z.string(), fromName: z.string() }),
+          receive: z.object({ templateId: z.string(), subject: z.string() }),
+        })
         .optional()
         .describe("Notification settings (sender and receive email config)"),
     }),

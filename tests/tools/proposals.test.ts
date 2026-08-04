@@ -35,7 +35,7 @@ describe('ghl_get_proposal_documents', () => {
     const fetch = mockFetchSuccess({ documents: [], total: 0 });
     await getTool('ghl_get_proposal_documents').handler(
       {
-        status: 'draft,sent',
+        status: 'draft',
         paymentStatus: 'paid',
         limit: 10,
         skip: 0,
@@ -46,7 +46,7 @@ describe('ghl_get_proposal_documents', () => {
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.params.status).toBe('draft,sent');
+    expect(call.params.status).toBe('draft');
     expect(call.params.paymentStatus).toBe('paid');
     expect(call.params.limit).toBe('10');
     expect(call.params.skip).toBe('0');
@@ -59,6 +59,13 @@ describe('ghl_get_proposal_documents', () => {
     mockFetchError(401, { message: 'Unauthorized' });
     const result = await getTool('ghl_get_proposal_documents').handler({}, TEST_CONFIG);
     expectError(result, 401);
+  });
+
+  it('rejects invalid status/paymentStatus enum values', () => {
+    const schema = getTool('ghl_get_proposal_documents').inputSchema;
+    expect(schema.safeParse({ status: 'archived' }).success).toBe(false);
+    expect(schema.safeParse({ paymentStatus: 'refunded' }).success).toBe(false);
+    expect(schema.safeParse({ status: 'draft', paymentStatus: 'paid' }).success).toBe(true);
   });
 });
 
@@ -83,8 +90,20 @@ describe('ghl_send_proposal_document', () => {
 
   it('passes optional documentName, medium, ccRecipients, notificationSettings', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
-    const ccRecipients = [{ id: 'u1', email: 'jim@gmail.com' }];
-    const notificationSettings = { sender: { fromName: 'A', fromEmail: 'a@b.com' } };
+    const ccRecipients = [
+      {
+        id: 'u1',
+        email: 'jim@gmail.com',
+        imageUrl: 'https://example.com/jim.png',
+        contactName: 'Jim Doe',
+        firstName: 'Jim',
+        lastName: 'Doe',
+      },
+    ];
+    const notificationSettings = {
+      sender: { fromName: 'A', fromEmail: 'a@b.com' },
+      receive: { templateId: 't1', subject: 'Hello' },
+    };
     await getTool('ghl_send_proposal_document').handler(
       {
         documentId: 'doc1',
@@ -110,6 +129,44 @@ describe('ghl_send_proposal_document', () => {
       TEST_CONFIG
     );
     expectError(result, 400);
+  });
+
+  it('rejects incomplete ccRecipients/notificationSettings shapes', () => {
+    const schema = getTool('ghl_send_proposal_document').inputSchema;
+    expect(
+      schema.safeParse({
+        documentId: 'd1',
+        sentBy: 'u1',
+        ccRecipients: [{ id: 'u1', email: 'jim@gmail.com' }], // missing imageUrl/contactName/firstName/lastName
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        documentId: 'd1',
+        sentBy: 'u1',
+        notificationSettings: { sender: { fromEmail: 'a@b.com', fromName: 'A' } }, // missing receive
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        documentId: 'd1',
+        sentBy: 'u1',
+        ccRecipients: [
+          {
+            id: 'u1',
+            email: 'jim@gmail.com',
+            imageUrl: 'https://example.com/jim.png',
+            contactName: 'Jim Doe',
+            firstName: 'Jim',
+            lastName: 'Doe',
+          },
+        ],
+        notificationSettings: {
+          sender: { fromEmail: 'a@b.com', fromName: 'A' },
+          receive: { templateId: 't1', subject: 'Hi' },
+        },
+      }).success
+    ).toBe(true);
   });
 });
 
