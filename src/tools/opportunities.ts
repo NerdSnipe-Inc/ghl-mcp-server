@@ -1,6 +1,19 @@
 import { z } from "zod";
 import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
+// Spec: CreateDtoV3/UpdateOpportunityDtoV3 customFields items are one of several
+// typed field variants (customFieldsInputStringSchemaV3, ...ArraySchemaV3,
+// ...ObjectSchemaV3) that all share {id?, key?, fieldValue}. `fieldValue` is the
+// spec's field name — NOT `value`.
+const customFieldSchema = z.object({
+  id: z.string().optional().describe("Custom field ID (pass id or key)"),
+  key: z.string().optional().describe("Custom field key (pass id or key)"),
+  fieldValue: z
+    .union([z.string(), z.number(), z.array(z.string()), z.record(z.unknown())])
+    .optional()
+    .describe("Value for the custom field"),
+});
+
 export const opportunityTools = [
   {
     name: "ghl_get_pipelines",
@@ -42,12 +55,12 @@ export const opportunityTools = [
           token: config.token,
           version: GHL_VERSION_V3,
           params: {
-            location_id: config.locationId,
+            locationId: config.locationId,
             q: args.query as string | undefined,
-            contact_id: args.contactId as string | undefined,
-            pipeline_id: args.pipelineId as string | undefined,
-            pipeline_stage_id: args.pipelineStageId as string | undefined,
-            assigned_to: args.assignedTo as string | undefined,
+            contactId: args.contactId as string | undefined,
+            pipelineId: args.pipelineId as string | undefined,
+            pipelineStageId: args.pipelineStageId as string | undefined,
+            assignedTo: args.assignedTo as string | undefined,
             status: args.status as string | undefined,
             limit: args.limit as number | undefined,
             page: args.page as number | undefined,
@@ -93,8 +106,9 @@ export const opportunityTools = [
       assignedTo: z.string().optional().describe("User ID to assign to"),
       source: z.string().optional(),
       customFields: z
-        .array(z.object({ id: z.string(), value: z.string() }))
-        .optional(),
+        .array(customFieldSchema)
+        .optional()
+        .describe("Custom field values [{id, fieldValue}]"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
@@ -122,8 +136,9 @@ export const opportunityTools = [
       assignedTo: z.string().optional(),
       source: z.string().optional(),
       customFields: z
-        .array(z.object({ id: z.string(), value: z.string() }))
-        .optional(),
+        .array(customFieldSchema)
+        .optional()
+        .describe("Custom field values [{id, fieldValue}]"),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       const { opportunityId, ...updateData } = args as {
@@ -147,9 +162,10 @@ export const opportunityTools = [
     inputSchema: z.object({
       opportunityId: z.string(),
       status: z.enum(["open", "won", "lost", "abandoned"]),
+      lostReasonId: z.string().optional().describe("Lost reason ID (relevant when status is 'lost')"),
     }),
     handler: async (
-      args: { opportunityId: string; status: string },
+      args: { opportunityId: string; status: string; lostReasonId?: string },
       config: GHLConfig
     ) => {
       try {
@@ -159,7 +175,7 @@ export const opportunityTools = [
           {
             token: config.token,
             version: GHL_VERSION_V3,
-            body: { status: args.status },
+            body: { status: args.status, lostReasonId: args.lostReasonId },
           }
         );
         return JSON.stringify(result, null, 2);
@@ -170,15 +186,35 @@ export const opportunityTools = [
   },
   {
     name: "ghl_upsert_opportunity",
-    description: "Create or update an opportunity matched by contact and pipeline.",
+    description:
+      "Create or update an opportunity. Pass the opportunity `id` to target an existing " +
+      "opportunity for update; if omitted, a new opportunity is created. " +
+      "Note: the real UpsertOpportunityDto has no `contactId` field — despite " +
+      "GHL's public docs describing contactId-based upsert matching, the spec's " +
+      "actual matching key is the opportunity `id`. `followers` (array of user IDs) " +
+      "is required; its spec description confusingly says \"contactId\" but its " +
+      "type/name make clear it is the followers list, not the linked contact.",
     inputSchema: z.object({
+      id: z.string().optional().describe("Opportunity ID — pass to update an existing opportunity"),
       pipelineId: z.string(),
-      pipelineStageId: z.string(),
-      contactId: z.string(),
+      pipelineStageId: z.string().optional(),
       name: z.string(),
       status: z.enum(["open", "won", "lost", "abandoned"]).optional().default("open"),
       monetaryValue: z.number().optional(),
       assignedTo: z.string().optional(),
+      followers: z
+        .array(z.string())
+        .describe(
+          "Array of user IDs following this opportunity (required by spec; despite its " +
+            "spec description saying \"contactId\", this is not the linked contact)"
+        ),
+      isRemoveAllFollowers: z.boolean().describe("Whether to remove all existing followers"),
+      followersActionType: z
+        .enum(["add", "remove"])
+        .describe("Whether to add or remove the given followers"),
+      forecastExpectedCloseDate: z.string().optional().describe("Expected close date"),
+      forecastProbability: z.number().optional(),
+      lostReasonId: z.string().optional(),
     }),
     handler: async (args: Record<string, unknown>, config: GHLConfig) => {
       try {
