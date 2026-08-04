@@ -38,6 +38,15 @@ dependencies).
   attempt to fully type out ad-platform campaign/targeting schemas.
 - **Verify `locationId` presence/placement per endpoint — don't assume.** It appears
   as a path segment, query param, or body field depending on the operation.
+- **CORRECTION found during Task 1, applies to every remaining task in this plan:**
+  despite this spec file being named `ad-publishing-v3.json`, every operation's
+  `Version` header parameter is a fixed-value schema enum containing ONLY
+  `"2021-07-28"` (confirmed directly across GET/PUT/POST samples spanning Facebook,
+  Google, and LinkedIn — not a one-off quirk). Use `GHL_VERSION_LEGACY` (not
+  `GHL_VERSION_V3`) for every `ghlRequest` call in this entire phase. Verify this
+  yourself per-operation as you go (don't assume it without checking your own
+  operations), but expect it to hold universally — no exceptions have been found so
+  far.
 - **Disclose malformed/ambiguous upstream spec fields with a one-line code comment**
   as you write each tool, not as an afterthought.
 - **Do not trim "large" required-field lists.**
