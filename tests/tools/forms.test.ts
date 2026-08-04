@@ -69,6 +69,7 @@ describe('ghl_get_form_submissions', () => {
     await getTool('ghl_get_form_submissions').handler(
       {
         formId: 'form-1',
+        q: 'jane@example.com',
         startAt: '2024-01-01',
         endAt: '2024-01-31',
         limit: 50,
@@ -78,6 +79,7 @@ describe('ghl_get_form_submissions', () => {
     );
     const call = parseLastFetchCall(fetch);
     expect(call.params.formId).toBe('form-1');
+    expect(call.params.q).toBe('jane@example.com');
     expect(call.params.startAt).toBe('2024-01-01');
     expect(call.params.endAt).toBe('2024-01-31');
     expect(call.params.limit).toBe('50');

@@ -33,6 +33,7 @@ export const formTools = [
     description: "Get submissions for a specific form or all forms in the location.",
     inputSchema: z.object({
       formId: z.string().optional().describe("Filter by form ID — omit to get all submissions"),
+      q: z.string().optional().describe("Filter by contactId, name, email, or phone number"),
       startAt: z.string().optional().describe("Start date ISO 8601"),
       endAt: z.string().optional().describe("End date ISO 8601"),
       limit: z.number().optional().default(25),
@@ -46,6 +47,7 @@ export const formTools = [
           params: {
             locationId: config.locationId,
             formId: args.formId as string | undefined,
+            q: args.q as string | undefined,
             startAt: args.startAt as string | undefined,
             endAt: args.endAt as string | undefined,
             limit: args.limit as number | undefined,
