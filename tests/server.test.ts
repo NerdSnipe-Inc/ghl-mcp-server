@@ -40,6 +40,7 @@ import { agentStudioTools } from '../src/tools/agent_studio.js';
 import { socialPlannerQueuesTools } from '../src/tools/social_planner_queues.js';
 import { socialPlannerCommentsTools } from '../src/tools/social_planner_comments.js';
 import { socialPlannerAccountsTools } from '../src/tools/social_planner_accounts.js';
+import { socialPlannerPostsTools } from '../src/tools/social_planner_posts.js';
 
 const ALL_TOOLS = [
   // CRM core
@@ -110,11 +111,12 @@ const ALL_TOOLS = [
   // Social planner — comments
   ...socialPlannerCommentsTools,
   ...socialPlannerAccountsTools,
+  ...socialPlannerPostsTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 290 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(299);
+  it('registers exactly 309 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(309);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -201,6 +203,7 @@ describe('Tool counts per module', () => {
   it('socialPlannerQueues has 18 tools', () => expect(socialPlannerQueuesTools).toHaveLength(18));
   it('socialPlannerComments has 4 tools', () => expect(socialPlannerCommentsTools).toHaveLength(4));
   it('socialPlannerAccounts has 9 tools', () => expect(socialPlannerAccountsTools).toHaveLength(9));
+  it('socialPlannerPosts has 10 tools', () => expect(socialPlannerPostsTools).toHaveLength(10));
 });
 
 describe('Specific tool existence', () => {
@@ -377,12 +380,17 @@ describe('Specific tool existence', () => {
     'ghl_start_social_oauth', 'ghl_get_social_oauth_accounts', 'ghl_connect_social_oauth_account',
     'ghl_delete_social_account', 'ghl_set_social_accounts', 'ghl_get_social_categories',
     'ghl_get_social_category', 'ghl_get_social_tags', 'ghl_get_social_tags_by_ids',
+    // Social planner — posts, CSV bulk-import, statistics (10)
+    'ghl_upload_social_csv', 'ghl_get_social_csv_upload_status', 'ghl_get_social_csv_post',
+    'ghl_finalize_social_csv', 'ghl_delete_social_csv', 'ghl_delete_social_csv_post',
+    'ghl_bulk_delete_social_posts', 'ghl_get_social_post', 'ghl_update_social_post',
+    'ghl_get_social_statistics',
   ];
 
-  it('all 299 expected tools are present', () => {
+  it('all 309 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(299);
+    expect(expectedTools).toHaveLength(309);
   });
 });

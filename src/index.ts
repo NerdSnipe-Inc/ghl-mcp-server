@@ -74,6 +74,7 @@ import { agentStudioTools } from "./tools/agent_studio.js";
 import { socialPlannerQueuesTools } from "./tools/social_planner_queues.js";
 import { socialPlannerCommentsTools } from "./tools/social_planner_comments.js";
 import { socialPlannerAccountsTools } from "./tools/social_planner_accounts.js";
+import { socialPlannerPostsTools } from "./tools/social_planner_posts.js";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -160,6 +161,9 @@ const ALL_TOOLS: ToolDef[] = [
 
   // Social planner — OAuth connection and account/category/tag management
   ...socialPlannerAccountsTools,
+
+  // Social planner — CSV bulk-import, post operations, and statistics
+  ...socialPlannerPostsTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));
