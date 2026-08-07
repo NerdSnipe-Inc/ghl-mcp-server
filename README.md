@@ -1119,4 +1119,5 @@ MIT © [Business AI Specialist](https://nerdsnipe.cc)
 
 - [GoHighLevel API Documentation](https://marketplace.gohighlevel.com/docs/)
 - [Model Context Protocol](https://modelcontextprotocol.io)
+- [UltraLevel](https://www.ultralevel.app) — a native macOS app for GoHighLevel. If this MCP server is how your AI agents talk to GHL, UltraLevel is how *you* do: contacts, conversations, deals, and tasks in a fast native workspace, with private on-device AI built in. Free 14-day trial.
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
