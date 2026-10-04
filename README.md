@@ -12,6 +12,10 @@
 
 ---
 
+[![Sponsor NerdSnipe-Inc](https://img.shields.io/badge/Sponsor-NerdSnipe--Inc-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/NerdSnipe-Inc)
+
+> ghl-mcp-server is free and open source. If it saved you time, [sponsoring NerdSnipe Inc](https://github.com/sponsors/NerdSnipe-Inc) pays for the maintenance, bug fixes and new releases that keep it working.
+
 ## What is this?
 
 This is a **[Model Context Protocol (MCP)](https://modelcontextprotocol.io) server** that connects your AI tools directly to your GoHighLevel (GHL) sub-account via the GHL API v3.
@@ -1015,26 +1019,57 @@ ghl-mcp-server/
 │   ├── index.ts          # MCP server entry point — registers all tools
 │   ├── client.ts         # GHL HTTP client (auth, request helper, error handling)
 │   └── tools/
-│       ├── contacts.ts       # 21 contact tools
-│       ├── conversations.ts  #  9 conversation & messaging tools
-│       ├── calendars.ts      # 10 calendar & appointment tools
-│       ├── opportunities.ts  #  8 pipeline & deal tools
-│       ├── workflows.ts      #  2 workflow & campaign tools
-│       ├── locations.ts      # 16 location settings tools
-│       ├── payments.ts       # 12 payment & invoice tools
-│       ├── social.ts         #  8 social, media & trigger link tools
-│       ├── emails.ts         #  9 email builder & campaign tools
-│       ├── funnels.ts        #  3 funnel tools
-│       ├── phone_numbers.ts  #  5 phone number tools
-│       ├── surveys.ts        #  2 survey tools
-│       ├── knowledge_base.ts # 14 knowledge base, FAQ & web crawler tools
-│       ├── products.ts       # 14 product, price & inventory tools
-│       ├── product_collections.ts #  5 product collection tools
-│       ├── product_reviews.ts #  5 product review tools
-│       ├── product_store.ts  #  3 storefront visibility & stats tools
-│       ├── store.ts          # 18 shipping & store settings tools
-│       ├── affiliate_manager.ts #  4 affiliate tools
-│       └── email_isv.ts      #  1 email verification tool
+│       ├── contacts.ts                   # 19 contact tools
+│       ├── conversations.ts              #  9 conversation & messaging tools
+│       ├── conversation_ai.ts            # 12 Conversation AI agent tools
+│       ├── voice_ai.ts                   # 11 Voice AI agent tools
+│       ├── agent_studio.ts               #  8 Agent Studio tools
+│       ├── calendars.ts                  # 10 calendar & appointment tools
+│       ├── opportunities.ts              #  8 pipeline & deal tools
+│       ├── workflows.ts                  #  2 workflow & campaign tools
+│       ├── location.ts                   #  1 location lookup tool
+│       ├── tags.ts                       #  3 location tag tools
+│       ├── custom_fields.ts              #  4 custom field tools
+│       ├── custom_values.ts              #  4 custom value tools
+│       ├── users.ts                      #  6 user tools
+│       ├── templates.ts                  #  2 location template tools
+│       ├── forms.ts                      #  2 form tools
+│       ├── surveys.ts                    #  2 survey tools
+│       ├── businesses.ts                 #  5 business tools
+│       ├── objects.ts                    #  8 custom object tools
+│       ├── associations.ts               # 10 association & relation tools
+│       ├── custom_menus.ts               #  5 custom menu tools
+│       ├── payments.ts                   # 12 payment & invoice tools
+│       ├── proposals.ts                  #  4 proposal & document tools
+│       ├── emails.ts                     # 10 email builder & campaign tools
+│       ├── email_isv.ts                  #  1 email verification tool
+│       ├── social.ts                     #  9 social posts, media & trigger link tools
+│       ├── social_planner_accounts.ts    #  9 social planner account tools
+│       ├── social_planner_posts.ts       # 10 social planner post tools
+│       ├── social_planner_queues.ts      # 18 social planner queue tools
+│       ├── social_planner_comments.ts    #  4 social planner comment tools
+│       ├── blogs.ts                      #  7 blog tools
+│       ├── brand_boards.ts               # 11 brand board & brand voice tools
+│       ├── chat_widget.ts                #  8 chat widget tools
+│       ├── courses.ts                    #  1 course import tool
+│       ├── funnels.ts                    #  3 funnel tools
+│       ├── phone_numbers.ts              #  5 phone number tools
+│       ├── knowledge_base.ts             # 14 knowledge base, FAQ & web crawler tools
+│       ├── products.ts                   # 14 product, price & inventory tools
+│       ├── product_collections.ts        #  5 product collection tools
+│       ├── product_reviews.ts            #  5 product review tools
+│       ├── product_store.ts              #  3 storefront visibility & stats tools
+│       ├── store.ts                      # 18 shipping & store settings tools
+│       ├── affiliate_manager.ts          #  4 affiliate tools
+│       ├── facebook_accounts.ts          # 14 Facebook Ads accounts, pages & integration tools
+│       ├── facebook_campaigns.ts         # 18 Facebook Ads campaign, ad set & ad tools
+│       ├── facebook_audiences.ts         # 12 Facebook Ads audience, pixel & form tools
+│       ├── facebook_reporting.ts         #  4 Facebook Ads reporting & targeting tools
+│       ├── google_accounts.ts            #  7 Google Ads accounts & integration tools
+│       ├── google_campaigns.ts           #  6 Google Ads campaign & asset tools
+│       ├── google_audiences.ts           # 14 Google Ads audience, segment & conversion tools
+│       ├── google_reporting.ts           #  4 Google Ads reporting & targeting tools
+│       └── linkedin.ts                   # 16 LinkedIn Ads tools
 ├── dist/                 # Compiled output (generated by npm run build)
 ├── .env.example          # Environment variable template
 ├── package.json
@@ -1121,3 +1156,10 @@ MIT © [Business AI Specialist](https://nerdsnipe.cc)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [UltraLevel](https://www.ultralevel.app) — a native macOS app for GoHighLevel. If this MCP server is how your AI agents talk to GHL, UltraLevel is how *you* do: contacts, conversations, deals, and tasks in a fast native workspace, with private on-device AI built in. Free 14-day trial.
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+
+## Support this project
+
+ghl-mcp-server is built and maintained by [NerdSnipe Inc](https://nerdsnipe.cc), a small independent studio in Ottawa. Keeping 401 tools in step with GoHighLevel's API changes is the main cost.
+
+- [Sponsor on GitHub](https://github.com/sponsors/NerdSnipe-Inc), from $5/month or a one-time amount
+- [More about what we fund](https://nerdsnipe.cc/sponsor)
