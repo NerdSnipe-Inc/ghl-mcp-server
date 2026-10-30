@@ -4,6 +4,13 @@ import { conversationTools } from '../src/tools/conversations.js';
 import { calendarTools } from '../src/tools/calendars.js';
 import { opportunityTools } from '../src/tools/opportunities.js';
 import { workflowTools } from '../src/tools/workflows.js';
+import { projectSpaceTools } from '../src/tools/project_spaces.js';
+import { projectFolderTools } from '../src/tools/project_folders.js';
+import { projectListTools } from '../src/tools/project_lists.js';
+import { projectStatusTools } from '../src/tools/project_statuses.js';
+import { projectTaskTools } from '../src/tools/project_tasks.js';
+import { projectCommentTools } from '../src/tools/project_comments.js';
+import { projectRecurringTaskTools } from '../src/tools/project_recurring_tasks.js';
 import { locationTools } from '../src/tools/location.js';
 import { tagTools } from '../src/tools/tags.js';
 import { customFieldTools } from '../src/tools/custom_fields.js';
@@ -130,11 +137,20 @@ const ALL_TOOLS = [
   ...googleAudiencesTools,
   ...googleReportingTools,
   ...linkedinTools,
+
+  // Project management
+  ...projectSpaceTools,
+  ...projectFolderTools,
+  ...projectListTools,
+  ...projectStatusTools,
+  ...projectTaskTools,
+  ...projectCommentTools,
+  ...projectRecurringTaskTools,
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 411 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(411);
+  it('registers exactly 456 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(456);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -231,6 +247,13 @@ describe('Tool counts per module', () => {
   it('googleAudiences has 14 tools', () => expect(googleAudiencesTools).toHaveLength(14));
   it('googleReporting has 4 tools', () => expect(googleReportingTools).toHaveLength(4));
   it('linkedin has 16 tools', () => expect(linkedinTools).toHaveLength(16));
+  it('projectSpaces has 7 tools', () => expect(projectSpaceTools).toHaveLength(7));
+  it('projectFolders has 7 tools', () => expect(projectFolderTools).toHaveLength(7));
+  it('projectLists has 9 tools', () => expect(projectListTools).toHaveLength(9));
+  it('projectStatuses has 3 tools', () => expect(projectStatusTools).toHaveLength(3));
+  it('projectTasks has 11 tools', () => expect(projectTaskTools).toHaveLength(11));
+  it('projectComments has 4 tools', () => expect(projectCommentTools).toHaveLength(4));
+  it('projectRecurringTasks has 4 tools', () => expect(projectRecurringTaskTools).toHaveLength(4));
 });
 
 describe('Specific tool existence', () => {
@@ -466,12 +489,28 @@ describe('Specific tool existence', () => {
     'ghl_create_linkedin_lead_form', 'ghl_get_linkedin_lead_forms',
     'ghl_get_linkedin_reporting', 'ghl_get_linkedin_campaign_group_reporting',
     'ghl_get_linkedin_reporting_list', 'ghl_search_linkedin_targeting',
+    // Project management (45)
+    'ghl_create_space', 'ghl_get_spaces', 'ghl_get_space', 'ghl_update_space',
+    'ghl_delete_space', 'ghl_get_space_users', 'ghl_revoke_space_member',
+    'ghl_get_folders', 'ghl_create_folder', 'ghl_get_folder', 'ghl_update_folder',
+    'ghl_delete_folder', 'ghl_get_folder_users', 'ghl_revoke_folder_member',
+    'ghl_get_lists_in_space', 'ghl_create_list_in_space', 'ghl_get_lists_in_folder',
+    'ghl_create_list_in_folder', 'ghl_get_list', 'ghl_update_list', 'ghl_delete_list',
+    'ghl_get_list_users', 'ghl_revoke_list_member',
+    'ghl_get_space_statuses', 'ghl_update_space_statuses', 'ghl_get_list_statuses',
+    'ghl_get_tasks', 'ghl_create_task', 'ghl_get_task', 'ghl_update_task',
+    'ghl_delete_task', 'ghl_search_tasks', 'ghl_get_tasks_by_ids', 'ghl_get_task_lists',
+    'ghl_add_task_to_list', 'ghl_remove_task_from_list', 'ghl_move_task_home_list',
+    'ghl_get_task_comments', 'ghl_create_task_comment', 'ghl_update_task_comment',
+    'ghl_delete_task_comment',
+    'ghl_create_recurring_task', 'ghl_get_recurring_task', 'ghl_update_recurring_task',
+    'ghl_delete_recurring_task',
   ];
 
-  it('all 404 expected tools are present', () => {
+  it('all 456 expected tools are present', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(411);
+    expect(expectedTools).toHaveLength(456);
   });
 });

@@ -27,7 +27,7 @@ Once installed, you can talk to your CRM naturally:
 > *"Move any open opportunities in Stage 1 that haven't been touched in 14 days to 'Lost'"*
 > *"Create a note on John's contact record and enroll him in the cold call workflow"*
 
-**401 tools** covering the full GHL API:
+**456 tools** covering the full GHL API:
 
 | Category                       | Tools                                                                       |
 |--------------------------------|-----------------------------------------------------------------------------|
@@ -35,7 +35,7 @@ Once installed, you can talk to your CRM naturally:
 | Conversations & Messaging      | Search, send SMS/email/WhatsApp, schedule, message history                  |
 | Calendars & Appointments       | List calendars, check availability, book, reschedule, block slots           |
 | Opportunities / Pipeline       | Pipelines, deals, stage moves, won/lost/abandoned                           |
-| Workflows & Campaigns          | List workflows and campaigns                                                |
+| Workflows & Campaigns          | List/create/edit/publish/delete/search workflows, campaigns, validate workflow definitions, step types, logs & analytics (workflow-build endpoints require GHL to enable the Workflow API for the sub-account — otherwise returns 403 `WORKFLOW_API_NOT_ENABLED_FOR_LOCATION`) |
 | Location Settings              | Custom fields, custom values, tags, users, templates, forms, surveys        |
 | Email Marketing                | Email builder templates, email campaigns, scheduling                        |
 | Funnels                        | List funnels, pages, page counts                                            |
@@ -62,6 +62,7 @@ Once installed, you can talk to your CRM naturally:
 | Facebook Ads                    | Ad accounts, page/Instagram/integration setup, campaigns, ad sets, ads, custom audiences, pixels, lead & conversation forms, reporting, targeting search (48 tools) |
 | Google Ads                      | Ad accounts, integration, campaigns, creative assets, keyword ideas, audiences, segments, conversion actions, reporting, targeting search (31 tools) |
 | LinkedIn Ads                    | Ad accounts, integration, campaign groups, lead forms, reporting, targeting search (16 tools) |
+| Project Manager                 | Spaces, folders, lists, statuses, tasks, subtasks, comments, recurring tasks |
 
 > **Not yet covered:** the following GHL API v3 resources require credentials this
 > server doesn't have (agency-level or Marketplace-app-developer identity, not a
@@ -298,7 +299,7 @@ node dist/index.js
 
 ---
 
-## All 401 Tools — Full Reference
+## All 456 Tools — Full Reference
 
 ### Contacts
 

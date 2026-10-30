@@ -32,6 +32,13 @@ import { conversationTools } from "./tools/conversations.js";
 import { calendarTools } from "./tools/calendars.js";
 import { opportunityTools } from "./tools/opportunities.js";
 import { workflowTools } from "./tools/workflows.js";
+import { projectSpaceTools } from "./tools/project_spaces.js";
+import { projectFolderTools } from "./tools/project_folders.js";
+import { projectListTools } from "./tools/project_lists.js";
+import { projectStatusTools } from "./tools/project_statuses.js";
+import { projectTaskTools } from "./tools/project_tasks.js";
+import { projectCommentTools } from "./tools/project_comments.js";
+import { projectRecurringTaskTools } from "./tools/project_recurring_tasks.js";
 
 import { locationTools } from "./tools/location.js";
 import { tagTools } from "./tools/tags.js";
@@ -192,6 +199,15 @@ const ALL_TOOLS: ToolDef[] = [
   ...googleAudiencesTools,
   ...googleReportingTools,
   ...linkedinTools,
+
+  // Project management
+  ...projectSpaceTools,
+  ...projectFolderTools,
+  ...projectListTools,
+  ...projectStatusTools,
+  ...projectTaskTools,
+  ...projectCommentTools,
+  ...projectRecurringTaskTools,
 ] as ToolDef[];
 
 const toolMap = new Map<string, ToolDef>(ALL_TOOLS.map((t) => [t.name, t]));

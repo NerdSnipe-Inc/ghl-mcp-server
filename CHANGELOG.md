@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.1.0] - 2026-10-30
+
+**Tool count: 401 → 456.** Adds 55 new tools (10 Workflows v2 + 45 Projects)
+across two new GHL API v3 capabilities.
+
+- **Workflows v2** — extends the previously read-only Workflows tools
+  (`ghl_get_workflows`, `ghl_get_campaigns`) with 10 build/edit/publish/delete/
+  search/validate/logs/analytics tools: `ghl_create_workflow`,
+  `ghl_get_workflow_definition`, `ghl_update_workflow_definition`,
+  `ghl_update_workflow_status`, `ghl_delete_workflow`, `ghl_search_workflows`,
+  `ghl_get_workflow_step_types`, `ghl_validate_workflow_definition`,
+  `ghl_get_workflow_logs`, `ghl_get_workflow_log_statistics`. The build/edit
+  endpoints require GHL to have the workflow API enabled for the sub-account —
+  when it isn't, GHL returns a 403 with error code
+  `WORKFLOW_API_NOT_ENABLED_FOR_LOCATION`.
+- **Projects ("Project Manager")** — new category covering GHL's Space →
+  Folder → List → Task hierarchy, plus statuses, task comments, and recurring
+  tasks (45 tools across `project_spaces.ts`, `project_folders.ts`,
+  `project_lists.ts`, `project_statuses.ts`, `project_tasks.ts`,
+  `project_comments.ts`, and `project_recurring_tasks.ts`). Unlike the rest of
+  this server's tools, Projects API calls never send `locationId` — GHL
+  ignores it for PIT/OAuth auth on these endpoints and derives the location
+  from the token itself.
+
 ## [2.0.0] - 2026-08-04
 
 Full migration of the GoHighLevel MCP server from API v2 to API v3, plus complete
