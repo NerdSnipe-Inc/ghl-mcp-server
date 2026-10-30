@@ -29,7 +29,7 @@ export const projectFolderTools = [
     description: "List the folders in a Project space (paginated).",
     inputSchema: z.object({
       spaceId: z.string().describe("Space ID"),
-      limit: z.number().max(50).optional().describe("Maximum folders to return (max 50)"),
+      limit: z.number().min(1).max(100).optional().describe("Maximum folders to return (1-100, default 20)"),
       cursor: z.string().optional().describe("Pagination cursor"),
       anchorId: z.string().optional().describe("Folder ID to anchor pagination on"),
     }),
@@ -165,7 +165,7 @@ export const projectFolderTools = [
     inputSchema: z.object({
       folderId: z.string().describe("Folder ID"),
       skip: z.number().optional().describe("Number of members to skip (pagination)"),
-      limit: z.number().max(50).optional().describe("Maximum members to return (max 50)"),
+      limit: z.number().min(1).max(50).optional().describe("Maximum members to return (1-50, default 50)"),
     }),
     handler: async (args: { folderId: string; skip?: number; limit?: number }, config: GHLConfig) => {
       try {

@@ -34,10 +34,15 @@ describe('ghl_get_folders', () => {
     expect(call.params.anchorId).toBe('folder_9');
   });
 
-  it('rejects a limit above 50', () => {
+  it('rejects a limit above 100', () => {
     const schema = getTool('ghl_get_folders').inputSchema;
-    expect(schema.safeParse({ spaceId: 'space_1', limit: 51 }).success).toBe(false);
-    expect(schema.safeParse({ spaceId: 'space_1', limit: 50 }).success).toBe(true);
+    expect(schema.safeParse({ spaceId: 'space_1', limit: 101 }).success).toBe(false);
+    expect(schema.safeParse({ spaceId: 'space_1', limit: 100 }).success).toBe(true);
+  });
+
+  it('rejects a limit of 0', () => {
+    const schema = getTool('ghl_get_folders').inputSchema;
+    expect(schema.safeParse({ spaceId: 'space_1', limit: 0 }).success).toBe(false);
   });
 
   it('handles API errors', async () => {
@@ -175,6 +180,11 @@ describe('ghl_get_folder_users', () => {
     const schema = getTool('ghl_get_folder_users').inputSchema;
     expect(schema.safeParse({ folderId: 'folder_1', limit: 51 }).success).toBe(false);
     expect(schema.safeParse({ folderId: 'folder_1', limit: 50 }).success).toBe(true);
+  });
+
+  it('rejects a limit of 0', () => {
+    const schema = getTool('ghl_get_folder_users').inputSchema;
+    expect(schema.safeParse({ folderId: 'folder_1', limit: 0 }).success).toBe(false);
   });
 
   it('handles API errors', async () => {
