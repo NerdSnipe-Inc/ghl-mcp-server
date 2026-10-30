@@ -240,6 +240,7 @@ function zodToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
       };
     }
     if (s instanceof z.ZodOptional) return convert(s.unwrap());
+    if (s instanceof z.ZodNullable) return convert(s.unwrap());
     if (s instanceof z.ZodDefault) return convert(s._def.innerType as z.ZodTypeAny);
     if (s instanceof z.ZodString) return { type: "string" };
     if (s instanceof z.ZodNumber) return { type: "number" };
@@ -248,6 +249,8 @@ function zodToJsonSchema(schema: z.ZodTypeAny): Record<string, unknown> {
     if (s instanceof z.ZodEnum) return { type: "string", enum: s.options };
     if (s instanceof z.ZodUnion) return { oneOf: (s.options as z.ZodTypeAny[]).map(convert) };
     if (s instanceof z.ZodNever) return { not: {} };
+    if (s instanceof z.ZodRecord) return { type: "object" };
+    if (s instanceof z.ZodUnknown || s instanceof z.ZodAny) return {};
     return { type: "string" };
   }
   const result = convert(schema);

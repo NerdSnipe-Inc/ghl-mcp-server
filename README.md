@@ -299,7 +299,9 @@ node dist/index.js
 
 ---
 
-## All 456 Tools — Full Reference
+## Tool Reference
+
+> This section documents most of the original 401 tools in full detail. The Workflows v2 additions are now included in [Workflows & Campaigns](#workflows--campaigns) below; the 45 new Projects tools are summarized by module in [Projects](#projects), with full per-tool tables to follow.
 
 ### Contacts
 
@@ -369,10 +371,20 @@ node dist/index.js
 
 ### Workflows & Campaigns
 
-| Tool                | Description                                       |
-|---------------------|---------------------------------------------------|
-| `ghl_get_workflows` | List all workflows (use to discover workflow IDs) |
-| `ghl_get_campaigns` | List all campaigns                                |
+| Tool                               | Description                                           |
+|-------------------------------------|-------------------------------------------------------|
+| `ghl_get_workflows`                 | List all workflows (use to discover workflow IDs)     |
+| `ghl_get_campaigns`                 | List all campaigns                                    |
+| `ghl_create_workflow`               | Create a new workflow                                 |
+| `ghl_get_workflow_definition`       | Get a workflow's full step/trigger definition         |
+| `ghl_update_workflow_definition`    | Update a workflow's step/trigger definition           |
+| `ghl_update_workflow_status`        | Publish or unpublish a workflow                        |
+| `ghl_delete_workflow`               | Permanently delete a workflow                          |
+| `ghl_search_workflows`              | Search workflows with filters and sort                 |
+| `ghl_get_workflow_step_types`       | List available workflow step types                     |
+| `ghl_validate_workflow_definition`  | Validate a workflow definition before saving            |
+| `ghl_get_workflow_logs`             | Get paginated execution logs for a workflow             |
+| `ghl_get_workflow_log_statistics`   | Get aggregate execution statistics for a workflow        |
 
 > Enrolling contacts in workflows is done via `ghl_add_contact_to_workflow`.
 
@@ -944,6 +956,22 @@ Use the crawler to discover and ingest website pages as AI training data for a k
 | `ghl_get_linkedin_reporting_list`                   | Get a LinkedIn reporting list for a campaign within a campaign group                  |
 | `ghl_search_linkedin_targeting`                     | Search LinkedIn targeting facets (e.g. locations, industries, job titles)             |
 
+### Projects
+
+45 tools covering GHL's Projects feature (spaces, folders, lists, statuses, tasks, comments, and recurring tasks). Detailed per-tool tables are a planned follow-up; for now, the tools are grouped by module:
+
+| Module          | Tools | Covers                                                            |
+|-----------------|-------|--------------------------------------------------------------------|
+| Spaces          | 7     | Create/read/update/delete project spaces, members, visibility      |
+| Folders         | 7     | Create/read/update/delete folders within a space                   |
+| Lists           | 9     | Create/read/update/delete lists within a folder or space           |
+| Statuses        | 3     | Get and update the status groups/columns for a space               |
+| Tasks           | 11    | Create/read/update/delete/search tasks, assignees, custom fields   |
+| Comments        | 4     | Create/read/update/delete comments on a task                       |
+| Recurring tasks | 4     | Create/read/update/delete recurring task schedules (RRULE-based)   |
+
+See `src/tools/project_*.ts` for the full tool list and `tests/server.test.ts` for exact per-module counts.
+
 ---
 
 ## Example Prompts
@@ -1027,7 +1055,7 @@ ghl-mcp-server/
 │       ├── agent_studio.ts               #  8 Agent Studio tools
 │       ├── calendars.ts                  # 10 calendar & appointment tools
 │       ├── opportunities.ts              #  8 pipeline & deal tools
-│       ├── workflows.ts                  #  2 workflow & campaign tools
+│       ├── workflows.ts                  # 12 workflow & campaign tools
 │       ├── location.ts                   #  1 location lookup tool
 │       ├── tags.ts                       #  3 location tag tools
 │       ├── custom_fields.ts              #  4 custom field tools
@@ -1070,7 +1098,14 @@ ghl-mcp-server/
 │       ├── google_campaigns.ts           #  6 Google Ads campaign & asset tools
 │       ├── google_audiences.ts           # 14 Google Ads audience, segment & conversion tools
 │       ├── google_reporting.ts           #  4 Google Ads reporting & targeting tools
-│       └── linkedin.ts                   # 16 LinkedIn Ads tools
+│       ├── linkedin.ts                   # 16 LinkedIn Ads tools
+│       ├── project_spaces.ts             #  7 Projects space tools
+│       ├── project_folders.ts            #  7 Projects folder tools
+│       ├── project_lists.ts              #  9 Projects list tools
+│       ├── project_statuses.ts           #  3 Projects status tools
+│       ├── project_tasks.ts              # 11 Projects task tools
+│       ├── project_comments.ts           #  4 Projects task comment tools
+│       └── project_recurring_tasks.ts    #  4 Projects recurring task tools
 ├── dist/                 # Compiled output (generated by npm run build)
 ├── .env.example          # Environment variable template
 ├── package.json
@@ -1160,7 +1195,7 @@ MIT © [Business AI Specialist](https://nerdsnipe.cc)
 
 ## Support this project
 
-ghl-mcp-server is built and maintained by [NerdSnipe Inc](https://nerdsnipe.cc), a small independent studio in Ottawa. Keeping 401 tools in step with GoHighLevel's API changes is the main cost.
+ghl-mcp-server is built and maintained by [NerdSnipe Inc](https://nerdsnipe.cc), a small independent studio in Ottawa. Keeping 456 tools in step with GoHighLevel's API changes is the main cost.
 
 - [Sponsor on GitHub](https://github.com/sponsors/NerdSnipe-Inc), from $5/month or a one-time amount
 - [More about what we fund](https://nerdsnipe.cc/sponsor)
