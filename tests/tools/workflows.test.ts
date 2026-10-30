@@ -55,6 +55,33 @@ describe('ghl_get_campaigns', () => {
   });
 });
 
+// ── ghl_create_workflow ───────────────────────────────────────────────────────
+
+describe('ghl_create_workflow', () => {
+  it('calls POST /workflows/ with locationId and definition body passed through', async () => {
+    const fetch = mockFetchSuccess({ id: 'wf_new' });
+    await getTool('ghl_create_workflow').handler(
+      { name: 'Welcome', steps: [{ type: 'wait' }] },
+      TEST_CONFIG
+    );
+    const call = parseLastFetchCall(fetch);
+    expect(call.method).toBe('POST');
+    expect(call.pathname).toBe('/workflows/');
+    expect(call.headers.Version).toBe(GHL_VERSION_V3);
+    expect(call.params.locationId).toBe(TEST_CONFIG.locationId);
+    expect(call.body).toMatchObject({ name: 'Welcome', steps: [{ type: 'wait' }] });
+  });
+
+  it('states that new workflows start as a draft', () => {
+    expect(getTool('ghl_create_workflow').description).toContain('always starts as a draft');
+  });
+
+  it('handles API errors', async () => {
+    mockFetchError(500, { message: 'Server error' });
+    expectError(await getTool('ghl_create_workflow').handler({ name: 'Welcome' }, TEST_CONFIG), 500);
+  });
+});
+
 // ── ghl_get_workflow_definition ───────────────────────────────────────────────
 
 describe('ghl_get_workflow_definition', () => {

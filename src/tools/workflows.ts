@@ -40,6 +40,29 @@ export const workflowTools = [
     },
   },
   {
+    name: "ghl_create_workflow",
+    description:
+      "Create a new workflow in the GHL location from a full workflow definition. The request body is passed to the API as-is. A new workflow always starts as a draft; publish it with ghl_update_workflow_status.",
+    inputSchema: z
+      .object({
+        name: z.string().optional().describe("Workflow name"),
+      })
+      .passthrough(),
+    handler: async (args: Record<string, unknown>, config: GHLConfig) => {
+      try {
+        const result = await ghlRequest("POST", "/workflows/", {
+          token: config.token,
+          version: GHL_VERSION_V3,
+          params: { locationId: config.locationId },
+          body: args,
+        });
+        return JSON.stringify(result, null, 2);
+      } catch (e) {
+        return formatError(e);
+      }
+    },
+  },
+  {
     name: "ghl_get_workflow_definition",
     description:
       "Get the full definition (steps and configuration) of a workflow, including its current version number.",

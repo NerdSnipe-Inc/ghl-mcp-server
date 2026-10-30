@@ -133,8 +133,8 @@ const ALL_TOOLS = [
 ];
 
 describe('Tool registry', () => {
-  it('registers exactly 401 tools', () => {
-    expect(ALL_TOOLS).toHaveLength(401);
+  it('registers exactly 411 tools', () => {
+    expect(ALL_TOOLS).toHaveLength(411);
   });
 
   it('every tool name starts with ghl_', () => {
@@ -178,7 +178,7 @@ describe('Tool counts per module', () => {
   it('conversations has 9 tools', () => expect(conversationTools).toHaveLength(9));
   it('calendars has 10 tools', () => expect(calendarTools).toHaveLength(10));
   it('opportunities has 8 tools', () => expect(opportunityTools).toHaveLength(8));
-  it('workflows has 2 tools', () => expect(workflowTools).toHaveLength(2));
+  it('workflows has 12 tools', () => expect(workflowTools).toHaveLength(12));
   it('location has 1 tool', () => expect(locationTools).toHaveLength(1));
   it('tags has 3 tools', () => expect(tagTools).toHaveLength(3));
   it('customFields has 4 tools', () => expect(customFieldTools).toHaveLength(4));
@@ -259,8 +259,12 @@ describe('Specific tool existence', () => {
     'ghl_get_pipelines', 'ghl_search_opportunities', 'ghl_get_opportunity',
     'ghl_create_opportunity', 'ghl_update_opportunity', 'ghl_update_opportunity_status',
     'ghl_upsert_opportunity', 'ghl_delete_opportunity',
-    // Workflows (2)
+    // Workflows (12)
     'ghl_get_workflows', 'ghl_get_campaigns',
+    'ghl_create_workflow', 'ghl_get_workflow_definition', 'ghl_update_workflow_definition',
+    'ghl_update_workflow_status', 'ghl_delete_workflow', 'ghl_search_workflows',
+    'ghl_get_workflow_step_types', 'ghl_validate_workflow_definition', 'ghl_get_workflow_logs',
+    'ghl_get_workflow_log_statistics',
     // Location (1)
     'ghl_get_location',
     // Tags (3)
@@ -468,6 +472,6 @@ describe('Specific tool existence', () => {
     expectedTools.forEach((name) => {
       expect(toolNames.has(name), `Missing tool: ${name}`).toBe(true);
     });
-    expect(expectedTools).toHaveLength(401);
+    expect(expectedTools).toHaveLength(411);
   });
 });
