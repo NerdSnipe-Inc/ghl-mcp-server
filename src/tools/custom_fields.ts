@@ -1,14 +1,11 @@
 import { z } from "zod";
 import { ghlRequest, formatError, GHLConfig, GHL_VERSION_V3 } from "../client.js";
 
-// Spec note (locations-v3.json): neither CreateCustomFieldsDTO nor
-// UpdateCustomFieldsDTO documents any field for setting picklist choices —
-// `picklistOptions` only appears on the *response* schema (CustomFieldSchema).
-// The old `options` field name is confirmed wrong (not in the request DTO at
-// all), so it's renamed to `picklistOptions` to match the field's real name in
-// the response/GHL API convention, but this could not be independently
-// confirmed as an accepted request field against the v3 spec's request DTOs —
-// disclosing this gap rather than guessing further.
+// Confirmed live against the actual API (2026-11-12): a request sent with
+// `picklistOptions` was rejected with "property picklistOptions should not
+// exist" / "options must be an array" — the request DTO's real field name is
+// `options`, not `picklistOptions` (which, per the original spec note here,
+// only appears on the *response* schema). Renamed accordingly.
 export const customFieldTools = [
   {
     name: "ghl_get_custom_fields",
@@ -56,7 +53,7 @@ export const customFieldTools = [
         ])
         .describe("Field data type"),
       placeholder: z.string().optional(),
-      picklistOptions: z
+      options: z
         .array(z.string())
         .optional()
         .describe("Options for SINGLE_OPTIONS/MULTIPLE_OPTIONS/CHECKBOX/RADIO fields"),
@@ -99,7 +96,7 @@ export const customFieldTools = [
       fieldId: z.string().describe("Custom field ID to update"),
       name: z.string().describe("Field name (required by spec, even on update)"),
       placeholder: z.string().optional(),
-      picklistOptions: z
+      options: z
         .array(z.string())
         .optional()
         .describe("Options for SINGLE_OPTIONS/MULTIPLE_OPTIONS/CHECKBOX/RADIO fields"),

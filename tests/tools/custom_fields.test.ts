@@ -72,13 +72,13 @@ describe('ghl_create_custom_field', () => {
     );
   });
 
-  it('sends picklistOptions (not options) and file/textbox/model fields', async () => {
+  it('sends options (not picklistOptions) and file/textbox/model fields', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_create_custom_field').handler(
       {
         name: 'Favorite Color',
         dataType: 'SINGLE_OPTIONS',
-        picklistOptions: ['Red', 'Blue'],
+        options: ['Red', 'Blue'],
         acceptedFormat: ['.pdf', '.docx'],
         isMultipleFile: true,
         maxNumberOfFiles: 3,
@@ -88,8 +88,8 @@ describe('ghl_create_custom_field', () => {
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.body?.picklistOptions).toEqual(['Red', 'Blue']);
-    expect(call.body?.options).toBeUndefined();
+    expect(call.body?.options).toEqual(['Red', 'Blue']);
+    expect(call.body?.picklistOptions).toBeUndefined();
     expect(call.body?.acceptedFormat).toEqual(['.pdf', '.docx']);
     expect(call.body?.isMultipleFile).toBe(true);
     expect(call.body?.maxNumberOfFiles).toBe(3);
@@ -140,13 +140,13 @@ describe('ghl_update_custom_field', () => {
     expect(result.success).toBe(false);
   });
 
-  it('sends picklistOptions (not options) and file/textbox/model fields', async () => {
+  it('sends options (not picklistOptions) and file/textbox/model fields', async () => {
     const fetch = mockFetchSuccess(MOCK_DATA);
     await getTool('ghl_update_custom_field').handler(
       {
         fieldId: 'field-1',
         name: 'Updated',
-        picklistOptions: ['Red', 'Blue'],
+        options: ['Red', 'Blue'],
         acceptedFormat: ['.pdf'],
         isMultipleFile: false,
         maxNumberOfFiles: 1,
@@ -156,8 +156,8 @@ describe('ghl_update_custom_field', () => {
       TEST_CONFIG
     );
     const call = parseLastFetchCall(fetch);
-    expect(call.body?.picklistOptions).toEqual(['Red', 'Blue']);
-    expect(call.body?.options).toBeUndefined();
+    expect(call.body?.options).toEqual(['Red', 'Blue']);
+    expect(call.body?.picklistOptions).toBeUndefined();
     expect(call.body?.acceptedFormat).toEqual(['.pdf']);
     expect(call.body?.isMultipleFile).toBe(false);
     expect(call.body?.maxNumberOfFiles).toBe(1);

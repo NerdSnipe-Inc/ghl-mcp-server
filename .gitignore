@@ -27,3 +27,4 @@ _DEV_NOTES.md
 .superpowers/
 .claude/settings.local.json
 docs/
+/.mcp.json
